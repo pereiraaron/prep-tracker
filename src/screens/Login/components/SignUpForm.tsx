@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { Button, Checkbox, Text, VStack } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "@store/useAuthStore";
@@ -22,10 +22,10 @@ const SignUpForm = () => {
       return;
     }
     if (!captchaToken) return;
-    signup(email, password, rememberMe, captchaToken);
+    signup(email, password, rememberMe);
   };
 
-  const handleCaptchaExpire = useCallback(() => setCaptchaToken(null), []);
+  const handleCaptchaExpire = () => setCaptchaToken(null);
 
   const displayError = localError || error;
 

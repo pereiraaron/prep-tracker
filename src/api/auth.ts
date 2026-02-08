@@ -1,5 +1,5 @@
-const BASE_URL = "";
-const API_KEY = "";
+const BASE_URL = import.meta.env.VITE_AUTH_BASE_URL;
+const API_KEY = import.meta.env.VITE_AUTH_API_KEY;
 
 const headers = (token?: string): HeadersInit => ({
   "Content-Type": "application/json",
@@ -41,20 +41,20 @@ const handleResponse = async <T>(res: Response): Promise<T> => {
 };
 
 export const auth = {
-  register: async (email: string, password: string, captchaToken?: string) => {
+  register: async (email: string, password: string) => {
     const res = await fetch(`${BASE_URL}/auth/register`, {
       method: "POST",
       headers: headers(),
-      body: JSON.stringify({ email, password, captchaToken }),
+      body: JSON.stringify({ email, password }),
     });
     return handleResponse<RegisterResponse>(res);
   },
 
-  login: async (email: string, password: string, captchaToken?: string) => {
+  login: async (email: string, password: string) => {
     const res = await fetch(`${BASE_URL}/auth/login`, {
       method: "POST",
       headers: headers(),
-      body: JSON.stringify({ email, password, captchaToken }),
+      body: JSON.stringify({ email, password }),
     });
     return handleResponse<LoginResponse>(res);
   },

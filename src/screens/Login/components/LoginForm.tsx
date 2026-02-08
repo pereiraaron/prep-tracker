@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import { Button, Checkbox, Text, VStack } from '@chakra-ui/react'
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '@store/useAuthStore'
@@ -15,10 +15,10 @@ const LoginForm = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!captchaToken) return
-    login(email, password, rememberMe, captchaToken)
+    login(email, password, rememberMe)
   }
 
-  const handleCaptchaExpire = useCallback(() => setCaptchaToken(null), [])
+  const handleCaptchaExpire = () => setCaptchaToken(null)
 
   return (
     <form onSubmit={handleSubmit}>

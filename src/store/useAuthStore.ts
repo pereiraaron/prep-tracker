@@ -14,8 +14,8 @@ interface AuthState {
   isAuthenticated: boolean
   isLoading: boolean
   error: string | null
-  login: (email: string, password: string, rememberMe?: boolean, captchaToken?: string) => Promise<void>
-  signup: (email: string, password: string, rememberMe?: boolean, captchaToken?: string) => Promise<void>
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>
+  signup: (email: string, password: string, rememberMe?: boolean) => Promise<void>
   logout: () => void
   clearError: () => void
   hydrate: () => void
@@ -28,10 +28,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: false,
   error: null,
 
-  login: async (email: string, password: string, rememberMe = true, captchaToken?: string) => {
+  login: async (email: string, password: string, rememberMe = true) => {
     set({ isLoading: true, error: null })
     try {
-      const { accessToken, user } = await auth.login(email, password, captchaToken)
+      const { accessToken, user } = await auth.login(email, password)
       const storage = rememberMe ? localStorage : sessionStorage
       storage.setItem('token', accessToken)
       localStorage.setItem('remember', String(rememberMe))
@@ -49,11 +49,11 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  signup: async (email: string, password: string, rememberMe = true, captchaToken?: string) => {
+  signup: async (email: string, password: string, rememberMe = true) => {
     set({ isLoading: true, error: null })
     try {
-      await auth.register(email, password, captchaToken)
-      const { accessToken, user } = await auth.login(email, password, captchaToken)
+      await auth.register(email, password)
+      const { accessToken, user } = await auth.login(email, password)
       const storage = rememberMe ? localStorage : sessionStorage
       storage.setItem('token', accessToken)
       localStorage.setItem('remember', String(rememberMe))
