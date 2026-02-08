@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { Box } from '@chakra-ui/react'
 import { useColorMode } from '@hooks/useColorMode'
 
-const SITE_KEY = '1x00000000000000000000AA'
+const SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY
 const SCRIPT_ID = 'cf-turnstile-script'
 const SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
 
