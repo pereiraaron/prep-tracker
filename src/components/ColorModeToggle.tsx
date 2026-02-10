@@ -9,11 +9,11 @@ const ColorModeToggle = () => {
     <IconButton
       aria-label="Toggle color mode"
       variant="outline"
-      size="lg"
+      size={{ base: "md", md: "lg" }}
       rounded="full"
       position="fixed"
-      bottom={6}
-      left={6}
+      bottom={{ base: 4, md: 6 }}
+      left={{ base: 4, md: 6 }}
       zIndex={10}
       onClick={toggleColorMode}
     >

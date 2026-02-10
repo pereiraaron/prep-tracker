@@ -12,6 +12,7 @@ interface AuthState {
   user: User | null
   token: string | null
   isAuthenticated: boolean
+  isHydrated: boolean
   isLoading: boolean
   error: string | null
   login: (email: string, password: string, rememberMe?: boolean) => Promise<void>
@@ -25,6 +26,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: null,
   isAuthenticated: false,
+  isHydrated: false,
   isLoading: false,
   error: null,
 
@@ -33,11 +35,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const { accessToken, user } = await auth.login(email, password)
       const storage = rememberMe ? localStorage : sessionStorage
+      const userData = { id: user.id, email, username: user.username, role: user.role }
       storage.setItem('token', accessToken)
+      storage.setItem('user', JSON.stringify(userData))
       localStorage.setItem('remember', String(rememberMe))
       set({
         token: accessToken,
-        user: { id: user.id, email, username: user.username, role: user.role },
+        user: userData,
         isAuthenticated: true,
         isLoading: false,
       })
@@ -55,11 +59,13 @@ export const useAuthStore = create<AuthState>((set) => ({
       await auth.register(email, password)
       const { accessToken, user } = await auth.login(email, password)
       const storage = rememberMe ? localStorage : sessionStorage
+      const userData = { id: user.id, email, username: user.username, role: user.role }
       storage.setItem('token', accessToken)
+      storage.setItem('user', JSON.stringify(userData))
       localStorage.setItem('remember', String(rememberMe))
       set({
         token: accessToken,
-        user: { id: user.id, email, username: user.username, role: user.role },
+        user: userData,
         isAuthenticated: true,
         isLoading: false,
       })
@@ -73,8 +79,10 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: () => {
     localStorage.removeItem('token')
+    localStorage.removeItem('user')
     localStorage.removeItem('remember')
     sessionStorage.removeItem('token')
+    sessionStorage.removeItem('user')
     set({ user: null, token: null, isAuthenticated: false, error: null })
   },
 
@@ -84,25 +92,21 @@ export const useAuthStore = create<AuthState>((set) => ({
     const remember = localStorage.getItem('remember') !== 'false'
     const storage = remember ? localStorage : sessionStorage
     const token = storage.getItem('token')
-    if (!token) return
-    auth
-      .getProfile(token)
-      .then((profile) => {
-        set({
-          token,
-          user: {
-            id: profile._id,
-            email: profile.email,
-            username: profile.username,
-            role: '',
-          },
-          isAuthenticated: true,
-        })
-      })
-      .catch(() => {
-        localStorage.removeItem('token')
-        sessionStorage.removeItem('token')
-        localStorage.removeItem('remember')
-      })
+    const userJson = storage.getItem('user')
+    if (token && userJson) {
+      try {
+        const user = JSON.parse(userJson) as User
+        set({ token, user, isAuthenticated: true, isHydrated: true })
+        return
+      } catch {
+        // corrupted data, fall through to clear
+      }
+    }
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    localStorage.removeItem('remember')
+    sessionStorage.removeItem('token')
+    sessionStorage.removeItem('user')
+    set({ isHydrated: true })
   },
 }))

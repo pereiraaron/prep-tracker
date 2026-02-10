@@ -5,6 +5,8 @@ import { useAuthStore } from "@store/useAuthStore";
 import Input from "@components/Input";
 import Captcha from "@components/Captcha";
 
+const isDev = import.meta.env.DEV;
+
 const SignUpForm = () => {
   const { signup, isLoading, error } = useAuthStore();
   const [email, setEmail] = useState("");
@@ -14,6 +16,8 @@ const SignUpForm = () => {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [localError, setLocalError] = useState("");
 
+  const captchaPassed = isDev || !!captchaToken;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError("");
@@ -21,7 +25,7 @@ const SignUpForm = () => {
       setLocalError("Passwords do not match");
       return;
     }
-    if (!captchaToken) return;
+    if (!captchaPassed) return;
     signup(email, password, rememberMe);
   };
 
@@ -67,7 +71,7 @@ const SignUpForm = () => {
           <Checkbox.Label fontSize="sm">Remember me</Checkbox.Label>
         </Checkbox.Root>
 
-        <Captcha onVerify={setCaptchaToken} onExpire={handleCaptchaExpire} />
+        {!isDev && <Captcha onVerify={setCaptchaToken} onExpire={handleCaptchaExpire} />}
 
         {displayError && (
           <Text color="red.500" fontSize="sm">
@@ -81,7 +85,7 @@ const SignUpForm = () => {
           width="full"
           size="lg"
           loading={isLoading}
-          disabled={!captchaToken || isLoading}
+          disabled={!captchaPassed || isLoading}
         >
           Sign Up
         </Button>

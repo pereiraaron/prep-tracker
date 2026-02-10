@@ -4,6 +4,9 @@ import { Flex } from '@chakra-ui/react'
 import { useAuthStore } from '@store/useAuthStore'
 import Login from '@screens/Login/Login'
 import Dashboard from '@screens/Dashboard/Dashboard'
+import Entries from '@screens/Entries/Entries'
+import EntryForm from '@screens/Entries/EntryForm'
+import Stats from '@screens/Stats/Stats'
 import Navbar from '@components/Navbar'
 import ColorModeToggle from '@components/ColorModeToggle'
 
@@ -25,7 +28,10 @@ const GuestRoute = ({ children }: { children: React.ReactNode }) => {
 
 const App = () => {
   const hydrate = useAuthStore((s) => s.hydrate)
+  const isHydrated = useAuthStore((s) => s.isHydrated)
   useEffect(() => { hydrate() }, [hydrate])
+
+  if (!isHydrated) return null
 
   return (
     <Flex direction="column" minH="100vh">
@@ -45,6 +51,38 @@ const App = () => {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/entries"
+            element={
+              <ProtectedRoute>
+                <Entries />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/entries/new"
+            element={
+              <ProtectedRoute>
+                <EntryForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/entries/:id"
+            element={
+              <ProtectedRoute>
+                <EntryForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/stats"
+            element={
+              <ProtectedRoute>
+                <Stats />
               </ProtectedRoute>
             }
           />
