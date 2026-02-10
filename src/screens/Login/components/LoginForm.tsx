@@ -5,6 +5,8 @@ import { useAuthStore } from '@store/useAuthStore'
 import Input from '@components/Input'
 import Captcha from '@components/Captcha'
 
+const isDev = import.meta.env.DEV
+
 const LoginForm = () => {
   const { login, isLoading, error } = useAuthStore()
   const [email, setEmail] = useState('')
@@ -12,9 +14,11 @@ const LoginForm = () => {
   const [rememberMe, setRememberMe] = useState(true)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
 
+  const captchaPassed = isDev || !!captchaToken
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!captchaToken) return
+    if (!captchaPassed) return
     login(email, password, rememberMe)
   }
 
@@ -50,7 +54,7 @@ const LoginForm = () => {
           <Checkbox.Label fontSize="sm">Remember me</Checkbox.Label>
         </Checkbox.Root>
 
-        <Captcha onVerify={setCaptchaToken} onExpire={handleCaptchaExpire} />
+        {!isDev && <Captcha onVerify={setCaptchaToken} onExpire={handleCaptchaExpire} />}
 
         {error && (
           <Text color="red.500" fontSize="sm">
@@ -64,7 +68,7 @@ const LoginForm = () => {
           width="full"
           size="lg"
           loading={isLoading}
-          disabled={!captchaToken || isLoading}
+          disabled={!captchaPassed || isLoading}
         >
           Log In
         </Button>
