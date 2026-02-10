@@ -1,20 +1,4 @@
-import { useAuthStore } from '@store/useAuthStore'
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL
-
-const headers = (): HeadersInit => {
-  const token = useAuthStore.getState().token
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  }
-}
-
-const handleResponse = async <T>(res: Response): Promise<T> => {
-  const data = await res.json()
-  if (!res.ok) throw new Error(data.message || 'Something went wrong')
-  return data as T
-}
+import { API_BASE_URL, apiHeaders, handleResponse } from './client'
 
 // ---- Enums ----
 
@@ -190,91 +174,91 @@ export const entriesApi = {
     if (filter?.page) params.set('page', String(filter.page))
     if (filter?.limit) params.set('limit', String(filter.limit))
     const query = params.toString() ? `?${params}` : ''
-    const res = await fetch(`${BASE_URL}/entries${query}`, { headers: headers() })
+    const res = await fetch(`${API_BASE_URL}/entries${query}`, { headers: apiHeaders() })
     return handleResponse<PaginatedEntries>(res)
   },
 
   getById: async (id: string) => {
-    const res = await fetch(`${BASE_URL}/entries/${id}`, { headers: headers() })
+    const res = await fetch(`${API_BASE_URL}/entries/${id}`, { headers: apiHeaders() })
     return handleResponse<Entry>(res)
   },
 
   create: async (body: CreateEntryBody) => {
-    const res = await fetch(`${BASE_URL}/entries`, {
+    const res = await fetch(`${API_BASE_URL}/entries`, {
       method: 'POST',
-      headers: headers(),
+      headers: apiHeaders(),
       body: JSON.stringify(body),
     })
     return handleResponse<Entry>(res)
   },
 
   update: async (id: string, body: UpdateEntryBody) => {
-    const res = await fetch(`${BASE_URL}/entries/${id}`, {
+    const res = await fetch(`${API_BASE_URL}/entries/${id}`, {
       method: 'PUT',
-      headers: headers(),
+      headers: apiHeaders(),
       body: JSON.stringify(body),
     })
     return handleResponse<Entry>(res)
   },
 
   delete: async (id: string) => {
-    const res = await fetch(`${BASE_URL}/entries/${id}`, {
+    const res = await fetch(`${API_BASE_URL}/entries/${id}`, {
       method: 'DELETE',
-      headers: headers(),
+      headers: apiHeaders(),
     })
     return handleResponse<{ message: string }>(res)
   },
 
   bulkDelete: async (ids: string[]) => {
-    const res = await fetch(`${BASE_URL}/entries/bulk-delete`, {
+    const res = await fetch(`${API_BASE_URL}/entries/bulk-delete`, {
       method: 'POST',
-      headers: headers(),
+      headers: apiHeaders(),
       body: JSON.stringify({ ids }),
     })
     return handleResponse<{ message: string; deletedCount: number }>(res)
   },
 
   getToday: async () => {
-    const res = await fetch(`${BASE_URL}/entries/today`, { headers: headers() })
+    const res = await fetch(`${API_BASE_URL}/entries/today`, { headers: apiHeaders() })
     return handleResponse<TodayResponse>(res)
   },
 
   getHistory: async (params: { date: string } | { from: string; to: string }) => {
     const query = new URLSearchParams(params as Record<string, string>).toString()
-    const res = await fetch(`${BASE_URL}/entries/history?${query}`, { headers: headers() })
+    const res = await fetch(`${API_BASE_URL}/entries/history?${query}`, { headers: apiHeaders() })
     if ('date' in params) return handleResponse<HistoryDayResponse>(res)
     return handleResponse<HistoryRangeResponse>(res)
   },
 
   updateTaskStatus: async (body: UpdateTaskStatusBody) => {
-    const res = await fetch(`${BASE_URL}/entries/status`, {
+    const res = await fetch(`${API_BASE_URL}/entries/status`, {
       method: 'POST',
-      headers: headers(),
+      headers: apiHeaders(),
       body: JSON.stringify(body),
     })
     return handleResponse<TaskCompletion>(res)
   },
 
   search: async (q: string) => {
-    const res = await fetch(`${BASE_URL}/entries/search?q=${encodeURIComponent(q)}`, {
-      headers: headers(),
+    const res = await fetch(`${API_BASE_URL}/entries/search?q=${encodeURIComponent(q)}`, {
+      headers: apiHeaders(),
     })
     return handleResponse<Entry[]>(res)
   },
 
   getTags: async () => {
-    const res = await fetch(`${BASE_URL}/entries/tags`, { headers: headers() })
+    const res = await fetch(`${API_BASE_URL}/entries/tags`, { headers: apiHeaders() })
     return handleResponse<TagCount[]>(res)
   },
 
   getTopics: async (category?: PrepCategory) => {
     const query = category ? `?category=${category}` : ''
-    const res = await fetch(`${BASE_URL}/entries/topics${query}`, { headers: headers() })
+    const res = await fetch(`${API_BASE_URL}/entries/topics${query}`, { headers: apiHeaders() })
     return handleResponse<TopicCount[]>(res)
   },
 
   getSources: async () => {
-    const res = await fetch(`${BASE_URL}/entries/sources`, { headers: headers() })
+    const res = await fetch(`${API_BASE_URL}/entries/sources`, { headers: apiHeaders() })
     return handleResponse<SourceCount[]>(res)
   },
 }

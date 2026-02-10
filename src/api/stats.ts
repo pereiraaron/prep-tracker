@@ -1,20 +1,4 @@
-import { useAuthStore } from '@store/useAuthStore'
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL
-
-const headers = (): HeadersInit => {
-  const token = useAuthStore.getState().token
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  }
-}
-
-const handleResponse = async <T>(res: Response): Promise<T> => {
-  const data = await res.json()
-  if (!res.ok) throw new Error(data.message || 'Something went wrong')
-  return data as T
-}
+import { API_BASE_URL, apiHeaders, handleResponse } from './client'
 
 // ---- Response types ----
 
@@ -58,27 +42,27 @@ export interface ProgressDay {
 
 export const statsApi = {
   getOverview: async () => {
-    const res = await fetch(`${BASE_URL}/stats/overview`, { headers: headers() })
+    const res = await fetch(`${API_BASE_URL}/stats/overview`, { headers: apiHeaders() })
     return handleResponse<OverviewResponse>(res)
   },
 
   getCategoryBreakdown: async () => {
-    const res = await fetch(`${BASE_URL}/stats/categories`, { headers: headers() })
+    const res = await fetch(`${API_BASE_URL}/stats/categories`, { headers: apiHeaders() })
     return handleResponse<CategoryBreakdown[]>(res)
   },
 
   getDifficultyBreakdown: async () => {
-    const res = await fetch(`${BASE_URL}/stats/difficulties`, { headers: headers() })
+    const res = await fetch(`${API_BASE_URL}/stats/difficulties`, { headers: apiHeaders() })
     return handleResponse<DifficultyBreakdown[]>(res)
   },
 
   getStreaks: async () => {
-    const res = await fetch(`${BASE_URL}/stats/streaks`, { headers: headers() })
+    const res = await fetch(`${API_BASE_URL}/stats/streaks`, { headers: apiHeaders() })
     return handleResponse<StreaksResponse>(res)
   },
 
   getProgress: async (days = 30) => {
-    const res = await fetch(`${BASE_URL}/stats/progress?days=${days}`, { headers: headers() })
+    const res = await fetch(`${API_BASE_URL}/stats/progress?days=${days}`, { headers: apiHeaders() })
     return handleResponse<ProgressDay[]>(res)
   },
 }

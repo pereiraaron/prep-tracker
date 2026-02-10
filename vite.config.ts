@@ -20,4 +20,14 @@ export default defineConfig({
       '@hooks': path.resolve(__dirname, 'src/hooks'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['@chakra-ui/react', '@emotion/react'],
+        },
+      },
+    },
+  },
 })
