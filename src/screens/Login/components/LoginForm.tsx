@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Button, Checkbox, Text, VStack } from '@chakra-ui/react'
+import { Button, Checkbox, Text, VStack, Separator, HStack } from '@chakra-ui/react'
+import { LuFingerprint } from 'react-icons/lu'
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '@store/useAuthStore'
 import Input from '@components/Input'
@@ -8,7 +9,7 @@ import Captcha from '@components/Captcha'
 const isDev = import.meta.env.DEV
 
 const LoginForm = () => {
-  const { login, isLoading, error } = useAuthStore()
+  const { login, passkeyLogin, isLoading, error } = useAuthStore()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(true)
@@ -71,6 +72,26 @@ const LoginForm = () => {
           disabled={!captchaPassed || isLoading}
         >
           Log In
+        </Button>
+
+        <HStack width="full" gap={3}>
+          <Separator flex="1" />
+          <Text fontSize="xs" color="fg.muted" flexShrink={0}>
+            or
+          </Text>
+          <Separator flex="1" />
+        </HStack>
+
+        <Button
+          type="button"
+          variant="outline"
+          width="full"
+          size="lg"
+          disabled={isLoading}
+          onClick={() => passkeyLogin(email || undefined, rememberMe)}
+        >
+          <LuFingerprint />
+          Sign in with Passkey
         </Button>
 
         <Text fontSize="sm" color="fg.muted">

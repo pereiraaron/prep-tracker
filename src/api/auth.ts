@@ -1,4 +1,4 @@
-import { AUTH_BASE_URL, authHeaders, handleResponse } from './client'
+import { AUTH_BASE_URL, authHeaders, handleAuthResponse } from './client'
 
 interface LoginResponse {
   accessToken: string
@@ -32,7 +32,7 @@ export const auth = {
       headers: authHeaders(),
       body: JSON.stringify({ email, password }),
     })
-    return handleResponse<RegisterResponse>(res)
+    return handleAuthResponse<RegisterResponse>(res)
   },
 
   login: async (email: string, password: string) => {
@@ -41,7 +41,7 @@ export const auth = {
       headers: authHeaders(),
       body: JSON.stringify({ email, password }),
     })
-    return handleResponse<LoginResponse>(res)
+    return handleAuthResponse<LoginResponse>(res)
   },
 
   getProfile: async (token: string) => {
@@ -49,6 +49,6 @@ export const auth = {
       method: 'GET',
       headers: authHeaders(token),
     })
-    return handleResponse<UserProfileResponse>(res)
+    return handleAuthResponse<UserProfileResponse>(res)
   },
 }

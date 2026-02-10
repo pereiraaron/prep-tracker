@@ -71,6 +71,7 @@ const Navbar = () => {
             <NavLink to="/">Today</NavLink>
             <NavLink to="/entries">Entries</NavLink>
             <NavLink to="/stats">Stats</NavLink>
+            <NavLink to="/settings">Settings</NavLink>
           </HStack>
         )}
 
@@ -116,6 +117,7 @@ const Navbar = () => {
           <NavLink to="/" onClick={closeMenu}>Today</NavLink>
           <NavLink to="/entries" onClick={closeMenu}>Entries</NavLink>
           <NavLink to="/stats" onClick={closeMenu}>Stats</NavLink>
+          <NavLink to="/settings" onClick={closeMenu}>Settings</NavLink>
           <Box borderTopWidth="1px" mt={2} pt={2}>
             <Text fontSize="xs" color="fg.muted" px={2} mb={1}>
               {user?.username || user?.email}

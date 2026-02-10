@@ -20,6 +20,14 @@ export const apiHeaders = (): HeadersInit => {
   }
 }
 
+/** For auth endpoints (login, register, passkey login) — no auto-logout on 401. */
+export const handleAuthResponse = async <T>(res: Response): Promise<T> => {
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.message || 'Something went wrong')
+  return data as T
+}
+
+/** For protected endpoints — auto-logout + redirect on 401. */
 export const handleResponse = async <T>(res: Response): Promise<T> => {
   if (res.status === 401) {
     useAuthStore.getState().logout()
