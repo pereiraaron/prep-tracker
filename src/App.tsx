@@ -8,8 +8,9 @@ import ErrorBoundary from '@components/ErrorBoundary'
 
 const Login = lazy(() => import('@screens/Login/Login'))
 const Dashboard = lazy(() => import('@screens/Dashboard/Dashboard'))
-const Entries = lazy(() => import('@screens/Entries/Entries'))
-const EntryForm = lazy(() => import('@screens/Entries/EntryForm'))
+const Tasks = lazy(() => import('@screens/Tasks/Tasks'))
+const TaskForm = lazy(() => import('@screens/Tasks/TaskForm'))
+const Backlog = lazy(() => import('@screens/Backlog/Backlog'))
 const Stats = lazy(() => import('@screens/Stats/Stats'))
 
 const PageLoader = () => (
@@ -71,26 +72,34 @@ const App = () => {
                 }
               />
               <Route
-                path="/entries"
+                path="/tasks"
                 element={
                   <ProtectedRoute>
-                    <Entries />
+                    <Tasks />
                   </ProtectedRoute>
                 }
               />
               <Route
-                path="/entries/new"
+                path="/tasks/new"
                 element={
                   <ProtectedRoute>
-                    <EntryForm />
+                    <TaskForm />
                   </ProtectedRoute>
                 }
               />
               <Route
-                path="/entries/:id"
+                path="/tasks/:id"
                 element={
                   <ProtectedRoute>
-                    <EntryForm />
+                    <TaskForm />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/backlog"
+                element={
+                  <ProtectedRoute>
+                    <Backlog />
                   </ProtectedRoute>
                 }
               />

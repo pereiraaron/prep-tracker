@@ -1,4 +1,4 @@
-import type { PrepCategory } from './entries'
+import type { PrepCategory } from './tasks'
 
 export interface CategoryInfo {
   value: PrepCategory
@@ -44,8 +44,26 @@ export const DIFFICULTIES = [
   { value: 'hard', label: 'Hard' },
 ] as const
 
-export const STATUSES = [
+export const QUESTION_STATUSES = [
   { value: 'pending', label: 'Pending' },
   { value: 'in_progress', label: 'In Progress' },
+  { value: 'solved', label: 'Solved' },
+] as const
+
+export const TASK_STATUSES = [
+  { value: 'active', label: 'Active' },
   { value: 'completed', label: 'Completed' },
+] as const
+
+export const INSTANCE_STATUSES = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'incomplete', label: 'Incomplete' },
+  { value: 'in_progress', label: 'In Progress' },
+  { value: 'completed', label: 'Completed' },
+] as const
+
+export const QUESTION_SOURCES = [
+  { value: 'leetcode', label: 'LeetCode' },
+  { value: 'greatfrontend', label: 'GreatFrontend' },
+  { value: 'other', label: 'Other' },
 ] as const
