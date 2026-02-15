@@ -69,32 +69,35 @@ const Stats = () => {
       <Heading size={{ base: 'md', md: 'lg' }} mb={{ base: 4, md: 6 }}>Statistics</Heading>
 
       {/* Empty state */}
-      {overview && overview.total === 0 && (
+      {overview && overview.total === 0 && overview.backlogCount === 0 && (
         <VStack gap={3} py={16}>
           <Text color="fg.muted" fontSize="lg">No data to show yet</Text>
           <Text color="fg.muted" fontSize="sm">
-            Create some entries and complete tasks to see your statistics here.
+            Create some tasks and solve questions to see your statistics here.
           </Text>
         </VStack>
       )}
 
       {/* Overview cards */}
-      {overview && overview.total > 0 && (
+      {overview && (overview.total > 0 || overview.backlogCount > 0) && (
         <>
           <Flex gap={{ base: 2, md: 4 }} mb={{ base: 4, md: 8 }} wrap="wrap">
-            <OverviewCard label="Total Entries" value={overview.total} color="blue" />
-            <OverviewCard label="Completed" value={overview.byStatus.completed || 0} color="green" />
+            <OverviewCard label="Total Questions" value={overview.total} color="blue" />
+            <OverviewCard label="Solved" value={overview.byStatus.solved || 0} color="green" />
             <OverviewCard label="In Progress" value={overview.byStatus.in_progress || 0} color="yellow" />
             <OverviewCard label="Pending" value={overview.byStatus.pending || 0} color="gray" />
           </Flex>
 
-          {streaks && (
-            <Flex gap={{ base: 2, md: 4 }} mb={{ base: 4, md: 8 }} wrap="wrap">
-              <OverviewCard label="Current Streak" value={streaks.currentStreak} color="orange" suffix=" days" />
-              <OverviewCard label="Longest Streak" value={streaks.longestStreak} color="yellow" suffix=" days" />
-              <OverviewCard label="Active Days" value={streaks.totalActiveDays} color="blue" />
-            </Flex>
-          )}
+          <Flex gap={{ base: 2, md: 4 }} mb={{ base: 4, md: 8 }} wrap="wrap">
+            <OverviewCard label="Backlog" value={overview.backlogCount} color="purple" />
+            {streaks && (
+              <>
+                <OverviewCard label="Current Streak" value={streaks.currentStreak} color="orange" suffix=" days" />
+                <OverviewCard label="Longest Streak" value={streaks.longestStreak} color="yellow" suffix=" days" />
+                <OverviewCard label="Active Days" value={streaks.totalActiveDays} color="blue" />
+              </>
+            )}
+          </Flex>
         </>
       )}
 
@@ -110,7 +113,7 @@ const Stats = () => {
                     {CATEGORY_LABEL[cat.category as keyof typeof CATEGORY_LABEL] || cat.category}
                   </Badge>
                   <Text fontSize="sm" color="fg.muted">
-                    {cat.completed}/{cat.total} ({cat.completionRate}%)
+                    {cat.solved}/{cat.total} ({cat.completionRate}%)
                   </Text>
                 </Flex>
                 <Progress.Root value={cat.completionRate} size="sm" colorPalette={CATEGORY_COLOR[cat.category] || 'gray'}>
@@ -121,7 +124,7 @@ const Stats = () => {
                 <Flex gap={{ base: 2, md: 3 }} mt={2} wrap="wrap">
                   <Text fontSize="xs" color="fg.muted">{cat.pending} pending</Text>
                   <Text fontSize="xs" color="fg.muted">{cat.in_progress} in progress</Text>
-                  <Text fontSize="xs" color="fg.muted">{cat.completed} done</Text>
+                  <Text fontSize="xs" color="fg.muted">{cat.solved} solved</Text>
                 </Flex>
               </Box>
             ))}
@@ -141,7 +144,7 @@ const Stats = () => {
                     {diff.difficulty}
                   </Badge>
                   <Text fontSize="sm" color="fg.muted">
-                    {diff.completed}/{diff.total} ({diff.completionRate}%)
+                    {diff.solved}/{diff.total} ({diff.completionRate}%)
                   </Text>
                 </Flex>
                 <Progress.Root value={diff.completionRate} size="sm" colorPalette={DIFFICULTY_COLOR[diff.difficulty] || 'gray'}>

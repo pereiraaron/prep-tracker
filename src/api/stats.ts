@@ -4,6 +4,7 @@ import { API_BASE_URL, apiHeaders, handleResponse } from './client'
 
 export interface OverviewResponse {
   total: number
+  backlogCount: number
   byStatus: Record<string, number>
   byCategory: Record<string, number>
   byDifficulty: Record<string, number>
@@ -12,7 +13,7 @@ export interface OverviewResponse {
 export interface CategoryBreakdown {
   category: string
   total: number
-  completed: number
+  solved: number
   in_progress: number
   pending: number
   completionRate: number
@@ -21,7 +22,7 @@ export interface CategoryBreakdown {
 export interface DifficultyBreakdown {
   difficulty: string
   total: number
-  completed: number
+  solved: number
   in_progress: number
   pending: number
   completionRate: number
@@ -35,7 +36,7 @@ export interface StreaksResponse {
 
 export interface ProgressDay {
   date: string
-  completed: number
+  solved: number
 }
 
 // ---- API ----

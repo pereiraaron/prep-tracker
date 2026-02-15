@@ -69,7 +69,8 @@ const Navbar = () => {
         {isAuthenticated && (
           <HStack gap={1} ms={6} display={{ base: 'none', md: 'flex' }}>
             <NavLink to="/">Today</NavLink>
-            <NavLink to="/entries">Entries</NavLink>
+            <NavLink to="/tasks">Tasks</NavLink>
+            <NavLink to="/backlog">Backlog</NavLink>
             <NavLink to="/stats">Stats</NavLink>
           </HStack>
         )}
@@ -114,7 +115,8 @@ const Navbar = () => {
           display={{ base: 'flex', md: 'none' }}
         >
           <NavLink to="/" onClick={closeMenu}>Today</NavLink>
-          <NavLink to="/entries" onClick={closeMenu}>Entries</NavLink>
+          <NavLink to="/tasks" onClick={closeMenu}>Tasks</NavLink>
+          <NavLink to="/backlog" onClick={closeMenu}>Backlog</NavLink>
           <NavLink to="/stats" onClick={closeMenu}>Stats</NavLink>
           <Box borderTopWidth="1px" mt={2} pt={2}>
             <Text fontSize="xs" color="fg.muted" px={2} mb={1}>
