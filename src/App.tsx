@@ -12,6 +12,7 @@ const Tasks = lazy(() => import('@screens/Tasks/Tasks'))
 const TaskForm = lazy(() => import('@screens/Tasks/TaskForm'))
 const Backlog = lazy(() => import('@screens/Backlog/Backlog'))
 const Stats = lazy(() => import('@screens/Stats/Stats'))
+const Settings = lazy(() => import('@screens/Settings/Settings'))
 
 const PageLoader = () => (
   <Flex justify="center" align="center" flex="1" py={20}>
@@ -108,6 +109,14 @@ const App = () => {
                 element={
                   <ProtectedRoute>
                     <Stats />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <Settings />
                   </ProtectedRoute>
                 }
               />

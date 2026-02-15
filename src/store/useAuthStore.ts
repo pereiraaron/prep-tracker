@@ -1,5 +1,7 @@
 import { create } from 'zustand'
+import { startAuthentication } from '@simplewebauthn/browser'
 import { auth } from '@api/auth'
+import { passkeyApi } from '@api/passkey'
 
 interface User {
   id: string
@@ -16,6 +18,7 @@ interface AuthState {
   isLoading: boolean
   error: string | null
   login: (email: string, password: string, rememberMe?: boolean) => Promise<void>
+  passkeyLogin: (email?: string, rememberMe?: boolean) => Promise<void>
   signup: (email: string, password: string, rememberMe?: boolean) => Promise<void>
   logout: () => void
   clearError: () => void
@@ -49,6 +52,31 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({
         isLoading: false,
         error: err instanceof Error ? err.message : 'Login failed',
+      })
+    }
+  },
+
+  passkeyLogin: async (email?: string, rememberMe = true) => {
+    set({ isLoading: true, error: null })
+    try {
+      const { options, challengeId } = await passkeyApi.getLoginOptions(email)
+      const credential = await startAuthentication({ optionsJSON: options })
+      const { accessToken, user } = await passkeyApi.verifyLogin(challengeId, credential)
+      const storage = rememberMe ? localStorage : sessionStorage
+      const userData = { id: user.id, email: email || '', username: user.username, role: user.role }
+      storage.setItem('token', accessToken)
+      storage.setItem('user', JSON.stringify(userData))
+      localStorage.setItem('remember', String(rememberMe))
+      set({
+        token: accessToken,
+        user: userData,
+        isAuthenticated: true,
+        isLoading: false,
+      })
+    } catch (err) {
+      set({
+        isLoading: false,
+        error: err instanceof Error ? err.message : 'Passkey login failed',
       })
     }
   },
