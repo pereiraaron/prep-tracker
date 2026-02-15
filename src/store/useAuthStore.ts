@@ -19,6 +19,7 @@ interface AuthState {
   error: string | null
   login: (email: string, password: string, rememberMe?: boolean) => Promise<void>
   passkeyLogin: (email?: string, rememberMe?: boolean) => Promise<void>
+  passkeyConditionalLogin: (signal: AbortSignal, rememberMe?: boolean) => Promise<void>
   signup: (email: string, password: string, rememberMe?: boolean) => Promise<void>
   logout: () => void
   clearError: () => void
@@ -74,10 +75,36 @@ export const useAuthStore = create<AuthState>((set) => ({
         isLoading: false,
       })
     } catch (err) {
+      if (err instanceof Error && err.name === 'NotAllowedError') {
+        set({ isLoading: false })
+        return
+      }
       set({
         isLoading: false,
         error: err instanceof Error ? err.message : 'Passkey login failed',
       })
+    }
+  },
+
+  passkeyConditionalLogin: async (signal: AbortSignal, rememberMe = true) => {
+    try {
+      const { options, challengeId } = await passkeyApi.getLoginOptions(undefined, signal)
+      const credential = await startAuthentication({ optionsJSON: options, useBrowserAutofill: true })
+      const { accessToken, user } = await passkeyApi.verifyLogin(challengeId, credential, signal)
+      const storage = rememberMe ? localStorage : sessionStorage
+      const userData = { id: user.id, email: '', username: user.username, role: user.role }
+      storage.setItem('token', accessToken)
+      storage.setItem('user', JSON.stringify(userData))
+      localStorage.setItem('remember', String(rememberMe))
+      set({
+        token: accessToken,
+        user: userData,
+        isAuthenticated: true,
+        isLoading: false,
+      })
+    } catch {
+      // Conditional mediation errors are silent — the user either
+      // cancelled, the signal was aborted, or autofill isn't available.
     }
   },
 
