@@ -51,20 +51,22 @@ interface RegisterVerifyResponse {
 
 export const passkeyApi = {
   // Login (API key auth, no bearer token)
-  getLoginOptions: async (email?: string) => {
+  getLoginOptions: async (email?: string, signal?: AbortSignal) => {
     const res = await fetch(`${BASE}/login/options`, {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify(email ? { email } : {}),
+      signal,
     })
     return handleAuthResponse<AuthenticationOptionsResponse>(res)
   },
 
-  verifyLogin: async (challengeId: string, credential: unknown) => {
+  verifyLogin: async (challengeId: string, credential: unknown, signal?: AbortSignal) => {
     const res = await fetch(`${BASE}/login/verify`, {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify({ challengeId, credential }),
+      signal,
     })
     return handleAuthResponse<LoginVerifyResponse>(res)
   },

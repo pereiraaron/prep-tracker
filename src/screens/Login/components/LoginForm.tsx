@@ -1,6 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button, Checkbox, Text, VStack, Separator, HStack } from '@chakra-ui/react'
 import { LuFingerprint } from 'react-icons/lu'
+import {
+  browserSupportsWebAuthn,
+  browserSupportsWebAuthnAutofill,
+} from '@simplewebauthn/browser'
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '@store/useAuthStore'
 import Input from '@components/Input'
@@ -9,18 +13,53 @@ import Captcha from '@components/Captcha'
 const isDev = import.meta.env.DEV
 
 const LoginForm = () => {
-  const { login, passkeyLogin, isLoading, error } = useAuthStore()
+  const { login, passkeyLogin, passkeyConditionalLogin, isLoading, error } = useAuthStore()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(true)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
 
+  const webAuthnSupported = browserSupportsWebAuthn()
+  const abortRef = useRef<AbortController | null>(null)
+
+  // Start conditional mediation (autofill) on mount
+  useEffect(() => {
+    if (!webAuthnSupported) return
+
+    let controller: AbortController | null = null
+
+    browserSupportsWebAuthnAutofill().then((supported) => {
+      if (!supported) return
+      controller = new AbortController()
+      abortRef.current = controller
+      passkeyConditionalLogin(controller.signal, rememberMe)
+    })
+
+    return () => {
+      controller?.abort()
+      abortRef.current = null
+    }
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const captchaPassed = isDev || !!captchaToken
+
+  const abortConditional = () => {
+    abortRef.current?.abort()
+    abortRef.current = null
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!captchaPassed) return
+    abortConditional()
     login(email, password, rememberMe)
+  }
+
+  const handlePasskeyClick = () => {
+    abortConditional()
+    passkeyLogin(email || undefined, rememberMe)
   }
 
   const handleCaptchaExpire = () => setCaptchaToken(null)
@@ -33,6 +72,7 @@ const LoginForm = () => {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          autoComplete="username webauthn"
           required
         />
 
@@ -74,25 +114,29 @@ const LoginForm = () => {
           Log In
         </Button>
 
-        <HStack width="full" gap={3}>
-          <Separator flex="1" />
-          <Text fontSize="xs" color="fg.muted" flexShrink={0}>
-            or
-          </Text>
-          <Separator flex="1" />
-        </HStack>
+        {webAuthnSupported && (
+          <>
+            <HStack width="full" gap={3}>
+              <Separator flex="1" />
+              <Text fontSize="xs" color="fg.muted" flexShrink={0}>
+                or
+              </Text>
+              <Separator flex="1" />
+            </HStack>
 
-        <Button
-          type="button"
-          variant="outline"
-          width="full"
-          size="lg"
-          disabled={isLoading}
-          onClick={() => passkeyLogin(email || undefined, rememberMe)}
-        >
-          <LuFingerprint />
-          Sign in with Passkey
-        </Button>
+            <Button
+              type="button"
+              variant="outline"
+              width="full"
+              size="lg"
+              disabled={isLoading}
+              onClick={handlePasskeyClick}
+            >
+              <LuFingerprint />
+              Sign in with Passkey
+            </Button>
+          </>
+        )}
 
         <Text fontSize="sm" color="fg.muted">
           Don't have an account?{' '}
