@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import PageContainer from '@components/PageContainer'
 import {
   Box,
   Flex,
@@ -13,16 +14,8 @@ import {
 import { LuPlus, LuTrash2 } from 'react-icons/lu'
 import { useNavigate } from 'react-router-dom'
 import { useTaskStore } from '@store/useTaskStore'
-import { PREP_CATEGORIES, TASK_STATUSES, CATEGORY_LABEL } from '@api/types'
+import { PREP_CATEGORIES, TASK_STATUSES, CATEGORY_LABEL, CATEGORY_COLOR } from '@api/types'
 import type { PrepCategory, TaskStatus } from '@api/tasks'
-
-const CATEGORY_COLOR: Record<string, string> = {
-  dsa: 'purple',
-  system_design: 'blue',
-  behavioral: 'green',
-  machine_coding: 'orange',
-  language_framework: 'teal',
-}
 
 const Tasks = () => {
   const navigate = useNavigate()
@@ -46,7 +39,7 @@ const Tasks = () => {
   }
 
   return (
-    <Box maxW="900px" mx="auto" w="full" p={{ base: 4, md: 6 }} pt={{ base: 4, md: 8 }}>
+    <PageContainer>
       <Flex justify="space-between" align="center" mb={{ base: 4, md: 6 }}>
         <Heading size={{ base: 'md', md: 'lg' }}>All Tasks</Heading>
         <Button colorPalette="blue" size="sm" onClick={() => navigate('/tasks/new')}>
@@ -178,7 +171,7 @@ const Tasks = () => {
           </Text>
         </Flex>
       )}
-    </Box>
+    </PageContainer>
   )
 }
 

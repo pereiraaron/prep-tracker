@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import PageContainer from '@components/PageContainer'
 import {
   Box,
   Button,
@@ -80,7 +81,7 @@ const Settings = () => {
   }
 
   return (
-    <Box maxW="700px" mx="auto" w="full" p={{ base: 4, md: 8 }} pt={{ base: 6, md: 10 }}>
+    <PageContainer>
       <Heading size="lg" mb={6}>
         Settings
       </Heading>
@@ -217,7 +218,7 @@ const Settings = () => {
           </VStack>
         )}
       </Box>
-    </Box>
+    </PageContainer>
   )
 }
 

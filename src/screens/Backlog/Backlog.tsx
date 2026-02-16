@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import PageContainer from '@components/PageContainer'
 import {
   Box,
   Flex,
@@ -93,7 +94,7 @@ const Backlog = () => {
   const todayInstances = today?.groups.flatMap((g) => g.instances) || []
 
   return (
-    <Box maxW="900px" mx="auto" w="full" p={{ base: 4, md: 6 }} pt={{ base: 4, md: 8 }}>
+    <PageContainer>
       <Flex justify="space-between" align="center" mb={{ base: 4, md: 6 }}>
         <Heading size={{ base: 'md', md: 'lg' }}>Backlog</Heading>
         <Button colorPalette="blue" size="sm" onClick={() => setShowForm(true)}>
@@ -267,7 +268,7 @@ const Backlog = () => {
           </Flex>
         ))}
       </VStack>
-    </Box>
+    </PageContainer>
   )
 }
 

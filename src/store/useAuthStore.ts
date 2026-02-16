@@ -26,11 +26,16 @@ interface AuthState {
   hydrate: () => void
 }
 
+// TODO: Remove mock user before production
+const DEV_MOCK_USER: User | null = import.meta.env.DEV
+  ? { id: 'mock', email: 'john@example.com', username: 'John Doe', role: 'user' }
+  : null
+
 export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  token: null,
-  isAuthenticated: false,
-  isHydrated: false,
+  user: DEV_MOCK_USER,
+  token: DEV_MOCK_USER ? 'mock-token' : null,
+  isAuthenticated: !!DEV_MOCK_USER,
+  isHydrated: !!DEV_MOCK_USER,
   isLoading: false,
   error: null,
 
@@ -144,6 +149,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   clearError: () => set({ error: null }),
 
   hydrate: () => {
+    // Skip hydration when using dev mock user
+    if (DEV_MOCK_USER) {
+      set({ isHydrated: true })
+      return
+    }
     const remember = localStorage.getItem('remember') !== 'false'
     const storage = remember ? localStorage : sessionStorage
     const token = storage.getItem('token')

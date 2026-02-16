@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import PageContainer from '@components/PageContainer'
 import {
   Box,
   Button,
@@ -103,7 +104,7 @@ const TaskForm = () => {
   }
 
   return (
-    <Box maxW="600px" mx="auto" w="full" p={{ base: 4, md: 6 }} pt={{ base: 4, md: 8 }}>
+    <PageContainer>
       <Button variant="ghost" size="sm" mb={4} onClick={() => navigate(-1)}>
         <LuArrowLeft /> Back
       </Button>
@@ -239,7 +240,7 @@ const TaskForm = () => {
           </Button>
         </VStack>
       </form>
-    </Box>
+    </PageContainer>
   )
 }
 

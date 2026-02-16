@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
+import { Flex, Heading, Text, Spinner, VStack, Grid } from '@chakra-ui/react'
 import {
-  Box,
-  Flex,
-  Heading,
-  Text,
-  Badge,
-  Spinner,
-  VStack,
-  Progress,
-} from '@chakra-ui/react'
+  LuBookOpen,
+  LuCircleCheck,
+  LuClock,
+  LuFlame,
+  LuTrophy,
+  LuCalendarDays,
+  LuTarget,
+  LuArchive,
+} from 'react-icons/lu'
 import { statsApi } from '@api/stats'
 import type {
   OverviewResponse,
@@ -16,21 +17,13 @@ import type {
   DifficultyBreakdown,
   StreaksResponse,
 } from '@api/stats'
-import { CATEGORY_LABEL } from '@api/types'
-
-const CATEGORY_COLOR: Record<string, string> = {
-  dsa: 'purple',
-  system_design: 'blue',
-  behavioral: 'green',
-  machine_coding: 'orange',
-  language_framework: 'teal',
-}
-
-const DIFFICULTY_COLOR: Record<string, string> = {
-  easy: 'green',
-  medium: 'yellow',
-  hard: 'red',
-}
+import { CATEGORY_LABEL, CATEGORY_COLOR, DIFFICULTY_COLOR } from '@api/types'
+import PageContainer from '@components/PageContainer'
+import StatCard from '@components/StatCard'
+import Card from './components/Card'
+import ProgressBar from './components/ProgressBar'
+import BreakdownSection from './components/BreakdownSection'
+import { MOCK_OVERVIEW, MOCK_CATEGORIES, MOCK_DIFFICULTIES, MOCK_STREAKS } from './mockData'
 
 const Stats = () => {
   const [overview, setOverview] = useState<OverviewResponse | null>(null)
@@ -52,7 +45,14 @@ const Stats = () => {
         setDifficulties(d)
         setStreaks(s)
       })
-      .catch(() => {})
+      .catch(() => {
+        if (import.meta.env.DEV) {
+          setOverview(MOCK_OVERVIEW)
+          setCategories(MOCK_CATEGORIES)
+          setDifficulties(MOCK_DIFFICULTIES)
+          setStreaks(MOCK_STREAKS)
+        }
+      })
       .finally(() => setLoading(false))
   }, [])
 
@@ -64,11 +64,32 @@ const Stats = () => {
     )
   }
 
-  return (
-    <Box maxW="900px" mx="auto" w="full" p={{ base: 4, md: 6 }} pt={{ base: 4, md: 8 }}>
-      <Heading size={{ base: 'md', md: 'lg' }} mb={{ base: 4, md: 6 }}>Statistics</Heading>
+  const solved = overview?.byStatus.solved || 0
+  const total = overview?.total || 0
+  const completionRate = total > 0 ? Math.round((solved / total) * 100) : 0
 
-      {/* Empty state */}
+  const categoryItems = categories
+    .filter((c) => c.total > 0)
+    .map((cat) => ({
+      label: CATEGORY_LABEL[cat.category as keyof typeof CATEGORY_LABEL] || cat.category,
+      solved: cat.solved,
+      total: cat.total,
+      completionRate: cat.completionRate,
+      color: CATEGORY_COLOR[cat.category] || 'gray',
+    }))
+
+  const difficultyItems = difficulties
+    .filter((d) => d.total > 0)
+    .map((diff) => ({
+      label: diff.difficulty.charAt(0).toUpperCase() + diff.difficulty.slice(1),
+      solved: diff.solved,
+      total: diff.total,
+      completionRate: diff.completionRate,
+      color: DIFFICULTY_COLOR[diff.difficulty] || 'gray',
+    }))
+
+  return (
+    <PageContainer>
       {overview && overview.total === 0 && overview.backlogCount === 0 && (
         <VStack gap={3} py={16}>
           <Text color="fg.muted" fontSize="lg">No data to show yet</Text>
@@ -78,106 +99,51 @@ const Stats = () => {
         </VStack>
       )}
 
-      {/* Overview cards */}
       {overview && (overview.total > 0 || overview.backlogCount > 0) && (
         <>
-          <Flex gap={{ base: 2, md: 4 }} mb={{ base: 4, md: 8 }} wrap="wrap">
-            <OverviewCard label="Total Questions" value={overview.total} color="blue" />
-            <OverviewCard label="Solved" value={overview.byStatus.solved || 0} color="green" />
-            <OverviewCard label="In Progress" value={overview.byStatus.in_progress || 0} color="yellow" />
-            <OverviewCard label="Pending" value={overview.byStatus.pending || 0} color="gray" />
-          </Flex>
+          <Grid
+            templateColumns={{ base: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }}
+            gap={{ base: 3, md: 4 }}
+            mb={{ base: 4, md: 5 }}
+          >
+            <StatCard icon={<LuBookOpen size={20} />} label="Total Questions" value={total} color="blue.500" />
+            <StatCard icon={<LuCircleCheck size={20} />} label="Solved" value={solved} color="green.500" />
+            <StatCard icon={<LuClock size={20} />} label="In Progress" value={overview.byStatus.in_progress || 0} color="orange.500" />
+            <StatCard icon={<LuFlame size={20} />} label="Current Streak" value={streaks?.currentStreak ?? 0} suffix=" days" color="purple.500" />
+          </Grid>
 
-          <Flex gap={{ base: 2, md: 4 }} mb={{ base: 4, md: 8 }} wrap="wrap">
-            <OverviewCard label="Backlog" value={overview.backlogCount} color="purple" />
-            {streaks && (
-              <>
-                <OverviewCard label="Current Streak" value={streaks.currentStreak} color="orange" suffix=" days" />
-                <OverviewCard label="Longest Streak" value={streaks.longestStreak} color="yellow" suffix=" days" />
-                <OverviewCard label="Active Days" value={streaks.totalActiveDays} color="blue" />
-              </>
-            )}
-          </Flex>
+          <Grid
+            templateColumns={{ base: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }}
+            gap={{ base: 3, md: 4 }}
+            mb={{ base: 6, md: 8 }}
+          >
+            <StatCard icon={<LuTarget size={20} />} label="Completion Rate" value={completionRate} suffix="%" color="teal.500" />
+            <StatCard icon={<LuTrophy size={20} />} label="Longest Streak" value={streaks?.longestStreak ?? 0} suffix=" days" color="yellow.500" />
+            <StatCard icon={<LuCalendarDays size={20} />} label="Active Days" value={streaks?.totalActiveDays ?? 0} color="cyan.500" />
+            <StatCard icon={<LuArchive size={20} />} label="In Backlog" value={overview.backlogCount} color="gray.500" />
+          </Grid>
+
+          <Card mb={{ base: 6, md: 8 }}>
+            <Flex justify="space-between" align="center" mb={3}>
+              <Heading size="sm">Overall Progress</Heading>
+              <Text fontSize="sm" color="fg.muted" fontWeight="medium">
+                {solved}/{total} solved ({completionRate}%)
+              </Text>
+            </Flex>
+            <ProgressBar value={completionRate} color="green" size="md" />
+          </Card>
+
+          <Grid
+            templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
+            gap={{ base: 8, md: 6 }}
+          >
+            <BreakdownSection title="Category Breakdown" items={categoryItems} />
+            <BreakdownSection title="Difficulty Breakdown" items={difficultyItems} />
+          </Grid>
         </>
       )}
-
-      {/* Category breakdown */}
-      {categories.some((c) => c.total > 0) && (
-        <>
-          <Heading size="md" mb={4}>By Category</Heading>
-          <VStack gap={3} align="stretch" mb={8}>
-            {categories.filter((c) => c.total > 0).map((cat) => (
-              <Box key={cat.category} p={{ base: 3, md: 4 }} borderWidth="1px" borderRadius="md">
-                <Flex justify="space-between" align="center" mb={2}>
-                  <Badge colorPalette={CATEGORY_COLOR[cat.category] || 'gray'}>
-                    {CATEGORY_LABEL[cat.category as keyof typeof CATEGORY_LABEL] || cat.category}
-                  </Badge>
-                  <Text fontSize="sm" color="fg.muted">
-                    {cat.solved}/{cat.total} ({cat.completionRate}%)
-                  </Text>
-                </Flex>
-                <Progress.Root value={cat.completionRate} size="sm" colorPalette={CATEGORY_COLOR[cat.category] || 'gray'}>
-                  <Progress.Track>
-                    <Progress.Range />
-                  </Progress.Track>
-                </Progress.Root>
-                <Flex gap={{ base: 2, md: 3 }} mt={2} wrap="wrap">
-                  <Text fontSize="xs" color="fg.muted">{cat.pending} pending</Text>
-                  <Text fontSize="xs" color="fg.muted">{cat.in_progress} in progress</Text>
-                  <Text fontSize="xs" color="fg.muted">{cat.solved} solved</Text>
-                </Flex>
-              </Box>
-            ))}
-          </VStack>
-        </>
-      )}
-
-      {/* Difficulty breakdown */}
-      {difficulties.some((d) => d.total > 0) && (
-        <>
-          <Heading size="md" mb={4}>By Difficulty</Heading>
-          <VStack gap={3} align="stretch" mb={8}>
-            {difficulties.filter((d) => d.total > 0).map((diff) => (
-              <Box key={diff.difficulty} p={{ base: 3, md: 4 }} borderWidth="1px" borderRadius="md">
-                <Flex justify="space-between" align="center" mb={2}>
-                  <Badge colorPalette={DIFFICULTY_COLOR[diff.difficulty] || 'gray'}>
-                    {diff.difficulty}
-                  </Badge>
-                  <Text fontSize="sm" color="fg.muted">
-                    {diff.solved}/{diff.total} ({diff.completionRate}%)
-                  </Text>
-                </Flex>
-                <Progress.Root value={diff.completionRate} size="sm" colorPalette={DIFFICULTY_COLOR[diff.difficulty] || 'gray'}>
-                  <Progress.Track>
-                    <Progress.Range />
-                  </Progress.Track>
-                </Progress.Root>
-              </Box>
-            ))}
-          </VStack>
-        </>
-      )}
-    </Box>
+    </PageContainer>
   )
 }
-
-const OverviewCard = ({
-  label,
-  value,
-  color,
-  suffix = '',
-}: {
-  label: string
-  value: number
-  color: string
-  suffix?: string
-}) => (
-  <Box flex="1" minW={{ base: '0', sm: '130px' }} p={{ base: 3, md: 4 }} borderWidth="1px" borderRadius="lg" textAlign="center">
-    <Text fontWeight="bold" fontSize={{ base: 'lg', md: '2xl' }} color={`${color}.500`}>
-      {value}{suffix}
-    </Text>
-    <Text fontSize="xs" color="fg.muted">{label}</Text>
-  </Box>
-)
 
 export default Stats

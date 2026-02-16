@@ -27,24 +27,11 @@ import { useTaskStore } from '@store/useTaskStore'
 import { questionsApi } from '@api/questions'
 import type { CreateQuestionBody } from '@api/questions'
 import { statsApi, type StreaksResponse } from '@api/stats'
-import { CATEGORY_LABEL, DIFFICULTIES, QUESTION_SOURCES } from '@api/types'
+import { CATEGORY_LABEL, CATEGORY_COLOR, INSTANCE_STATUS_COLOR, DIFFICULTIES, QUESTION_SOURCES } from '@api/types'
 import type { TaskInstance } from '@api/tasks'
 import Input from '@components/Input'
-
-const CATEGORY_COLOR: Record<string, string> = {
-  dsa: 'purple',
-  system_design: 'blue',
-  behavioral: 'green',
-  machine_coding: 'orange',
-  language_framework: 'teal',
-}
-
-const INSTANCE_STATUS_COLOR: Record<string, string> = {
-  pending: 'gray',
-  incomplete: 'orange',
-  in_progress: 'yellow',
-  completed: 'green',
-}
+import PageContainer from '@components/PageContainer'
+import StatCard from '@components/StatCard'
 
 const Dashboard = () => {
   const navigate = useNavigate()
@@ -79,7 +66,7 @@ const Dashboard = () => {
   }
 
   return (
-    <Box maxW="900px" mx="auto" w="full" p={{ base: 4, md: 6 }} pt={{ base: 4, md: 8 }}>
+    <PageContainer>
       {/* Header */}
       <Flex justify="space-between" align="center" mb={{ base: 4, md: 6 }}>
         <Heading size={{ base: 'md', md: 'lg' }}>Today's Prep</Heading>
@@ -91,24 +78,32 @@ const Dashboard = () => {
       {/* Streak cards */}
       {streaks && (
         <Flex gap={{ base: 2, md: 4 }} mb={{ base: 4, md: 6 }} wrap="wrap">
-          <StatCard
-            icon={<LuFlame />}
-            label="Current Streak"
-            value={`${streaks.currentStreak} day${streaks.currentStreak !== 1 ? 's' : ''}`}
-            color="orange"
-          />
-          <StatCard
-            icon={<LuTrophy />}
-            label="Longest Streak"
-            value={`${streaks.longestStreak} day${streaks.longestStreak !== 1 ? 's' : ''}`}
-            color="yellow"
-          />
-          <StatCard
-            icon={<LuCalendar />}
-            label="Active Days"
-            value={String(streaks.totalActiveDays)}
-            color="blue"
-          />
+          <Box flex="1" minW={{ base: '0', sm: '140px' }}>
+            <StatCard
+              icon={<LuFlame />}
+              label="Current Streak"
+              value={streaks.currentStreak}
+              suffix={` day${streaks.currentStreak !== 1 ? 's' : ''}`}
+              color="orange.500"
+            />
+          </Box>
+          <Box flex="1" minW={{ base: '0', sm: '140px' }}>
+            <StatCard
+              icon={<LuTrophy />}
+              label="Longest Streak"
+              value={streaks.longestStreak}
+              suffix={` day${streaks.longestStreak !== 1 ? 's' : ''}`}
+              color="yellow.500"
+            />
+          </Box>
+          <Box flex="1" minW={{ base: '0', sm: '140px' }}>
+            <StatCard
+              icon={<LuCalendar />}
+              label="Active Days"
+              value={streaks.totalActiveDays}
+              color="blue.500"
+            />
+          </Box>
         </Flex>
       )}
 
@@ -181,7 +176,7 @@ const Dashboard = () => {
           </VStack>
         </Box>
       ))}
-    </Box>
+    </PageContainer>
   )
 }
 
@@ -378,36 +373,5 @@ const AddQuestionForm = ({
     </Box>
   )
 }
-
-const StatCard = ({
-  icon,
-  label,
-  value,
-  color,
-}: {
-  icon: React.ReactNode
-  label: string
-  value: string
-  color: string
-}) => (
-  <Box
-    flex="1"
-    minW={{ base: '0', sm: '140px' }}
-    p={{ base: 3, md: 4 }}
-    borderWidth="1px"
-    borderRadius="lg"
-    textAlign="center"
-  >
-    <Flex justify="center" mb={1} color={`${color}.500`}>
-      {icon}
-    </Flex>
-    <Text fontWeight="bold" fontSize={{ base: 'md', md: 'lg' }}>
-      {value}
-    </Text>
-    <Text fontSize="xs" color="fg.muted">
-      {label}
-    </Text>
-  </Box>
-)
 
 export default Dashboard
