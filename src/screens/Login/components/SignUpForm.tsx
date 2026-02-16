@@ -3,9 +3,6 @@ import { Button, Checkbox, Text, VStack } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "@store/useAuthStore";
 import Input from "@components/Input";
-import Captcha from "@components/Captcha";
-
-const isDev = import.meta.env.DEV;
 
 const SignUpForm = () => {
   const { signup, isLoading, error } = useAuthStore();
@@ -13,10 +10,7 @@ const SignUpForm = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [localError, setLocalError] = useState("");
-
-  const captchaPassed = isDev || !!captchaToken;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,11 +19,8 @@ const SignUpForm = () => {
       setLocalError("Passwords do not match");
       return;
     }
-    if (!captchaPassed) return;
     signup(email, password, rememberMe);
   };
-
-  const handleCaptchaExpire = () => setCaptchaToken(null);
 
   const displayError = localError || error;
 
@@ -71,8 +62,6 @@ const SignUpForm = () => {
           <Checkbox.Label fontSize="sm">Remember me</Checkbox.Label>
         </Checkbox.Root>
 
-        {!isDev && <Captcha onVerify={setCaptchaToken} onExpire={handleCaptchaExpire} />}
-
         {displayError && (
           <Text color="red.500" fontSize="sm">
             {displayError}
@@ -85,7 +74,7 @@ const SignUpForm = () => {
           width="full"
           size="lg"
           loading={isLoading}
-          disabled={!captchaPassed || isLoading}
+          disabled={isLoading}
         >
           Sign Up
         </Button>

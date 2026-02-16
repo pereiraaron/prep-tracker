@@ -8,16 +8,12 @@ import {
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '@store/useAuthStore'
 import Input from '@components/Input'
-import Captcha from '@components/Captcha'
-
-const isDev = import.meta.env.DEV
 
 const LoginForm = () => {
   const { login, passkeyLogin, /* passkeyConditionalLogin, */ isLoading, error } = useAuthStore()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(true)
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
 
   const webAuthnSupported = browserSupportsWebAuthn()
   // const abortRef = useRef<AbortController | null>(null)
@@ -43,8 +39,6 @@ const LoginForm = () => {
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, [])
 
-  const captchaPassed = isDev || !!captchaToken
-
   // const abortConditional = () => {
   //   abortRef.current?.abort()
   //   abortRef.current = null
@@ -52,15 +46,12 @@ const LoginForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!captchaPassed) return
     login(email, password, rememberMe)
   }
 
   const handlePasskeyClick = () => {
     passkeyLogin(email || undefined, rememberMe)
   }
-
-  const handleCaptchaExpire = () => setCaptchaToken(null)
 
   return (
     <form onSubmit={handleSubmit}>
@@ -93,8 +84,6 @@ const LoginForm = () => {
           <Checkbox.Label fontSize="sm">Remember me</Checkbox.Label>
         </Checkbox.Root>
 
-        {!isDev && <Captcha onVerify={setCaptchaToken} onExpire={handleCaptchaExpire} />}
-
         {error && (
           <Text color="red.500" fontSize="sm">
             {error}
@@ -107,7 +96,7 @@ const LoginForm = () => {
           width="full"
           size="lg"
           loading={isLoading}
-          disabled={!captchaPassed || isLoading}
+          disabled={isLoading}
         >
           Log In
         </Button>

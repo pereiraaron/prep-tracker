@@ -1,9 +1,16 @@
 import { useState } from 'react'
-import { Box, Flex, HStack, VStack, Text, Button, IconButton, Spacer } from '@chakra-ui/react'
-import { LuMenu, LuX } from 'react-icons/lu'
+import { Box, Flex, HStack, VStack, Text, Button, IconButton, Avatar } from '@chakra-ui/react'
+import { LuMenu, LuX, LuLogOut } from 'react-icons/lu'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@store/useAuthStore'
-import Logo from './Logo'
+
+const NAV_ITEMS = [
+  { to: '/', label: 'Dashboard' },
+  { to: '/tasks', label: 'Tasks' },
+  { to: '/backlog', label: 'Backlog' },
+  { to: '/stats', label: 'Stats' },
+  { to: '/settings', label: 'Settings' },
+]
 
 const NavLink = ({
   to,
@@ -21,11 +28,13 @@ const NavLink = ({
     <Link to={to} onClick={onClick}>
       <Text
         fontSize="sm"
-        fontWeight={isActive ? 'semibold' : 'normal'}
-        color={isActive ? 'fg' : 'fg.muted'}
-        _hover={{ color: 'fg' }}
-        px={2}
-        py={2}
+        fontWeight="medium"
+        color={isActive ? 'brand.fg' : 'fg.muted'}
+        bg={isActive ? 'brand.muted' : 'transparent'}
+        borderRadius="md"
+        px={3}
+        py={1.5}
+        _hover={{ color: 'brand.fg', bg: 'brand.muted' }}
       >
         {children}
       </Text>
@@ -44,48 +53,68 @@ const Navbar = () => {
     logout()
   }
 
+  const displayName = user?.username || user?.email || ''
+
   return (
     <Box
       as="nav"
       position="sticky"
       top="0"
       zIndex={10}
-      bg="bg"
+      bg="bg.card"
       borderBottomWidth="1px"
-      px={{ base: 3, md: 6 }}
-      py={3}
+      borderColor="border.card"
     >
-      <Flex align="center" maxW="1200px" mx="auto">
+      <Flex
+        align="center"
+        maxW="75rem"
+        mx="auto"
+        px={{ base: 4, md: 6 }}
+        h={16}
+      >
+        {/* Logo */}
         <Link to="/" onClick={closeMenu}>
           <HStack gap={2}>
-            <Logo />
-            <Text fontWeight="bold" fontSize={{ base: 'md', md: 'lg' }}>
+            <Text fontSize="xl">🧠</Text>
+            <Text fontWeight="bold" fontSize="lg">
               Prep Tracker
             </Text>
           </HStack>
         </Link>
 
-        {/* Desktop nav links */}
+        <Box flex="1" />
+
+        {/* Desktop nav links — centered */}
         {isAuthenticated && (
-          <HStack gap={1} ms={6} display={{ base: 'none', md: 'flex' }}>
-            <NavLink to="/">Today</NavLink>
-            <NavLink to="/tasks">Tasks</NavLink>
-            <NavLink to="/backlog">Backlog</NavLink>
-            <NavLink to="/stats">Stats</NavLink>
-            <NavLink to="/settings">Settings</NavLink>
+          <HStack gap={1} display={{ base: 'none', md: 'flex' }}>
+            {NAV_ITEMS.map((item) => (
+              <NavLink key={item.to} to={item.to}>
+                {item.label}
+              </NavLink>
+            ))}
           </HStack>
         )}
 
-        <Spacer />
+        <Box flex="1" />
 
         {/* Desktop user info + logout */}
         {isAuthenticated && (
           <HStack gap={3} display={{ base: 'none', md: 'flex' }}>
-            <Text fontSize="sm" color="fg.muted">
-              {user?.username || user?.email}
-            </Text>
-            <Button variant="ghost" size="sm" onClick={logout}>
-              Log Out
+            <HStack gap={2}>
+              <Avatar.Root size="sm" colorPalette="purple">
+                <Avatar.Fallback name={displayName} />
+              </Avatar.Root>
+              <Text fontSize="sm" fontWeight="medium">
+                {displayName}
+              </Text>
+            </HStack>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={logout}
+            >
+              <LuLogOut />
+              Logout
             </Button>
           </HStack>
         )}
@@ -106,29 +135,42 @@ const Navbar = () => {
 
       {/* Mobile dropdown menu */}
       {isAuthenticated && menuOpen && (
-        <VStack
-          align="stretch"
-          gap={0}
-          pt={3}
-          pb={2}
-          maxW="1200px"
-          mx="auto"
-          display={{ base: 'flex', md: 'none' }}
+        <Box
+          display={{ base: 'block', md: 'none' }}
+          borderTopWidth="1px"
+          borderColor="border.card"
+          px={4}
+          pb={3}
         >
-          <NavLink to="/" onClick={closeMenu}>Today</NavLink>
-          <NavLink to="/tasks" onClick={closeMenu}>Tasks</NavLink>
-          <NavLink to="/backlog" onClick={closeMenu}>Backlog</NavLink>
-          <NavLink to="/stats" onClick={closeMenu}>Stats</NavLink>
-          <NavLink to="/settings" onClick={closeMenu}>Settings</NavLink>
-          <Box borderTopWidth="1px" mt={2} pt={2}>
-            <Text fontSize="xs" color="fg.muted" px={2} mb={1}>
-              {user?.username || user?.email}
-            </Text>
-            <Button variant="ghost" size="sm" w="full" justifyContent="flex-start" onClick={handleLogout}>
-              Log Out
-            </Button>
+          <VStack align="stretch" gap={1} py={2}>
+            {NAV_ITEMS.map((item) => (
+              <NavLink key={item.to} to={item.to} onClick={closeMenu}>
+                {item.label}
+              </NavLink>
+            ))}
+          </VStack>
+
+          <Box borderTopWidth="1px" borderColor="border.card" pt={3}>
+            <Flex align="center" justify="space-between">
+              <HStack gap={2}>
+                <Avatar.Root size="sm" colorPalette="purple">
+                  <Avatar.Fallback name={displayName} />
+                </Avatar.Root>
+                <Text fontSize="sm" fontWeight="medium">
+                  {displayName}
+                </Text>
+              </HStack>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleLogout}
+              >
+                <LuLogOut />
+                Logout
+              </Button>
+            </Flex>
           </Box>
-        </VStack>
+        </Box>
       )}
     </Box>
   )

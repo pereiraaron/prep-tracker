@@ -67,3 +67,24 @@ export const QUESTION_SOURCES = [
   { value: 'greatfrontend', label: 'GreatFrontend' },
   { value: 'other', label: 'Other' },
 ] as const
+
+export const CATEGORY_COLOR: Record<string, string> = {
+  dsa: 'purple',
+  system_design: 'blue',
+  behavioral: 'green',
+  machine_coding: 'orange',
+  language_framework: 'teal',
+}
+
+export const DIFFICULTY_COLOR: Record<string, string> = {
+  easy: 'green',
+  medium: 'yellow',
+  hard: 'red',
+}
+
+export const INSTANCE_STATUS_COLOR: Record<string, string> = {
+  pending: 'gray',
+  incomplete: 'orange',
+  in_progress: 'yellow',
+  completed: 'green',
+}
