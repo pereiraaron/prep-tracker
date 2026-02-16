@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Flex, Heading, Text, Spinner, VStack, Grid } from '@chakra-ui/react'
 import {
   LuBookOpen,
@@ -19,9 +19,10 @@ import type {
 } from '@api/stats'
 import { CATEGORY_LABEL, CATEGORY_COLOR, DIFFICULTY_COLOR } from '@api/types'
 import PageContainer from '@components/PageContainer'
+import { ErrorState } from '@components/EmptyState'
 import StatCard from '@components/StatCard'
 import Card from './components/Card'
-import ProgressBar from './components/ProgressBar'
+import ProgressBar from '@components/ProgressBar'
 import BreakdownSection from './components/BreakdownSection'
 import { MOCK_OVERVIEW, MOCK_CATEGORIES, MOCK_DIFFICULTIES, MOCK_STREAKS } from './mockData'
 
@@ -31,8 +32,11 @@ const Stats = () => {
   const [difficulties, setDifficulties] = useState<DifficultyBreakdown[]>([])
   const [streaks, setStreaks] = useState<StreaksResponse | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
-  useEffect(() => {
+  const fetchStats = useCallback(() => {
+    setLoading(true)
+    setError(false)
     Promise.all([
       statsApi.getOverview(),
       statsApi.getCategoryBreakdown(),
@@ -51,16 +55,32 @@ const Stats = () => {
           setCategories(MOCK_CATEGORIES)
           setDifficulties(MOCK_DIFFICULTIES)
           setStreaks(MOCK_STREAKS)
+        } else {
+          setError(true)
         }
       })
       .finally(() => setLoading(false))
   }, [])
 
+  useEffect(() => {
+    fetchStats()
+  }, [fetchStats])
+
   if (loading) {
     return (
-      <Flex justify="center" py={20}>
-        <Spinner size="lg" />
-      </Flex>
+      <PageContainer>
+        <Flex justify="center" py={20}>
+          <Spinner size="lg" />
+        </Flex>
+      </PageContainer>
+    )
+  }
+
+  if (error) {
+    return (
+      <PageContainer>
+        <ErrorState onRetry={fetchStats} />
+      </PageContainer>
     )
   }
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Flex,
   Heading,
@@ -15,6 +15,7 @@ import type { Question, CreateBacklogQuestionBody, QuestionStatus } from '@api/q
 import type { Difficulty } from '@api/tasks'
 import { useTaskStore } from '@store/useTaskStore'
 import PageContainer from '@components/PageContainer'
+import { ErrorState } from '@components/EmptyState'
 import BacklogFilters from './components/BacklogFilters'
 import QuestionCard from './components/QuestionCard'
 import BulkActionBar from './components/BulkActionBar'
@@ -26,6 +27,7 @@ const Backlog = () => {
   const [questions, setQuestions] = useState<Question[]>([])
   const [totalCount, setTotalCount] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
   // Filters
   const [category, setCategory] = useState('')
@@ -40,8 +42,9 @@ const Backlog = () => {
   const [moveTarget, setMoveTarget] = useState('')
   const [moving, setMoving] = useState(false)
 
-  const fetchBacklog = async () => {
+  const fetchBacklog = useCallback(async () => {
     setLoading(true)
+    setError(false)
     try {
       const data = await questionsApi.getBacklog({
         ...(difficulty ? { difficulty: difficulty as Difficulty } : {}),
@@ -55,31 +58,41 @@ const Backlog = () => {
       if (import.meta.env.DEV) {
         setQuestions(MOCK_BACKLOG)
         setTotalCount(MOCK_BACKLOG.length)
+      } else {
+        setError(true)
       }
     } finally {
       setLoading(false)
     }
-  }
+  }, [category, difficulty, status, source])
 
   useEffect(() => {
     fetchBacklog()
     fetchToday()
-  }, [category, difficulty, status, source, fetchToday])
+  }, [fetchBacklog, fetchToday])
 
   const handleCreate = async (body: CreateBacklogQuestionBody) => {
-    await questionsApi.createBacklog(body)
-    setShowForm(false)
-    fetchBacklog()
+    try {
+      await questionsApi.createBacklog(body)
+      setShowForm(false)
+      fetchBacklog()
+    } catch {
+      // Form stays open so user can retry
+    }
   }
 
   const handleDelete = async (id: string) => {
-    await questionsApi.delete(id)
-    setSelected((prev) => {
-      const next = new Set(prev)
-      next.delete(id)
-      return next
-    })
-    fetchBacklog()
+    try {
+      await questionsApi.delete(id)
+      setSelected((prev) => {
+        const next = new Set(prev)
+        next.delete(id)
+        return next
+      })
+      fetchBacklog()
+    } catch {
+      // Question stays in list
+    }
   }
 
   const toggleSelect = (id: string) => {
@@ -100,6 +113,8 @@ const Backlog = () => {
       setMoveTarget('')
       fetchBacklog()
       fetchToday()
+    } catch {
+      // Selections preserved for retry
     } finally {
       setMoving(false)
     }
@@ -178,8 +193,13 @@ const Backlog = () => {
         </Flex>
       )}
 
+      {/* Error state */}
+      {!loading && error && (
+        <ErrorState onRetry={fetchBacklog} />
+      )}
+
       {/* Empty state */}
-      {!loading && questions.length === 0 && (
+      {!loading && !error && questions.length === 0 && (
         <VStack gap={4} py={16}>
           <Text color="fg.muted" fontSize="lg">
             {hasFilters ? 'No questions match the filters' : 'Backlog is empty'}
