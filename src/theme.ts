@@ -11,25 +11,6 @@ const customConfig = defineConfig({
       color: { _light: '{colors.gray.800}', _dark: 'white' },
     },
 
-    // Floating label effect
-    '.chakra-form-control': {
-      position: 'relative',
-    },
-    '.chakra-input:not(:placeholder-shown) + label, .chakra-input:focus + label': {
-      transform: 'scale(0.85) translateY(-24px)',
-      background: { _light: '{colors.gray.50}', _dark: '{colors.dark.bg}' },
-      color: '{colors.brand.500}',
-    },
-    label: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      padding: '18px 16px',
-      pointerEvents: 'none',
-      transformOrigin: 'left top',
-      transition: 'all 0.2s ease-out',
-      color: 'gray',
-    },
   },
 
   theme: {
