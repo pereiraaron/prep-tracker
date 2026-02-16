@@ -29,8 +29,7 @@ export const handleAuthResponse = async <T>(res: Response): Promise<T> => {
 
 /** For protected endpoints — auto-logout + redirect on 401. */
 export const handleResponse = async <T>(res: Response): Promise<T> => {
-  // TODO: Remove mock-token check before production
-  if (res.status === 401 && useAuthStore.getState().token !== 'mock-token') {
+  if (res.status === 401) {
     useAuthStore.getState().logout()
     window.location.href = '/login'
     throw new Error('Session expired')
