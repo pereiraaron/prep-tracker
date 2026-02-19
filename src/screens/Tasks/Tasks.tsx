@@ -17,7 +17,6 @@ import PageContainer from '@components/PageContainer'
 import { ErrorState } from '@components/EmptyState'
 import TaskFilters from './components/TaskFilters'
 import TaskCard from './components/TaskCard'
-import { MOCK_TASKS } from './mockData'
 
 const Tasks = () => {
   const navigate = useNavigate()
@@ -58,8 +57,7 @@ const Tasks = () => {
   const hasFilters = !!(category || status || recurring)
   const totalCount = pagination?.total ?? tasks.length
 
-  // In dev mode, if error and no tasks loaded, use mock data
-  const displayTasks = error && tasks.length === 0 && import.meta.env.DEV ? MOCK_TASKS : tasks
+  const displayTasks = tasks
 
   return (
     <PageContainer>
@@ -118,7 +116,7 @@ const Tasks = () => {
       )}
 
       {/* Error state */}
-      {!isLoading && error && !import.meta.env.DEV && (
+      {!isLoading && error && (
         <ErrorState onRetry={fetchWithFilters} />
       )}
 
@@ -144,10 +142,10 @@ const Tasks = () => {
       <VStack gap={3} align="stretch">
         {displayTasks.map((task) => (
           <TaskCard
-            key={task._id}
+            key={task.id}
             task={task}
-            onEdit={() => navigate(`/tasks/${task._id}`)}
-            onDelete={() => handleDelete(task._id)}
+            onEdit={() => navigate(`/tasks/${task.id}`)}
+            onDelete={() => handleDelete(task.id)}
           />
         ))}
       </VStack>

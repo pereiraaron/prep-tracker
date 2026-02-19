@@ -24,7 +24,6 @@ import StatCard from '@components/StatCard'
 import Card from './components/Card'
 import ProgressBar from '@components/ProgressBar'
 import BreakdownSection from './components/BreakdownSection'
-import { MOCK_OVERVIEW, MOCK_CATEGORIES, MOCK_DIFFICULTIES, MOCK_STREAKS } from './mockData'
 
 const Stats = () => {
   const [overview, setOverview] = useState<OverviewResponse | null>(null)
@@ -50,14 +49,7 @@ const Stats = () => {
         setStreaks(s)
       })
       .catch(() => {
-        if (import.meta.env.DEV) {
-          setOverview(MOCK_OVERVIEW)
-          setCategories(MOCK_CATEGORIES)
-          setDifficulties(MOCK_DIFFICULTIES)
-          setStreaks(MOCK_STREAKS)
-        } else {
-          setError(true)
-        }
+        setError(true)
       })
       .finally(() => setLoading(false))
   }, [])

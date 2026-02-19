@@ -1,33 +1,25 @@
 import { useEffect, useState } from 'react'
 import PageContainer from '@components/PageContainer'
 import {
-  Badge,
   Box,
   Button,
   Flex,
   Grid,
   Heading,
-  IconButton,
   NativeSelect,
   Spinner,
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { LuArrowLeft, LuPlus, LuTrash2 } from 'react-icons/lu'
+import { LuArrowLeft } from 'react-icons/lu'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTaskStore } from '@store/useTaskStore'
 import { tasksApi } from '@api/tasks'
 import type { PrepCategory } from '@api/tasks'
-import { PREP_CATEGORIES, DIFFICULTIES, QUESTION_SOURCES, DIFFICULTY_COLOR } from '@api/types'
+import { PREP_CATEGORIES } from '@api/types'
 import Input from '@components/Input'
 
 type FrequencyOption = 'daily' | 'weekly' | 'one_time' | 'custom'
-
-interface FormQuestion {
-  title: string
-  difficulty: string
-  source: string
-}
 
 const FREQUENCY_OPTIONS: { value: FrequencyOption; label: string }[] = [
   { value: 'daily', label: 'Daily' },
@@ -52,15 +44,11 @@ const TaskForm = () => {
   const [daysOfWeek, setDaysOfWeek] = useState<number[]>([])
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0])
   const [endDate, setEndDate] = useState('')
+  const [targetQuestionCount, setTargetQuestionCount] = useState(1)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(isEdit)
   const [notFound, setNotFound] = useState(false)
-
-  // Questions (visual only)
-  const [questions, setQuestions] = useState<FormQuestion[]>([])
-  const [showAddQuestion, setShowAddQuestion] = useState(false)
-  const [newQuestion, setNewQuestion] = useState<FormQuestion>({ title: '', difficulty: '', source: '' })
 
   useEffect(() => {
     if (!isEdit) return
@@ -68,6 +56,7 @@ const TaskForm = () => {
     tasksApi.getById(id).then((task) => {
       setName(task.name)
       setCategory(task.category)
+      setTargetQuestionCount(task.targetQuestionCount)
       if (!task.isRecurring) {
         setFrequency('one_time')
       } else if (task.recurrence) {
@@ -93,7 +82,6 @@ const TaskForm = () => {
     setError('')
 
     const isRecurring = frequency !== 'one_time'
-    const targetQuestionCount = Math.max(1, questions.length)
 
     const body = {
       name: name.trim(),
@@ -132,17 +120,6 @@ const TaskForm = () => {
     setDaysOfWeek((prev) =>
       prev.includes(jsDay) ? prev.filter((d) => d !== jsDay) : [...prev, jsDay]
     )
-  }
-
-  const handleAddQuestion = () => {
-    if (!newQuestion.title.trim()) return
-    setQuestions((prev) => [...prev, { ...newQuestion, title: newQuestion.title.trim() }])
-    setNewQuestion({ title: '', difficulty: '', source: '' })
-    setShowAddQuestion(false)
-  }
-
-  const handleRemoveQuestion = (index: number) => {
-    setQuestions((prev) => prev.filter((_, i) => i !== index))
   }
 
   if (loading) {
@@ -209,6 +186,14 @@ const TaskForm = () => {
                   <NativeSelect.Indicator />
                 </NativeSelect.Root>
               </Box>
+
+              <Input
+                label="Target Questions per Day"
+                type="number"
+                value={String(targetQuestionCount)}
+                onChange={(e) => setTargetQuestionCount(Math.max(1, parseInt(e.target.value) || 1))}
+                min={1}
+              />
             </VStack>
 
             {/* Right column */}
@@ -274,122 +259,6 @@ const TaskForm = () => {
               )}
             </VStack>
           </Grid>
-
-          {/* Questions section */}
-          <Box>
-            <Flex justify="space-between" align="center" mb={4}>
-              <Text fontSize="sm" fontWeight="medium">Questions</Text>
-              <Button
-                size="sm"
-                variant="outline"
-                colorPalette="purple"
-                onClick={() => setShowAddQuestion(true)}
-                type="button"
-              >
-                <LuPlus /> Add Question
-              </Button>
-            </Flex>
-
-            {showAddQuestion && (
-              <Box
-                bg="bg.card"
-                borderWidth="1px"
-                borderColor="border.card"
-                borderRadius="lg"
-                p={{ base: 3, md: 4 }}
-                mb={4}
-              >
-                <VStack gap={3} align="stretch">
-                  <Box>
-                    <Input
-                      label="Question Title"
-                      value={newQuestion.title}
-                      onChange={(e) => setNewQuestion((q) => ({ ...q, title: e.target.value }))}
-                      size="sm"
-                      autoFocus
-                    />
-                  </Box>
-                  <Flex gap={3} direction={{ base: 'column', sm: 'row' }}>
-                    <NativeSelect.Root size="sm" flex="1">
-                      <NativeSelect.Field
-                        value={newQuestion.difficulty}
-                        onChange={(e) => setNewQuestion((q) => ({ ...q, difficulty: e.target.value }))}
-                      >
-                        <option value="">Difficulty</option>
-                        {DIFFICULTIES.map((d) => (
-                          <option key={d.value} value={d.value}>{d.label}</option>
-                        ))}
-                      </NativeSelect.Field>
-                      <NativeSelect.Indicator />
-                    </NativeSelect.Root>
-                    <NativeSelect.Root size="sm" flex="1">
-                      <NativeSelect.Field
-                        value={newQuestion.source}
-                        onChange={(e) => setNewQuestion((q) => ({ ...q, source: e.target.value }))}
-                      >
-                        <option value="">Source</option>
-                        {QUESTION_SOURCES.map((s) => (
-                          <option key={s.value} value={s.value}>{s.label}</option>
-                        ))}
-                      </NativeSelect.Field>
-                      <NativeSelect.Indicator />
-                    </NativeSelect.Root>
-                  </Flex>
-                  <Flex gap={2} justify="flex-end">
-                    <Button size="sm" variant="ghost" onClick={() => setShowAddQuestion(false)} type="button">
-                      Cancel
-                    </Button>
-                    <Button size="sm" colorPalette="purple" onClick={handleAddQuestion} type="button">
-                      Add
-                    </Button>
-                  </Flex>
-                </VStack>
-              </Box>
-            )}
-
-            {questions.length > 0 ? (
-              <VStack gap={0} align="stretch">
-                {questions.map((q, i) => (
-                  <Flex
-                    key={i}
-                    align="center"
-                    gap={3}
-                    py={3}
-                    px={{ base: 3, md: 4 }}
-                    borderBottomWidth="1px"
-                    borderColor="border.card"
-                    _first={{ borderTopWidth: '1px' }}
-                  >
-                    <Text fontSize="sm" flex="1" lineClamp={1}>{q.title}</Text>
-                    {q.difficulty && (
-                      <Badge size="sm" colorPalette={DIFFICULTY_COLOR[q.difficulty] || 'gray'}>
-                        {q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1)}
-                      </Badge>
-                    )}
-                    {q.source && (
-                      <Text fontSize="xs" color="fg.muted" flexShrink={0}>
-                        {q.source === 'leetcode' ? 'LeetCode' : q.source === 'greatfrontend' ? 'GreatFrontend' : q.source}
-                      </Text>
-                    )}
-                    <IconButton
-                      aria-label="Remove question"
-                      variant="ghost"
-                      size="xs"
-                      colorPalette="red"
-                      onClick={() => handleRemoveQuestion(i)}
-                      type="button"
-                    >
-                      <LuTrash2 />
-                    </IconButton>
-                  </Flex>
-                ))}
-              </VStack>
-            ) : (
-              <Text fontSize="sm" color="fg.muted" textAlign="center" py={6}>
-                No questions added yet.
-              </Text>
-            )}
-          </Box>
 
           {error && (
             <Text color="red.500" fontSize="sm">{error}</Text>

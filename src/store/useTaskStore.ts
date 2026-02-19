@@ -34,7 +34,7 @@ export const useTaskStore = create<TaskState>((set) => ({
   fetchTasks: async (filter?: TasksFilter) => {
     set({ isLoading: true, error: null })
     try {
-      const { tasks, pagination } = await tasksApi.getAll(filter)
+      const { data: tasks, pagination } = await tasksApi.getAll(filter)
       set({ tasks, pagination, isLoading: false })
     } catch (err) {
       set({
@@ -67,7 +67,7 @@ export const useTaskStore = create<TaskState>((set) => ({
     try {
       const updated = await tasksApi.update(id, body)
       set((state) => ({
-        tasks: state.tasks.map((t) => (t._id === id ? updated : t)),
+        tasks: state.tasks.map((t) => (t.id === id ? updated : t)),
         isLoading: false,
       }))
       return updated
@@ -85,7 +85,7 @@ export const useTaskStore = create<TaskState>((set) => ({
     try {
       await tasksApi.delete(id)
       set((state) => ({
-        tasks: state.tasks.filter((t) => t._id !== id),
+        tasks: state.tasks.filter((t) => t.id !== id),
         isLoading: false,
       }))
     } catch (err) {

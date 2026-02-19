@@ -1,11 +1,11 @@
-import { API_BASE_URL, apiHeaders, handleResponse } from './client'
+import { API_BASE_URL, apiFetch } from './client'
 import type { Question } from './questions'
 
 // ---- Enums ----
 
 export type PrepCategory = 'dsa' | 'system_design' | 'behavioral' | 'machine_coding' | 'language_framework'
 export type TaskStatus = 'active' | 'completed'
-export type TaskInstanceStatus = 'pending' | 'incomplete' | 'in_progress' | 'completed'
+export type DailyTaskStatus = 'pending' | 'incomplete' | 'in_progress' | 'completed'
 export type RecurrenceFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'custom'
 export type Difficulty = 'easy' | 'medium' | 'hard'
 
@@ -21,7 +21,7 @@ export interface Recurrence {
 // ---- Task ----
 
 export interface Task {
-  _id: string
+  id: string
   name: string
   userId: string
   category: PrepCategory
@@ -61,7 +61,7 @@ export interface TasksFilter {
 }
 
 export interface PaginatedTasks {
-  tasks: Task[]
+  data: Task[]
   pagination: {
     page: number
     limit: number
@@ -70,10 +70,10 @@ export interface PaginatedTasks {
   }
 }
 
-// ---- TaskInstance ----
+// ---- DailyTask ----
 
-export interface TaskInstance {
-  _id: string
+export interface DailyTask {
+  id: string
   task: string
   userId: string
   date: string
@@ -82,7 +82,7 @@ export interface TaskInstance {
   targetQuestionCount: number
   addedQuestionCount: number
   solvedQuestionCount: number
-  status: TaskInstanceStatus
+  status: DailyTaskStatus
   questions?: Question[]
   createdAt: string
   updatedAt: string
@@ -101,7 +101,7 @@ export interface TaskSummary {
 export interface TaskGroup {
   category: string
   summary: TaskSummary
-  instances: TaskInstance[]
+  dailyTasks: DailyTask[]
 }
 
 export interface TodayResponse {
@@ -133,55 +133,38 @@ export const tasksApi = {
     if (filter?.page) params.set('page', String(filter.page))
     if (filter?.limit) params.set('limit', String(filter.limit))
     const query = params.toString() ? `?${params}` : ''
-    const res = await fetch(`${API_BASE_URL}/tasks${query}`, { headers: apiHeaders() })
-    return handleResponse<PaginatedTasks>(res)
+    return apiFetch<PaginatedTasks>(`${API_BASE_URL}/tasks${query}`)
   },
 
-  getById: async (id: string) => {
-    const res = await fetch(`${API_BASE_URL}/tasks/${id}`, { headers: apiHeaders() })
-    return handleResponse<Task>(res)
-  },
+  getById: async (id: string) =>
+    apiFetch<Task>(`${API_BASE_URL}/tasks/${id}`),
 
-  create: async (body: CreateTaskBody) => {
-    const res = await fetch(`${API_BASE_URL}/tasks`, {
+  create: async (body: CreateTaskBody) =>
+    apiFetch<Task>(`${API_BASE_URL}/tasks`, {
       method: 'POST',
-      headers: apiHeaders(),
       body: JSON.stringify(body),
-    })
-    return handleResponse<Task>(res)
-  },
+    }),
 
-  update: async (id: string, body: UpdateTaskBody) => {
-    const res = await fetch(`${API_BASE_URL}/tasks/${id}`, {
+  update: async (id: string, body: UpdateTaskBody) =>
+    apiFetch<Task>(`${API_BASE_URL}/tasks/${id}`, {
       method: 'PUT',
-      headers: apiHeaders(),
       body: JSON.stringify(body),
-    })
-    return handleResponse<Task>(res)
-  },
+    }),
 
-  delete: async (id: string) => {
-    const res = await fetch(`${API_BASE_URL}/tasks/${id}`, {
+  delete: async (id: string) =>
+    apiFetch<{ message: string }>(`${API_BASE_URL}/tasks/${id}`, {
       method: 'DELETE',
-      headers: apiHeaders(),
-    })
-    return handleResponse<{ message: string }>(res)
-  },
+    }),
 
-  getToday: async () => {
-    const res = await fetch(`${API_BASE_URL}/tasks/today`, { headers: apiHeaders() })
-    return handleResponse<TodayResponse>(res)
-  },
+  getToday: async () =>
+    apiFetch<TodayResponse>(`${API_BASE_URL}/tasks/today`),
 
   getHistory: async (params: { date: string } | { from: string; to: string }) => {
     const query = new URLSearchParams(params as Record<string, string>).toString()
-    const res = await fetch(`${API_BASE_URL}/tasks/history?${query}`, { headers: apiHeaders() })
-    if ('date' in params) return handleResponse<HistoryDayResponse>(res)
-    return handleResponse<HistoryRangeResponse>(res)
+    if ('date' in params) return apiFetch<HistoryDayResponse>(`${API_BASE_URL}/tasks/history?${query}`)
+    return apiFetch<HistoryRangeResponse>(`${API_BASE_URL}/tasks/history?${query}`)
   },
 
-  getInstanceById: async (id: string) => {
-    const res = await fetch(`${API_BASE_URL}/tasks/instances/${id}`, { headers: apiHeaders() })
-    return handleResponse<TaskInstance>(res)
-  },
+  getDailyTaskById: async (id: string) =>
+    apiFetch<DailyTask>(`${API_BASE_URL}/tasks/daily/${id}`),
 }

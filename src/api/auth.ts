@@ -10,16 +10,22 @@ interface LoginResponse {
   }
 }
 
+interface RefreshResponse {
+  accessToken: string
+  refreshToken: string
+  refreshTokenExpiresAt: string
+}
+
 interface RegisterResponse {
   message: string
   user: {
     email: string
-    _id: string
+    id: string
   }
 }
 
 interface UserProfileResponse {
-  _id: string
+  id: string
   email: string
   username?: string
   isActive: boolean
@@ -50,5 +56,14 @@ export const auth = {
       headers: authHeaders(token),
     })
     return handleAuthResponse<UserProfileResponse>(res)
+  },
+
+  refresh: async (refreshToken: string) => {
+    const res = await fetch(`${AUTH_BASE_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ refreshToken }),
+    })
+    return handleAuthResponse<RefreshResponse>(res)
   },
 }
