@@ -12,10 +12,17 @@ const bearerHeaders = (): HeadersInit => {
   return authHeaders(token ?? undefined)
 }
 
+const passkeyFetch = async <T>(url: string, init?: RequestInit): Promise<T> => {
+  const res = await fetch(url, { ...init, headers: bearerHeaders() })
+  return handleResponse<T>(res, () =>
+    fetch(url, { ...init, headers: bearerHeaders() })
+  )
+}
+
 // ---- Types ----
 
 export interface PasskeyCredential {
-  _id: string
+  id: string
   name: string
   deviceType: string
   backedUp: boolean
@@ -72,39 +79,26 @@ export const passkeyApi = {
   },
 
   // Registration (Bearer token required)
-  getRegisterOptions: async () => {
-    const res = await fetch(`${BASE}/register/options`, {
+  getRegisterOptions: async () =>
+    passkeyFetch<RegistrationOptionsResponse>(`${BASE}/register/options`, {
       method: 'POST',
-      headers: bearerHeaders(),
-    })
-    return handleResponse<RegistrationOptionsResponse>(res)
-  },
+    }),
 
-  verifyRegister: async (challengeId: string, credential: unknown, name?: string) => {
-    const res = await fetch(`${BASE}/register/verify`, {
+  verifyRegister: async (challengeId: string, credential: unknown, name?: string) =>
+    passkeyFetch<RegisterVerifyResponse>(`${BASE}/register/verify`, {
       method: 'POST',
-      headers: bearerHeaders(),
       body: JSON.stringify({ challengeId, credential, name }),
-    })
-    return handleResponse<RegisterVerifyResponse>(res)
-  },
+    }),
 
   // Credential management (Bearer token required)
-  listCredentials: async () => {
-    const res = await fetch(`${BASE}/credentials`, {
-      headers: bearerHeaders(),
-    })
-    return handleResponse<{ credentials: PasskeyCredential[] }>(res)
-  },
+  listCredentials: async () =>
+    passkeyFetch<{ credentials: PasskeyCredential[] }>(`${BASE}/credentials`),
 
-  renameCredential: async (id: string, name: string) => {
-    const res = await fetch(`${BASE}/credentials/${id}`, {
+  renameCredential: async (id: string, name: string) =>
+    passkeyFetch<{ credential: PasskeyCredential }>(`${BASE}/credentials/${id}`, {
       method: 'PATCH',
-      headers: bearerHeaders(),
       body: JSON.stringify({ name }),
-    })
-    return handleResponse<{ credential: PasskeyCredential }>(res)
-  },
+    }),
 
   deleteCredential: async (id: string) => {
     const res = await fetch(`${BASE}/credentials/${id}`, {
@@ -112,14 +106,13 @@ export const passkeyApi = {
       headers: bearerHeaders(),
     })
     if (res.status === 204) return
-    return handleResponse<void>(res)
+    return handleResponse<void>(res, () =>
+      fetch(`${BASE}/credentials/${id}`, { method: 'DELETE', headers: bearerHeaders() })
+    )
   },
 
-  optOut: async () => {
-    const res = await fetch(`${BASE}/opt-out`, {
+  optOut: async () =>
+    passkeyFetch<{ message: string }>(`${BASE}/opt-out`, {
       method: 'POST',
-      headers: bearerHeaders(),
-    })
-    return handleResponse<{ message: string }>(res)
-  },
+    }),
 }

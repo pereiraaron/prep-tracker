@@ -64,7 +64,7 @@ const PasskeySection = () => {
     setError('')
     try {
       const { credential } = await passkeyApi.renameCredential(id, editName.trim())
-      setCredentials((prev) => prev.map((c) => (c._id === id ? credential : c)))
+      setCredentials((prev) => prev.map((c) => (c.id === id ? credential : c)))
       setEditingId(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to rename')
@@ -75,7 +75,7 @@ const PasskeySection = () => {
     setError('')
     try {
       await passkeyApi.deleteCredential(id)
-      setCredentials((prev) => prev.filter((c) => c._id !== id))
+      setCredentials((prev) => prev.filter((c) => c.id !== id))
       setDeletingId(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete')
@@ -142,7 +142,7 @@ const PasskeySection = () => {
           <VStack gap={0} align="stretch">
             {credentials.map((cred) => (
               <Flex
-                key={cred._id}
+                key={cred.id}
                 align="center"
                 py={3}
                 borderTopWidth="1px"
@@ -150,14 +150,14 @@ const PasskeySection = () => {
                 gap={3}
               >
                 <Box flex="1" minW={0}>
-                  {editingId === cred._id ? (
+                  {editingId === cred.id ? (
                     <HStack gap={2}>
                       <Input
                         size="sm"
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
                         onKeyDown={(e) => {
-                          if (e.key === 'Enter') handleRename(cred._id)
+                          if (e.key === 'Enter') handleRename(cred.id)
                           if (e.key === 'Escape') setEditingId(null)
                         }}
                         autoFocus
@@ -167,7 +167,7 @@ const PasskeySection = () => {
                         size="xs"
                         variant="ghost"
                         colorPalette="green"
-                        onClick={() => handleRename(cred._id)}
+                        onClick={() => handleRename(cred.id)}
                       >
                         <LuCheck />
                       </IconButton>
@@ -195,14 +195,14 @@ const PasskeySection = () => {
                   )}
                 </Box>
 
-                {editingId !== cred._id && (
+                {editingId !== cred.id && (
                   <HStack gap={1}>
-                    {deletingId === cred._id ? (
+                    {deletingId === cred.id ? (
                       <>
                         <Button
                           size="xs"
                           colorPalette="red"
-                          onClick={() => handleDelete(cred._id)}
+                          onClick={() => handleDelete(cred.id)}
                         >
                           Confirm
                         </Button>
@@ -217,7 +217,7 @@ const PasskeySection = () => {
                           size="xs"
                           variant="ghost"
                           onClick={() => {
-                            setEditingId(cred._id)
+                            setEditingId(cred.id)
                             setEditName(cred.name || '')
                           }}
                         >
@@ -228,7 +228,7 @@ const PasskeySection = () => {
                           size="xs"
                           variant="ghost"
                           colorPalette="red"
-                          onClick={() => setDeletingId(cred._id)}
+                          onClick={() => setDeletingId(cred.id)}
                         >
                           <LuTrash2 />
                         </IconButton>

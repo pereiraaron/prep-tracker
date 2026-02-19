@@ -1,10 +1,10 @@
 import { Flex, Text, Button, NativeSelect, Box } from '@chakra-ui/react'
 import { LuArrowRight } from 'react-icons/lu'
-import type { TaskInstance } from '@api/tasks'
+import type { DailyTask } from '@api/tasks'
 
 interface BulkActionBarProps {
   selectedCount: number
-  todayInstances: TaskInstance[]
+  todayDailyTasks: DailyTask[]
   moveTarget: string
   onMoveTargetChange: (value: string) => void
   onMove: () => void
@@ -13,7 +13,7 @@ interface BulkActionBarProps {
 
 const BulkActionBar = ({
   selectedCount,
-  todayInstances,
+  todayDailyTasks,
   moveTarget,
   onMoveTargetChange,
   onMove,
@@ -48,8 +48,8 @@ const BulkActionBar = ({
         <NativeSelect.Root size="sm" flex="1" maxW={{ md: '280px' }}>
           <NativeSelect.Field value={moveTarget} onChange={(e) => onMoveTargetChange(e.target.value)}>
             <option value="">Move to Task...</option>
-            {todayInstances.map((inst) => (
-              <option key={inst._id} value={inst._id}>
+            {todayDailyTasks.map((inst) => (
+              <option key={inst.id} value={inst.id}>
                 {inst.taskName} ({inst.category})
               </option>
             ))}

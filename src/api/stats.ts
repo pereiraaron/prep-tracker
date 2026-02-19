@@ -1,4 +1,5 @@
-import { API_BASE_URL, apiHeaders, handleResponse } from './client'
+import { API_BASE_URL, apiFetch } from './client'
+import type { PrepCategory } from './tasks'
 
 // ---- Response types ----
 
@@ -28,6 +29,15 @@ export interface DifficultyBreakdown {
   completionRate: number
 }
 
+export interface TopicBreakdown {
+  topic: string
+  total: number
+  solved: number
+  in_progress: number
+  pending: number
+  completionRate: number
+}
+
 export interface StreaksResponse {
   currentStreak: number
   longestStreak: number
@@ -42,28 +52,23 @@ export interface ProgressDay {
 // ---- API ----
 
 export const statsApi = {
-  getOverview: async () => {
-    const res = await fetch(`${API_BASE_URL}/stats/overview`, { headers: apiHeaders() })
-    return handleResponse<OverviewResponse>(res)
+  getOverview: async () =>
+    apiFetch<OverviewResponse>(`${API_BASE_URL}/stats/overview`),
+
+  getCategoryBreakdown: async () =>
+    apiFetch<CategoryBreakdown[]>(`${API_BASE_URL}/stats/categories`),
+
+  getDifficultyBreakdown: async () =>
+    apiFetch<DifficultyBreakdown[]>(`${API_BASE_URL}/stats/difficulties`),
+
+  getTopicBreakdown: async (category?: PrepCategory) => {
+    const query = category ? `?category=${category}` : ''
+    return apiFetch<TopicBreakdown[]>(`${API_BASE_URL}/stats/topics${query}`)
   },
 
-  getCategoryBreakdown: async () => {
-    const res = await fetch(`${API_BASE_URL}/stats/categories`, { headers: apiHeaders() })
-    return handleResponse<CategoryBreakdown[]>(res)
-  },
+  getStreaks: async () =>
+    apiFetch<StreaksResponse>(`${API_BASE_URL}/stats/streaks`),
 
-  getDifficultyBreakdown: async () => {
-    const res = await fetch(`${API_BASE_URL}/stats/difficulties`, { headers: apiHeaders() })
-    return handleResponse<DifficultyBreakdown[]>(res)
-  },
-
-  getStreaks: async () => {
-    const res = await fetch(`${API_BASE_URL}/stats/streaks`, { headers: apiHeaders() })
-    return handleResponse<StreaksResponse>(res)
-  },
-
-  getProgress: async (days = 30) => {
-    const res = await fetch(`${API_BASE_URL}/stats/progress?days=${days}`, { headers: apiHeaders() })
-    return handleResponse<ProgressDay[]>(res)
-  },
+  getProgress: async (days = 30) =>
+    apiFetch<ProgressDay[]>(`${API_BASE_URL}/stats/progress?days=${days}`),
 }

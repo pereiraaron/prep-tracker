@@ -20,7 +20,6 @@ import BacklogFilters from './components/BacklogFilters'
 import QuestionCard from './components/QuestionCard'
 import BulkActionBar from './components/BulkActionBar'
 import BacklogForm from './components/BacklogForm'
-import { MOCK_BACKLOG } from './mockData'
 
 const Backlog = () => {
   const { today, fetchToday } = useTaskStore()
@@ -52,15 +51,10 @@ const Backlog = () => {
         ...(status ? { status: status as QuestionStatus } : {}),
         ...(category ? { topic: category } : {}),
       })
-      setQuestions(data.questions)
+      setQuestions(data.data)
       setTotalCount(data.pagination.total)
     } catch {
-      if (import.meta.env.DEV) {
-        setQuestions(MOCK_BACKLOG)
-        setTotalCount(MOCK_BACKLOG.length)
-      } else {
-        setError(true)
-      }
+      setError(true)
     } finally {
       setLoading(false)
     }
@@ -128,7 +122,7 @@ const Backlog = () => {
   }
 
   const hasFilters = !!(category || difficulty || status || source)
-  const todayInstances = today?.groups.flatMap((g) => g.instances) || []
+  const todayDailyTasks = today?.groups.flatMap((g) => g.dailyTasks) || []
 
   return (
     <PageContainer>
@@ -220,11 +214,11 @@ const Backlog = () => {
       <VStack gap={2} align="stretch" pb={selected.size > 0 ? 20 : 0}>
         {questions.map((q) => (
           <QuestionCard
-            key={q._id}
+            key={q.id}
             question={q}
-            isSelected={selected.has(q._id)}
-            onToggle={() => toggleSelect(q._id)}
-            onDelete={() => handleDelete(q._id)}
+            isSelected={selected.has(q.id)}
+            onToggle={() => toggleSelect(q.id)}
+            onDelete={() => handleDelete(q.id)}
           />
         ))}
       </VStack>
@@ -232,7 +226,7 @@ const Backlog = () => {
       {/* Bulk action bar */}
       <BulkActionBar
         selectedCount={selected.size}
-        todayInstances={todayInstances}
+        todayDailyTasks={todayDailyTasks}
         moveTarget={moveTarget}
         onMoveTargetChange={setMoveTarget}
         onMove={handleBulkMove}

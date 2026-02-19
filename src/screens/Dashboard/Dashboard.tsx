@@ -23,8 +23,8 @@ import PageContainer from '@components/PageContainer'
 import StatCard from '@components/StatCard'
 import { ErrorState } from '@components/EmptyState'
 import CategoryProgress from './components/CategoryProgress'
+import DailyTaskCard from './components/DailyTaskCard'
 import QuickActions from './components/QuickActions'
-import { MOCK_TODAY, MOCK_STREAKS } from './mockData'
 
 const getGreeting = () => {
   const hour = new Date().getHours()
@@ -63,11 +63,7 @@ const Dashboard = () => {
         throw new Error('Failed to load today data')
       }
     } catch {
-      if (import.meta.env.DEV) {
-        setStreaks(MOCK_STREAKS)
-      } else {
-        setError(true)
-      }
+      setError(true)
     } finally {
       setLoading(false)
     }
@@ -77,15 +73,14 @@ const Dashboard = () => {
     fetchData()
   }, [fetchData])
 
-  // Use mock data in dev when API fails
-  const todayData = !today && import.meta.env.DEV && !loading ? MOCK_TODAY : today
+  const todayData = today
 
   // Compute totals from groups
   const totalQuestions = todayData?.groups.reduce(
-    (sum, g) => sum + g.instances.reduce((s, i) => s + i.targetQuestionCount, 0), 0
+    (sum, g) => sum + g.dailyTasks.reduce((s, i) => s + i.targetQuestionCount, 0), 0
   ) ?? 0
   const solvedQuestions = todayData?.groups.reduce(
-    (sum, g) => sum + g.instances.reduce((s, i) => s + i.solvedQuestionCount, 0), 0
+    (sum, g) => sum + g.dailyTasks.reduce((s, i) => s + i.solvedQuestionCount, 0), 0
   ) ?? 0
 
   const displayName = user?.username || user?.email?.split('@')[0] || 'there'
@@ -159,10 +154,10 @@ const Dashboard = () => {
           <Heading size="sm" mb={{ base: 3, md: 4 }}>
             Today's Progress
           </Heading>
-          <VStack gap={3} align="stretch" mb={{ base: 6, md: 8 }}>
+          <VStack gap={4} align="stretch" mb={{ base: 6, md: 8 }}>
             {todayData.groups.map((group) => {
-              const groupSolved = group.instances.reduce((s, i) => s + i.solvedQuestionCount, 0)
-              const groupTotal = group.instances.reduce((s, i) => s + i.targetQuestionCount, 0)
+              const groupSolved = group.dailyTasks.reduce((s, i) => s + i.solvedQuestionCount, 0)
+              const groupTotal = group.dailyTasks.reduce((s, i) => s + i.targetQuestionCount, 0)
               const groupStatus = group.summary.completed === group.summary.total
                 ? 'completed'
                 : group.summary.in_progress > 0
@@ -171,17 +166,18 @@ const Dashboard = () => {
                     ? 'incomplete'
                     : 'pending'
 
-              const taskId = group.instances[0]?.task
-
               return (
-                <CategoryProgress
-                  key={group.category}
-                  category={group.category}
-                  solved={groupSolved}
-                  total={groupTotal}
-                  status={groupStatus}
-                  onClick={taskId ? () => navigate(`/tasks/${taskId}`) : undefined}
-                />
+                <VStack key={group.category} gap={0} align="stretch">
+                  <CategoryProgress
+                    category={group.category}
+                    solved={groupSolved}
+                    total={groupTotal}
+                    status={groupStatus}
+                  />
+                  {group.dailyTasks.map((dt) => (
+                    <DailyTaskCard key={dt.id} dailyTask={dt} />
+                  ))}
+                </VStack>
               )
             })}
           </VStack>
