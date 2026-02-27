@@ -1,162 +1,131 @@
-import { useCallback, useEffect, useState } from 'react'
-import {
-  Flex,
-  Heading,
-  Text,
-  Badge,
-  Button,
-  VStack,
-  Spinner,
-  IconButton,
-} from '@chakra-ui/react'
-import { LuPlus, LuFilter } from 'react-icons/lu'
-import { questionsApi } from '@api/questions'
-import type { Question, CreateBacklogQuestionBody, QuestionStatus } from '@api/questions'
-import type { Difficulty } from '@api/tasks'
-import { useTaskStore } from '@store/useTaskStore'
-import PageContainer from '@components/PageContainer'
-import { ErrorState } from '@components/EmptyState'
-import BacklogFilters from './components/BacklogFilters'
-import QuestionCard from './components/QuestionCard'
-import BulkActionBar from './components/BulkActionBar'
-import BacklogForm from './components/BacklogForm'
+import { useCallback, useEffect, useState } from "react";
+import { Flex, Heading, Text, Badge, Button, VStack, Spinner, IconButton } from "@chakra-ui/react";
+import { LuPlus, LuFilter } from "react-icons/lu";
+import { questionsApi } from "@api/questions";
+import type { Question, CreateBacklogQuestionBody, QuestionStatus } from "@api/questions";
+import type { Difficulty, PrepCategory } from "@api/types";
+import PageContainer from "@components/PageContainer";
+import { ErrorState } from "@components/EmptyState";
+import BacklogFilters from "./components/BacklogFilters";
+import QuestionCard from "./components/QuestionCard";
+import BacklogForm from "./components/BacklogForm";
 
 const Backlog = () => {
-  const { today, fetchToday } = useTaskStore()
-  const [questions, setQuestions] = useState<Question[]>([])
-  const [totalCount, setTotalCount] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   // Filters
-  const [category, setCategory] = useState('')
-  const [difficulty, setDifficulty] = useState('')
-  const [status, setStatus] = useState('')
-  const [source, setSource] = useState('')
+  const [category, setCategory] = useState("");
+  const [difficulty, setDifficulty] = useState("");
+  const [status, setStatus] = useState("");
+  const [source, setSource] = useState("");
 
   // UI state
-  const [showMobileFilters, setShowMobileFilters] = useState(false)
-  const [showForm, setShowForm] = useState(false)
-  const [selected, setSelected] = useState<Set<string>>(new Set())
-  const [moveTarget, setMoveTarget] = useState('')
-  const [moving, setMoving] = useState(false)
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [showForm, setShowForm] = useState(false);
 
   const fetchBacklog = useCallback(async () => {
-    setLoading(true)
-    setError(false)
+    setLoading(true);
+    setError(false);
     try {
       const data = await questionsApi.getBacklog({
         ...(difficulty ? { difficulty: difficulty as Difficulty } : {}),
         ...(source ? { source } : {}),
         ...(status ? { status: status as QuestionStatus } : {}),
         ...(category ? { topic: category } : {}),
-      })
-      setQuestions(data.data)
-      setTotalCount(data.pagination.total)
+      });
+      setQuestions(data.data);
+      setTotalCount(data.pagination.total);
     } catch {
-      setError(true)
+      setError(true);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [category, difficulty, status, source])
+  }, [category, difficulty, status, source]);
 
   useEffect(() => {
-    fetchBacklog()
-    fetchToday()
-  }, [fetchBacklog, fetchToday])
+    fetchBacklog();
+  }, [fetchBacklog]);
 
   const handleCreate = async (body: CreateBacklogQuestionBody) => {
     try {
-      await questionsApi.createBacklog(body)
-      setShowForm(false)
-      fetchBacklog()
+      await questionsApi.createBacklog(body);
+      setShowForm(false);
+      fetchBacklog();
     } catch {
       // Form stays open so user can retry
     }
-  }
+  };
 
   const handleDelete = async (id: string) => {
     try {
-      await questionsApi.delete(id)
-      setSelected((prev) => {
-        const next = new Set(prev)
-        next.delete(id)
-        return next
-      })
-      fetchBacklog()
+      await questionsApi.delete(id);
+      fetchBacklog();
     } catch {
       // Question stays in list
     }
-  }
+  };
 
-  const toggleSelect = (id: string) => {
-    setSelected((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }
-
-  const handleBulkMove = async () => {
-    if (!moveTarget || selected.size === 0) return
-    setMoving(true)
+  const handleStar = async (id: string) => {
+    setQuestions((prev) =>
+      prev.map((q) => (q.id === id ? { ...q, starred: !q.starred } : q)),
+    );
     try {
-      await questionsApi.bulkMove(Array.from(selected), moveTarget)
-      setSelected(new Set())
-      setMoveTarget('')
-      fetchBacklog()
-      fetchToday()
+      await questionsApi.star(id);
     } catch {
-      // Selections preserved for retry
-    } finally {
-      setMoving(false)
+      setQuestions((prev) =>
+        prev.map((q) => (q.id === id ? { ...q, starred: !q.starred } : q)),
+      );
     }
-  }
+  };
+
+  const handleSolve = async (id: string, category: PrepCategory) => {
+    try {
+      await questionsApi.update(id, { category });
+      await questionsApi.solve(id);
+      fetchBacklog();
+    } catch {
+      // Question stays in backlog
+    }
+  };
 
   const clearFilters = () => {
-    setCategory('')
-    setDifficulty('')
-    setStatus('')
-    setSource('')
-  }
+    setCategory("");
+    setDifficulty("");
+    setStatus("");
+    setSource("");
+  };
 
-  const hasFilters = !!(category || difficulty || status || source)
-  const todayDailyTasks = today?.groups.flatMap((g) => g.dailyTasks) || []
+  const hasFilters = !!(category || difficulty || status || source);
 
   return (
     <PageContainer>
       {/* Header */}
       <Flex justify="space-between" align="center" mb={{ base: 4, md: 6 }}>
         <Flex align="center" gap={2}>
-          <Heading size={{ base: 'md', md: 'lg' }}>Backlog</Heading>
+          <Heading size={{ base: "md", md: "lg" }}>Backlog</Heading>
           {!loading && (
             <Badge variant="subtle" size="sm" colorPalette="purple">
-              {totalCount} Question{totalCount !== 1 ? 's' : ''}
+              {totalCount} Question{totalCount !== 1 ? "s" : ""}
             </Badge>
           )}
         </Flex>
 
         <Flex gap={2} align="center">
-          {/* Mobile filter toggle */}
           <IconButton
             aria-label="Toggle filters"
-            variant={hasFilters ? 'solid' : 'outline'}
-            colorPalette={hasFilters ? 'purple' : undefined}
+            variant={hasFilters ? "solid" : "outline"}
+            colorPalette={hasFilters ? "purple" : undefined}
             size="sm"
-            display={{ base: 'flex', md: 'none' }}
+            display={{ base: "flex", md: "none" }}
             onClick={() => setShowMobileFilters((v) => !v)}
           >
             <LuFilter />
           </IconButton>
 
-          {/* Desktop add button */}
-          <Button
-            colorPalette="purple"
-            size="sm"
-            onClick={() => setShowForm(true)}
-            display={{ base: 'none', md: 'flex' }}
-          >
+          <Button colorPalette="purple" size="sm" onClick={() => setShowForm(true)} display={{ base: "none", md: "flex" }}>
             <LuPlus /> New Question
           </Button>
         </Flex>
@@ -176,9 +145,7 @@ const Backlog = () => {
       />
 
       {/* Add form */}
-      {showForm && (
-        <BacklogForm onSubmit={handleCreate} onCancel={() => setShowForm(false)} />
-      )}
+      {showForm && <BacklogForm onSubmit={handleCreate} onCancel={() => setShowForm(false)} />}
 
       {/* Loading */}
       {loading && questions.length === 0 && (
@@ -188,15 +155,13 @@ const Backlog = () => {
       )}
 
       {/* Error state */}
-      {!loading && error && (
-        <ErrorState onRetry={fetchBacklog} />
-      )}
+      {!loading && error && <ErrorState onRetry={fetchBacklog} />}
 
       {/* Empty state */}
       {!loading && !error && questions.length === 0 && (
         <VStack gap={4} py={16}>
           <Text color="fg.muted" fontSize="lg">
-            {hasFilters ? 'No questions match the filters' : 'Backlog is empty'}
+            {hasFilters ? "No questions match the filters" : "Backlog is empty"}
           </Text>
           {hasFilters ? (
             <Button variant="outline" size="sm" onClick={clearFilters}>
@@ -204,34 +169,24 @@ const Backlog = () => {
             </Button>
           ) : (
             <Text color="fg.muted" fontSize="sm">
-              Save questions here for later and move them to active tasks when ready.
+              Save questions here for later.
             </Text>
           )}
         </VStack>
       )}
 
       {/* Question list */}
-      <VStack gap={2} align="stretch" pb={selected.size > 0 ? 20 : 0}>
+      <VStack gap={2} align="stretch">
         {questions.map((q) => (
           <QuestionCard
             key={q.id}
             question={q}
-            isSelected={selected.has(q.id)}
-            onToggle={() => toggleSelect(q.id)}
             onDelete={() => handleDelete(q.id)}
+            onStar={() => handleStar(q.id)}
+            onSolve={(cat) => handleSolve(q.id, cat)}
           />
         ))}
       </VStack>
-
-      {/* Bulk action bar */}
-      <BulkActionBar
-        selectedCount={selected.size}
-        todayDailyTasks={todayDailyTasks}
-        moveTarget={moveTarget}
-        onMoveTargetChange={setMoveTarget}
-        onMove={handleBulkMove}
-        moving={moving}
-      />
 
       {/* Mobile FAB */}
       <IconButton
@@ -240,16 +195,16 @@ const Backlog = () => {
         size="lg"
         borderRadius="full"
         position="fixed"
-        bottom={selected.size > 0 ? 20 : 6}
+        bottom={6}
         right={6}
-        display={{ base: 'flex', md: 'none' }}
+        display={{ base: "flex", md: "none" }}
         boxShadow="lg"
         onClick={() => setShowForm(true)}
       >
         <LuPlus />
       </IconButton>
     </PageContainer>
-  )
-}
+  );
+};
 
-export default Backlog
+export default Backlog;

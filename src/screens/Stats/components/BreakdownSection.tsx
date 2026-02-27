@@ -1,5 +1,5 @@
 import { Box, Flex, Heading, Text, VStack, GridItem } from '@chakra-ui/react'
-import Card from './Card'
+import Card from '@components/Card'
 import ProgressBar from '@components/ProgressBar'
 
 interface BreakdownItem {

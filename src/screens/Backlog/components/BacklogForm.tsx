@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Box, Flex, Text, Button, VStack, NativeSelect, Textarea } from '@chakra-ui/react'
 import type { CreateBacklogQuestionBody, QuestionSource } from '@api/questions'
-import type { Difficulty } from '@api/tasks'
+import type { Difficulty } from '@api/types'
 import { DIFFICULTIES, QUESTION_SOURCES } from '@api/types'
 import Input from '@components/Input'
 

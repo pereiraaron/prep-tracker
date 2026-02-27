@@ -8,9 +8,8 @@ import ErrorBoundary from '@components/ErrorBoundary'
 
 const Login = lazy(() => import('@screens/Login/Login'))
 const Dashboard = lazy(() => import('@screens/Dashboard/Dashboard'))
-const Tasks = lazy(() => import('@screens/Tasks/Tasks'))
-const TaskForm = lazy(() => import('@screens/Tasks/TaskForm'))
-const AddQuestions = lazy(() => import('@screens/Tasks/AddQuestions'))
+const Questions = lazy(() => import('@screens/Questions/Questions'))
+const QuestionForm = lazy(() => import('@screens/Questions/QuestionForm'))
 const Backlog = lazy(() => import('@screens/Backlog/Backlog'))
 const Stats = lazy(() => import('@screens/Stats/Stats'))
 const Settings = lazy(() => import('@screens/Settings/Settings'))
@@ -74,34 +73,26 @@ const App = () => {
                 }
               />
               <Route
-                path="/tasks"
+                path="/questions"
                 element={
                   <ProtectedRoute>
-                    <Tasks />
+                    <Questions />
                   </ProtectedRoute>
                 }
               />
               <Route
-                path="/tasks/new"
+                path="/questions/new"
                 element={
                   <ProtectedRoute>
-                    <TaskForm />
+                    <QuestionForm />
                   </ProtectedRoute>
                 }
               />
               <Route
-                path="/tasks/:id"
+                path="/questions/:id"
                 element={
                   <ProtectedRoute>
-                    <TaskForm />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/tasks/daily/:id/add-questions"
-                element={
-                  <ProtectedRoute>
-                    <AddQuestions />
+                    <QuestionForm />
                   </ProtectedRoute>
                 }
               />

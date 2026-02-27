@@ -1,46 +1,43 @@
-import { Box, Grid, Text } from '@chakra-ui/react'
-import { LuPlus, LuArchive, LuChartBar, LuListTodo } from 'react-icons/lu'
-import { useNavigate } from 'react-router-dom'
+import { Box, Grid, Text } from "@chakra-ui/react";
+import { LuBookOpen, LuPlus, LuArchive, LuChartBar } from "react-icons/lu";
+import { useNavigate } from "react-router-dom";
 
 const ACTIONS = [
   {
+    icon: <LuBookOpen size={20} />,
+    title: "Browse Questions",
+    description: "View and manage all questions",
+    path: "/questions",
+    color: "purple.500",
+  },
+  {
     icon: <LuPlus size={20} />,
-    title: 'New Task',
-    description: 'Create a new prep task',
-    path: '/tasks/new',
-    color: 'purple.500',
+    title: "New Question",
+    description: "Add a solved question",
+    path: "/questions/new",
+    color: "teal.500",
   },
   {
     icon: <LuArchive size={20} />,
-    title: 'Add to Backlog',
-    description: 'Save questions for later',
-    path: '/backlog',
-    color: 'blue.500',
+    title: "Add to Backlog",
+    description: "Save questions for later",
+    path: "/backlog",
+    color: "blue.500",
   },
   {
     icon: <LuChartBar size={20} />,
-    title: 'View Stats',
-    description: 'Track your progress',
-    path: '/stats',
-    color: 'green.500',
+    title: "View Stats",
+    description: "Track your progress",
+    path: "/stats",
+    color: "green.500",
   },
-  {
-    icon: <LuListTodo size={20} />,
-    title: 'All Tasks',
-    description: 'Manage your tasks',
-    path: '/tasks',
-    color: 'orange.500',
-  },
-]
+];
 
 const QuickActions = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
-    <Grid
-      templateColumns={{ base: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }}
-      gap={{ base: 3, md: 4 }}
-    >
+    <Grid templateColumns={{ base: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }} gap={{ base: 3, md: 4 }}>
       {ACTIONS.map((action) => (
         <Box
           key={action.title}
@@ -50,7 +47,7 @@ const QuickActions = () => {
           borderRadius="xl"
           p={{ base: 4, md: 5 }}
           cursor="pointer"
-          _hover={{ borderColor: 'purple.500/40', bg: 'purple.500/5' }}
+          _hover={{ borderColor: "purple.500/40", bg: "purple.500/5" }}
           onClick={() => navigate(action.path)}
         >
           <Box color={action.color} mb={2}>
@@ -65,7 +62,7 @@ const QuickActions = () => {
         </Box>
       ))}
     </Grid>
-  )
-}
+  );
+};
 
-export default QuickActions
+export default QuickActions;

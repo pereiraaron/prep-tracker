@@ -1,20 +1,32 @@
 import { Flex, Box, Grid, NativeSelect, Text } from '@chakra-ui/react'
-import { PREP_CATEGORIES, TASK_STATUSES } from '@api/types'
+import { PREP_CATEGORIES, DIFFICULTIES, QUESTION_SOURCES, QUESTION_STATUSES } from '@api/types'
 
-const FREQUENCY_OPTIONS = [
-  { value: 'yes', label: 'Recurring' },
-  { value: 'no', label: 'One-time' },
-] as const
-
-interface TaskFiltersProps {
+interface QuestionsFiltersProps {
   category: string
   status: string
-  recurring: string
-  onCategoryChange: (value: string) => void
-  onStatusChange: (value: string) => void
-  onRecurringChange: (value: string) => void
+  difficulty: string
+  source: string
+  starred: string
+  sort: string
+  onCategoryChange: (v: string) => void
+  onStatusChange: (v: string) => void
+  onDifficultyChange: (v: string) => void
+  onSourceChange: (v: string) => void
+  onStarredChange: (v: string) => void
+  onSortChange: (v: string) => void
   showMobile: boolean
 }
+
+const SORT_OPTIONS = [
+  { value: '-createdAt', label: 'Newest' },
+  { value: 'createdAt', label: 'Oldest' },
+  { value: '-solvedAt', label: 'Recently Solved' },
+  { value: '-updatedAt', label: 'Recently Updated' },
+] as const
+
+const STARRED_OPTIONS = [
+  { value: 'true', label: 'Starred Only' },
+] as const
 
 interface FilterSelectProps {
   value: string
@@ -42,24 +54,22 @@ const FilterSelect = ({ value, onChange, label, placeholder, options, fullWidth 
   </Box>
 )
 
-const TaskFilters = ({
-  category,
-  status,
-  recurring,
-  onCategoryChange,
-  onStatusChange,
-  onRecurringChange,
+const QuestionsFilters = ({
+  category, status, difficulty, source, starred, sort,
+  onCategoryChange, onStatusChange, onDifficultyChange, onSourceChange, onStarredChange, onSortChange,
   showMobile,
-}: TaskFiltersProps) => {
+}: QuestionsFiltersProps) => {
   const filters = [
     { value: category, onChange: onCategoryChange, label: 'Category', placeholder: 'All Categories', options: PREP_CATEGORIES },
-    { value: status, onChange: onStatusChange, label: 'Status', placeholder: 'All Statuses', options: TASK_STATUSES },
-    { value: recurring, onChange: onRecurringChange, label: 'Frequency', placeholder: 'All Types', options: FREQUENCY_OPTIONS },
+    { value: status, onChange: onStatusChange, label: 'Status', placeholder: 'All Statuses', options: QUESTION_STATUSES },
+    { value: difficulty, onChange: onDifficultyChange, label: 'Difficulty', placeholder: 'All Difficulties', options: DIFFICULTIES },
+    { value: source, onChange: onSourceChange, label: 'Source', placeholder: 'All Sources', options: QUESTION_SOURCES },
+    { value: starred, onChange: onStarredChange, label: 'Starred', placeholder: 'All Questions', options: STARRED_OPTIONS },
+    { value: sort, onChange: onSortChange, label: 'Sort', placeholder: 'Sort by', options: SORT_OPTIONS },
   ] as const
 
   return (
     <Box mb={{ base: 4, md: 6 }}>
-      {/* Desktop filters */}
       <Flex gap={2} display={{ base: 'none', md: 'flex' }}>
         {filters.map((f) => (
           <FilterSelect
@@ -73,7 +83,6 @@ const TaskFilters = ({
         ))}
       </Flex>
 
-      {/* Mobile filters */}
       {showMobile && (
         <Box
           display={{ base: 'block', md: 'none' }}
@@ -102,4 +111,4 @@ const TaskFilters = ({
   )
 }
 
-export default TaskFilters
+export default QuestionsFilters

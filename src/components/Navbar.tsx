@@ -1,15 +1,14 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Box, Flex, HStack, VStack, Text, Button, IconButton, Avatar } from '@chakra-ui/react'
-import { LuMenu, LuX, LuLogOut } from 'react-icons/lu'
-import { Link, useLocation } from 'react-router-dom'
+import { LuMenu, LuX, LuLogOut, LuSettings } from 'react-icons/lu'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@store/useAuthStore'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard' },
-  { to: '/tasks', label: 'Tasks' },
+  { to: '/questions', label: 'Questions' },
   { to: '/backlog', label: 'Backlog' },
   { to: '/stats', label: 'Stats' },
-  { to: '/settings', label: 'Settings' },
 ]
 
 const NavLink = ({
@@ -44,16 +43,21 @@ const NavLink = ({
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuthStore()
+  const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false)
+  const avatarMenuRef = useRef<HTMLDivElement>(null)
 
   const closeMenu = () => setMenuOpen(false)
 
   const handleLogout = () => {
     closeMenu()
+    setAvatarMenuOpen(false)
     logout()
   }
 
   const displayName = user?.username || user?.email || ''
+  const displayEmail = user?.email || ''
 
   return (
     <Box
@@ -84,7 +88,7 @@ const Navbar = () => {
 
         <Box flex="1" />
 
-        {/* Desktop nav links — centered */}
+        {/* Desktop nav links */}
         {isAuthenticated && (
           <HStack gap={1} display={{ base: 'none', md: 'flex' }}>
             {NAV_ITEMS.map((item) => (
@@ -97,26 +101,83 @@ const Navbar = () => {
 
         <Box flex="1" />
 
-        {/* Desktop user info + logout */}
+        {/* Desktop avatar menu */}
         {isAuthenticated && (
-          <HStack gap={3} display={{ base: 'none', md: 'flex' }}>
-            <HStack gap={2}>
+          <Box position="relative" display={{ base: 'none', md: 'block' }} ref={avatarMenuRef}>
+            <Box
+              cursor="pointer"
+              onClick={() => setAvatarMenuOpen((v) => !v)}
+            >
               <Avatar.Root size="sm" colorPalette="purple">
                 <Avatar.Fallback name={displayName} />
               </Avatar.Root>
-              <Text fontSize="sm" fontWeight="medium">
-                {displayName}
-              </Text>
-            </HStack>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={logout}
-            >
-              <LuLogOut />
-              Logout
-            </Button>
-          </HStack>
+            </Box>
+
+            {avatarMenuOpen && (
+              <>
+                <Box
+                  position="fixed"
+                  top={0}
+                  left={0}
+                  right={0}
+                  bottom={0}
+                  onClick={() => setAvatarMenuOpen(false)}
+                  zIndex={10}
+                />
+                <Box
+                  position="absolute"
+                  top="100%"
+                  right={0}
+                  mt={2}
+                  bg="bg.card"
+                  borderWidth="1px"
+                  borderColor="border.card"
+                  borderRadius="lg"
+                  boxShadow="lg"
+                  minW="200px"
+                  zIndex={11}
+                  py={1}
+                >
+                  <Box px={3} py={2} borderBottomWidth="1px" borderColor="border.card">
+                    <Text fontSize="sm" fontWeight="medium">
+                      {displayName}
+                    </Text>
+                    {displayEmail && displayEmail !== displayName && (
+                      <Text fontSize="xs" color="fg.muted">
+                        {displayEmail}
+                      </Text>
+                    )}
+                  </Box>
+                  <Box px={1} py={1}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      w="full"
+                      justifyContent="flex-start"
+                      onClick={() => {
+                        setAvatarMenuOpen(false)
+                        navigate('/settings')
+                      }}
+                    >
+                      <LuSettings />
+                      Settings
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      w="full"
+                      justifyContent="flex-start"
+                      colorPalette="red"
+                      onClick={handleLogout}
+                    >
+                      <LuLogOut />
+                      Logout
+                    </Button>
+                  </Box>
+                </Box>
+              </>
+            )}
+          </Box>
         )}
 
         {/* Mobile hamburger */}
@@ -151,18 +212,39 @@ const Navbar = () => {
           </VStack>
 
           <Box borderTopWidth="1px" borderColor="border.card" pt={3}>
-            <Flex align="center" justify="space-between">
-              <HStack gap={2}>
-                <Avatar.Root size="sm" colorPalette="purple">
-                  <Avatar.Fallback name={displayName} />
-                </Avatar.Root>
+            <Flex align="center" gap={2} mb={3}>
+              <Avatar.Root size="sm" colorPalette="purple">
+                <Avatar.Fallback name={displayName} />
+              </Avatar.Root>
+              <Box>
                 <Text fontSize="sm" fontWeight="medium">
                   {displayName}
                 </Text>
-              </HStack>
+                {displayEmail && displayEmail !== displayName && (
+                  <Text fontSize="xs" color="fg.muted">
+                    {displayEmail}
+                  </Text>
+                )}
+              </Box>
+            </Flex>
+            <Flex gap={2}>
               <Button
                 size="sm"
                 variant="outline"
+                flex="1"
+                onClick={() => {
+                  closeMenu()
+                  navigate('/settings')
+                }}
+              >
+                <LuSettings />
+                Settings
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                colorPalette="red"
+                flex="1"
                 onClick={handleLogout}
               >
                 <LuLogOut />

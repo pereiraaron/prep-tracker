@@ -4,7 +4,6 @@ import type { QuestionStatus } from '@api/questions'
 
 const STATUS_OPTIONS: { value: QuestionStatus; label: string }[] = [
   { value: 'pending', label: 'Pending' },
-  { value: 'in_progress', label: 'In Progress' },
   { value: 'solved', label: 'Solved' },
 ]
 
