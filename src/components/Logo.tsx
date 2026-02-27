@@ -1,4 +1,3 @@
-import { Icon } from '@chakra-ui/react'
 import { LuClipboardCheck } from 'react-icons/lu'
 
 interface LogoProps {
@@ -6,7 +5,7 @@ interface LogoProps {
 }
 
 const Logo = ({ size = '28px' }: LogoProps) => {
-  return <Icon asChild boxSize={size}><LuClipboardCheck /></Icon>
+  return <LuClipboardCheck style={{ width: size, height: size }} />
 }
 
 export default Logo

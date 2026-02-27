@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react'
-import { Box } from '@chakra-ui/react'
 import { useColorMode } from '@hooks/useColorMode'
 
 const SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY
@@ -65,7 +64,7 @@ const Captcha = ({ onVerify, onExpire }: CaptchaProps) => {
     }
   }, [onVerify, onExpire, colorMode])
 
-  return <Box ref={containerRef} width="full" />
+  return <div ref={containerRef} className="w-full" />
 }
 
 export default Captcha

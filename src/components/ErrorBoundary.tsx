@@ -1,6 +1,5 @@
 import { Component } from 'react'
 import type { ErrorInfo, ReactNode } from 'react'
-import { Box, Heading, Text, Button, VStack } from '@chakra-ui/react'
 
 interface Props {
   children: ReactNode
@@ -24,15 +23,20 @@ class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <Box minH="100vh" display="flex" alignItems="center" justifyContent="center" p={6}>
-          <VStack gap={4} textAlign="center">
-            <Heading size="lg">Something went wrong</Heading>
-            <Text color="fg.muted">An unexpected error occurred. Please try reloading the page.</Text>
-            <Button colorPalette="blue" onClick={() => window.location.reload()}>
+        <div className="min-h-screen flex items-center justify-center p-6">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <h1 className="text-2xl font-bold">Something went wrong</h1>
+            <p className="text-(--muted-foreground)">
+              An unexpected error occurred. Please try reloading the page.
+            </p>
+            <button
+              className="btn-primary"
+              onClick={() => window.location.reload()}
+            >
               Reload Page
-            </Button>
-          </VStack>
-        </Box>
+            </button>
+          </div>
+        </div>
       )
     }
 

@@ -1,91 +1,74 @@
-import { useState } from 'react'
-import type { InputProps } from '@chakra-ui/react'
-import {
-  Box,
-  Field,
-  IconButton,
-  Input as ChakraInput,
-  defineStyle,
-  useControllableState,
-} from '@chakra-ui/react'
+import { useState, useRef, useEffect } from 'react'
 import { LuEye, LuEyeOff } from 'react-icons/lu'
 
-interface Props extends InputProps {
+interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
   label: React.ReactNode
 }
 
-const floatingStyles = defineStyle({
-  pos: 'absolute',
-  bg: 'bg',
-  px: '0.5',
-  top: '2.5',
-  insetStart: '3',
-  fontWeight: 'normal',
-  pointerEvents: 'none',
-  transition: 'position',
-  color: 'fg.muted',
-  '&[data-float]': {
-    top: '-3',
-    insetStart: '2',
-    color: 'fg',
-  },
-})
-
 const Input = (props: Props) => {
-  const { label, type, value, defaultValue = '', ...rest } = props
+  const { label, type, value: controlledValue, defaultValue = '', ...rest } = props
 
-  const [inputState, setInputState] = useControllableState({
-    defaultValue,
-    value,
-  })
+  const isControlled = controlledValue !== undefined
+  const [internalValue, setInternalValue] = useState(String(defaultValue))
+  const inputValue = isControlled ? String(controlledValue) : internalValue
 
   const [focused, setFocused] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const shouldFloat = String(inputState).length > 0 || focused
+  const shouldFloat = inputValue.length > 0 || focused
   const isPassword = type === 'password'
 
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Sync internal state when controlled value changes
+  useEffect(() => {
+    if (isControlled) {
+      setInternalValue(String(controlledValue))
+    }
+  }, [controlledValue, isControlled])
+
   return (
-    <Field.Root>
-      <Box pos="relative" w="full">
-        <ChakraInput
-          {...rest}
-          type={isPassword && showPassword ? 'text' : type}
-          pe={isPassword ? '10' : undefined}
-          onFocus={(e) => {
-            props.onFocus?.(e)
-            setFocused(true)
-          }}
-          onBlur={(e) => {
-            props.onBlur?.(e)
-            setFocused(false)
-          }}
-          onChange={(e) => {
-            props.onChange?.(e)
-            setInputState(e.target.value)
-          }}
-          value={inputState}
-          data-float={shouldFloat || undefined}
-        />
-        <Field.Label css={floatingStyles} data-float={shouldFloat || undefined}>
-          {label}
-        </Field.Label>
-        {isPassword && (
-          <IconButton
-            aria-label={showPassword ? 'Hide password' : 'Show password'}
-            variant="ghost"
-            size="sm"
-            pos="absolute"
-            top="50%"
-            insetEnd="1"
-            transform="translateY(-50%)"
-            onClick={() => setShowPassword((v) => !v)}
-            tabIndex={-1}
-          >
-            {showPassword ? <LuEyeOff /> : <LuEye />}
-          </IconButton>
-        )}
-      </Box>
-    </Field.Root>
+    <div className="relative w-full">
+      <input
+        ref={inputRef}
+        {...rest}
+        type={isPassword && showPassword ? 'text' : type}
+        className={`peer input-base w-full ${isPassword ? 'pr-10' : ''}`}
+        data-float={shouldFloat || undefined}
+        value={inputValue}
+        onFocus={(e) => {
+          props.onFocus?.(e)
+          setFocused(true)
+        }}
+        onBlur={(e) => {
+          props.onBlur?.(e)
+          setFocused(false)
+        }}
+        onChange={(e) => {
+          props.onChange?.(e)
+          if (!isControlled) {
+            setInternalValue(e.target.value)
+          }
+        }}
+      />
+      <label
+        className="absolute left-3 top-2.5 px-0.5 text-sm text-(--muted-foreground) bg-(--background) pointer-events-none transition-all
+          peer-focus:-top-3 peer-focus:left-2 peer-focus:text-(--foreground) peer-focus:text-xs
+          peer-data-float:-top-3 peer-data-float:left-2 peer-data-float:text-(--foreground) peer-data-float:text-xs"
+      >
+        {label}
+      </label>
+      {isPassword && (
+        <button
+          type="button"
+          aria-label={showPassword ? 'Hide password' : 'Show password'}
+          className="absolute right-1 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-(--secondary) transition-colors"
+          onClick={() => setShowPassword((v) => !v)}
+          tabIndex={-1}
+        >
+          {showPassword ? <LuEyeOff size={16} /> : <LuEye size={16} />}
+        </button>
+      )}
+    </div>
   )
 }
 

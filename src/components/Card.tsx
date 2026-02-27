@@ -1,16 +1,14 @@
-import { Box, type BoxProps } from '@chakra-ui/react'
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode
+}
 
-const Card = ({ children, ...props }: BoxProps) => (
-  <Box
-    bg="bg.card"
-    borderWidth="1px"
-    borderColor="border.card"
-    borderRadius="xl"
-    p={{ base: 4, md: 5 }}
+const Card = ({ children, className = '', ...props }: CardProps) => (
+  <div
+    className={`glass-card rounded-xl p-4 md:p-5 ${className}`}
     {...props}
   >
     {children}
-  </Box>
+  </div>
 )
 
 export default Card

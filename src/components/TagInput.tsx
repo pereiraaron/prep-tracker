@@ -1,5 +1,4 @@
 import { useState, useRef } from 'react'
-import { Badge, Box, Flex, Text } from '@chakra-ui/react'
 import { LuX } from 'react-icons/lu'
 
 interface TagInputProps {
@@ -35,39 +34,26 @@ const TagInput = ({ label, value, onChange, placeholder = 'Type and press Enter'
   }
 
   return (
-    <Box>
-      <Text fontSize="sm" fontWeight="medium" mb={1.5}>
-        {label}
-      </Text>
-      <Flex
-        wrap="wrap"
-        gap={1.5}
-        p={2}
-        borderWidth="1px"
-        borderColor="border.card"
-        borderRadius="md"
-        minH="40px"
-        alignItems="center"
-        cursor="text"
+    <div>
+      <label className="text-sm font-medium mb-1.5 block">{label}</label>
+      <div
+        className="flex flex-wrap gap-1.5 p-2 border border-(--border) rounded-md min-h-10 items-center cursor-text"
         onClick={() => inputRef.current?.focus()}
       >
         {value.map((tag) => (
-          <Badge
+          <span
             key={tag}
-            variant="subtle"
-            colorPalette="purple"
-            size="sm"
-            cursor="pointer"
+            className="inline-flex items-center gap-1 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 px-2 py-0.5 text-xs font-medium cursor-pointer"
             onClick={(e) => {
               e.stopPropagation()
               removeTag(tag)
             }}
           >
             {tag}
-            <Box as="span" ml={1} display="inline-flex">
+            <span className="inline-flex">
               <LuX size={10} />
-            </Box>
-          </Badge>
+            </span>
+          </span>
         ))}
         <input
           ref={inputRef}
@@ -75,18 +61,10 @@ const TagInput = ({ label, value, onChange, placeholder = 'Type and press Enter'
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={value.length === 0 ? placeholder : ''}
-          style={{
-            flex: 1,
-            minWidth: '80px',
-            fontSize: '0.875rem',
-            border: 'none',
-            outline: 'none',
-            background: 'transparent',
-            color: 'inherit',
-          }}
+          className="flex-1 min-w-20 text-sm border-none outline-none bg-transparent text-inherit"
         />
-      </Flex>
-    </Box>
+      </div>
+    </div>
   )
 }
 

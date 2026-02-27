@@ -1,4 +1,3 @@
-import { VStack, Text, Button } from '@chakra-ui/react'
 import { LuRefreshCw } from 'react-icons/lu'
 
 interface EmptyStateProps {
@@ -12,18 +11,18 @@ interface EmptyStateProps {
 }
 
 const EmptyState = ({ icon, title, description, action }: EmptyStateProps) => (
-  <VStack gap={3} py={16} textAlign="center">
-    {icon && <Text fontSize="3xl">{icon}</Text>}
-    <Text color="fg.muted" fontSize="lg">{title}</Text>
+  <div className="flex flex-col items-center gap-3 py-16 text-center">
+    {icon && <p className="text-3xl">{icon}</p>}
+    <p className="text-(--muted-foreground) text-lg">{title}</p>
     {description && (
-      <Text color="fg.muted" fontSize="sm" maxW="sm">{description}</Text>
+      <p className="text-(--muted-foreground) text-sm max-w-sm">{description}</p>
     )}
     {action && (
-      <Button variant="outline" size="sm" onClick={action.onClick}>
+      <button className="btn-outline text-sm" onClick={action.onClick}>
         {action.label}
-      </Button>
+      </button>
     )}
-  </VStack>
+  </div>
 )
 
 interface ErrorStateProps {
@@ -32,17 +31,17 @@ interface ErrorStateProps {
 }
 
 export const ErrorState = ({ message = 'Something went wrong', onRetry }: ErrorStateProps) => (
-  <VStack gap={3} py={16} textAlign="center">
-    <Text color="fg.muted" fontSize="lg">{message}</Text>
-    <Text color="fg.muted" fontSize="sm">
+  <div className="flex flex-col items-center gap-3 py-16 text-center">
+    <p className="text-(--muted-foreground) text-lg">{message}</p>
+    <p className="text-(--muted-foreground) text-sm">
       Please check your connection and try again.
-    </Text>
+    </p>
     {onRetry && (
-      <Button variant="outline" size="sm" onClick={onRetry}>
+      <button className="btn-outline text-sm" onClick={onRetry}>
         <LuRefreshCw /> Retry
-      </Button>
+      </button>
     )}
-  </VStack>
+  </div>
 )
 
 export default EmptyState

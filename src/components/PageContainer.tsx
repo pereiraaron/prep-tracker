@@ -1,9 +1,7 @@
-import { Box } from '@chakra-ui/react'
-
 const PageContainer = ({ children }: { children: React.ReactNode }) => (
-  <Box maxW="75rem" mx="auto" w="full" px={{ base: 4, md: 6 }} pt={{ base: 6, md: 10 }} pb={{ base: 4, md: 8 }}>
+  <div className="w-full max-w-300 pt-20 lg:pt-10 pb-4 md:pb-8 px-4 md:px-6 lg:px-8 lg:ml-55">
     {children}
-  </Box>
+  </div>
 )
 
 export default PageContainer
