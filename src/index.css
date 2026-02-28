@@ -1,0 +1,200 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap");
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  --color-stat-blue: hsl(var(--stat-blue));
+  --color-stat-green: hsl(var(--stat-green));
+  --color-stat-orange: hsl(var(--stat-orange));
+  --color-stat-purple: hsl(var(--stat-purple));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --font-family-display: "Space Grotesk", sans-serif;
+  --font-family-body: "Inter", sans-serif;
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-fade-in: fade-in 0.4s ease-out;
+}
+
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to { height: 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+:root {
+  --background: 220 20% 97%;
+  --foreground: 224 30% 12%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 224 30% 12%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 224 30% 12%;
+
+  --primary: 230 65% 55%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 220 15% 93%;
+  --secondary-foreground: 224 30% 12%;
+
+  --muted: 220 15% 93%;
+  --muted-foreground: 220 10% 46%;
+
+  --accent: 230 65% 55%;
+  --accent-foreground: 0 0% 100%;
+
+  --destructive: 0 72% 55%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 220 15% 90%;
+  --input: 220 15% 90%;
+  --ring: 230 65% 55%;
+
+  --radius: 0.75rem;
+
+  --stat-blue: 220 80% 56%;
+  --stat-green: 155 65% 42%;
+  --stat-orange: 28 90% 55%;
+  --stat-purple: 265 60% 55%;
+
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 224 30% 12%;
+  --sidebar-primary: 230 65% 55%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 220 15% 95%;
+  --sidebar-accent-foreground: 224 30% 12%;
+  --sidebar-border: 220 15% 90%;
+  --sidebar-ring: 230 65% 55%;
+}
+
+.dark {
+  --background: 224 30% 8%;
+  --foreground: 220 15% 93%;
+
+  --card: 224 25% 12%;
+  --card-foreground: 220 15% 93%;
+
+  --popover: 224 25% 12%;
+  --popover-foreground: 220 15% 93%;
+
+  --primary: 230 65% 60%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 224 20% 16%;
+  --secondary-foreground: 220 15% 93%;
+
+  --muted: 224 20% 16%;
+  --muted-foreground: 220 10% 55%;
+
+  --accent: 230 65% 60%;
+  --accent-foreground: 0 0% 100%;
+
+  --destructive: 0 62% 45%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 224 20% 18%;
+  --input: 224 20% 18%;
+  --ring: 230 65% 60%;
+
+  --stat-blue: 220 80% 62%;
+  --stat-green: 155 65% 50%;
+  --stat-orange: 28 90% 60%;
+  --stat-purple: 265 60% 62%;
+
+  --sidebar-background: 224 30% 10%;
+  --sidebar-foreground: 220 15% 93%;
+  --sidebar-primary: 230 65% 60%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 224 20% 14%;
+  --sidebar-accent-foreground: 220 15% 93%;
+  --sidebar-border: 224 20% 18%;
+  --sidebar-ring: 230 65% 60%;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+button, [role="button"], a, select, summary, [type="checkbox"], [type="radio"] {
+  cursor: pointer;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-family-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-display);
+}
+
+@utility glass-card {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+@utility font-display {
+  font-family: var(--font-family-display);
+}
+
+@utility font-body {
+  font-family: var(--font-family-body);
+}
+
+@utility safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

@@ -1,143 +1,60 @@
-import { lazy, Suspense, useEffect } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { Flex, Spinner } from '@chakra-ui/react'
-import { useAuthStore } from '@store/useAuthStore'
-import Navbar from '@components/Navbar'
-import ColorModeToggle from '@components/ColorModeToggle'
-import ErrorBoundary from '@components/ErrorBoundary'
+import { lazy, Suspense, type ReactNode } from "react";
+import { Toaster } from "@components/ui/toaster";
+import { Toaster as Sonner } from "@components/ui/sonner";
+import { TooltipProvider } from "@components/ui/tooltip";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useAuthStore } from "@store/useAuthStore";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Loader2 } from "lucide-react";
 
-const Login = lazy(() => import('@screens/Login/Login'))
-const Dashboard = lazy(() => import('@screens/Dashboard/Dashboard'))
-const Tasks = lazy(() => import('@screens/Tasks/Tasks'))
-const TaskForm = lazy(() => import('@screens/Tasks/TaskForm'))
-const AddQuestions = lazy(() => import('@screens/Tasks/AddQuestions'))
-const Backlog = lazy(() => import('@screens/Backlog/Backlog'))
-const Stats = lazy(() => import('@screens/Stats/Stats'))
-const Settings = lazy(() => import('@screens/Settings/Settings'))
+const DashboardPage = lazy(() => import("@pages/DashboardPage"));
+const QuestionsPage = lazy(() => import("@pages/QuestionsPage"));
+const QuestionDetailPage = lazy(() => import("@pages/QuestionDetailPage"));
+const NewQuestionPage = lazy(() => import("@pages/NewQuestionPage"));
+const BacklogPage = lazy(() => import("@pages/BacklogPage"));
+const StatsPage = lazy(() => import("@pages/StatsPage"));
+const SettingsPage = lazy(() => import("@pages/SettingsPage"));
+const LoginPage = lazy(() => import("@pages/LoginPage"));
+const RegisterPage = lazy(() => import("@pages/RegisterPage"));
+const AuthCallbackPage = lazy(() => import("@pages/AuthCallbackPage"));
+const NotFound = lazy(() => import("@pages/NotFound"));
 
 const PageLoader = () => (
-  <Flex justify="center" align="center" flex="1" py={20}>
-    <Spinner size="lg" />
-  </Flex>
-)
+  <div className="flex min-h-screen items-center justify-center">
+    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+  </div>
+);
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuthStore()
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
-  }
-  return children
-}
+const ProtectedRoute = ({ children }: { children: ReactNode }) => {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  if (!isAuthenticated) return <Navigate to="/auth/login" replace />;
+  return <>{children}</>;
+};
 
-const GuestRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuthStore()
-  if (isAuthenticated) {
-    return <Navigate to="/" replace />
-  }
-  return children
-}
+const App = () => (
+  <ErrorBoundary>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/auth/login" element={<LoginPage />} />
+            <Route path="/auth/register" element={<RegisterPage />} />
+            <Route path="/auth/callback" element={<AuthCallbackPage />} />
+            <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+            <Route path="/questions" element={<ProtectedRoute><QuestionsPage /></ProtectedRoute>} />
+            <Route path="/questions/:id" element={<ProtectedRoute><QuestionDetailPage /></ProtectedRoute>} />
+            <Route path="/new" element={<ProtectedRoute><NewQuestionPage /></ProtectedRoute>} />
+            <Route path="/backlog" element={<ProtectedRoute><BacklogPage /></ProtectedRoute>} />
+            <Route path="/stats" element={<ProtectedRoute><StatsPage /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </BrowserRouter>
+    </TooltipProvider>
+  </ErrorBoundary>
+);
 
-const App = () => {
-  const hydrate = useAuthStore((s) => s.hydrate)
-  const isHydrated = useAuthStore((s) => s.isHydrated)
-  useEffect(() => { hydrate() }, [hydrate])
-
-  if (!isHydrated) {
-    return (
-      <Flex minH="100vh" justify="center" align="center">
-        <Spinner size="lg" />
-      </Flex>
-    )
-  }
-
-  return (
-    <ErrorBoundary>
-      <Flex direction="column" minH="100vh">
-        <Navbar />
-        <Flex flex="1" direction="column">
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route
-                path="/login"
-                element={
-                  <GuestRoute>
-                    <Login />
-                  </GuestRoute>
-                }
-              />
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/tasks"
-                element={
-                  <ProtectedRoute>
-                    <Tasks />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/tasks/new"
-                element={
-                  <ProtectedRoute>
-                    <TaskForm />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/tasks/:id"
-                element={
-                  <ProtectedRoute>
-                    <TaskForm />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/tasks/daily/:id/add-questions"
-                element={
-                  <ProtectedRoute>
-                    <AddQuestions />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/backlog"
-                element={
-                  <ProtectedRoute>
-                    <Backlog />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/stats"
-                element={
-                  <ProtectedRoute>
-                    <Stats />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/settings"
-                element={
-                  <ProtectedRoute>
-                    <Settings />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Suspense>
-        </Flex>
-
-        <ColorModeToggle />
-      </Flex>
-    </ErrorBoundary>
-  )
-}
-
-export default App
+export default App;

@@ -2,23 +2,55 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Prep Tracker</title>
-    <meta name="description" content="Track your interview preparation progress across DSA, system design, behavioral, and more." />
-    <meta name="theme-color" content="#3182ce" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href="https://preptracker.app" />
+
+    <title>PrepTracker — Interview Prep Tracker</title>
+    <meta name="description" content="Track your coding interview preparation. Organize questions by category, monitor progress with charts, and stay consistent with PrepTracker." />
+    <meta name="keywords" content="interview prep, coding questions, leetcode tracker, DSA practice, interview preparation, system design, behavioral" />
+    <meta name="author" content="PrepTracker" />
     <meta name="robots" content="index, follow" />
 
-    <!-- Open Graph -->
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="Prep Tracker" />
-    <meta property="og:description" content="Track your interview preparation progress across DSA, system design, behavioral, and more." />
+    <!-- Theme -->
+    <meta name="theme-color" content="#4f5bd5" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a1d2e" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
 
-    <link rel="icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" href="/favicon.ico" />
+    <!-- Open Graph -->
+    <meta property="og:title" content="PrepTracker — Interview Prep Tracker" />
+    <meta property="og:description" content="Track your coding interview preparation. Organize questions, monitor progress, and stay consistent." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://preptracker.app" />
+    <meta property="og:site_name" content="PrepTracker" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="PrepTracker — Interview Prep Tracker" />
+    <meta name="twitter:description" content="Track your coding interview preparation. Organize questions, monitor progress, and stay consistent." />
+
+    <!-- Apple -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="PrepTracker" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "PrepTracker",
+        "description": "Track your coding interview preparation. Organize questions by category, monitor progress with charts, and stay consistent.",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Web"
+      }
+    </script>
   </head>
+
   <body>
     <div id="root"></div>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

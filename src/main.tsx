@@ -1,16 +1,14 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import { ChakraProvider } from '@chakra-ui/react'
-import { system } from './theme'
-import App from './App.tsx'
+import { createRoot } from "react-dom/client";
+import App from "./App.tsx";
+import "./index.css";
+import { useAuthStore } from "@store/useAuthStore";
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <BrowserRouter>
-      <ChakraProvider value={system}>
-        <App />
-      </ChakraProvider>
-    </BrowserRouter>
-  </StrictMode>,
-)
+// Restore theme before render to prevent flash
+const theme = localStorage.getItem("theme");
+if (theme === "dark" || (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+  document.documentElement.classList.add("dark");
+}
+
+useAuthStore.getState().hydrate();
+
+createRoot(document.getElementById("root")!).render(<App />);

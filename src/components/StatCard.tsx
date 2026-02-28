@@ -1,32 +1,24 @@
-import { Box, Flex, Text } from '@chakra-ui/react'
+import { LucideIcon } from 'lucide-react';
 
 interface StatCardProps {
-  icon: React.ReactNode
-  label: string
-  value: number | string
-  color: string
-  suffix?: string
+  label: string;
+  value: number | string;
+  icon: LucideIcon;
+  color: string;
 }
 
-const StatCard = ({ icon, label, value, color, suffix = '' }: StatCardProps) => (
-  <Box
-    bg="bg.card"
-    borderWidth="1px"
-    borderColor="border.card"
-    borderRadius="xl"
-    p={{ base: 4, md: 5 }}
-    textAlign="center"
-  >
-    <Flex justify="center" mb={2} color={color}>
-      {icon}
-    </Flex>
-    <Text fontWeight="bold" fontSize={{ base: 'xl', md: '2xl' }} color={color}>
-      {value}{suffix}
-    </Text>
-    <Text fontSize="xs" color="fg.muted" mt={1}>
-      {label}
-    </Text>
-  </Box>
-)
+const StatCard = ({ label, value, icon: Icon, color }: StatCardProps) => (
+  <div className="glass-card rounded-xl p-4">
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
+        <p className="mt-1 font-display text-2xl font-bold">{value}</p>
+      </div>
+      <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${color}`}>
+        <Icon className="h-5 w-5" />
+      </div>
+    </div>
+  </div>
+);
 
-export default StatCard
+export default StatCard;
