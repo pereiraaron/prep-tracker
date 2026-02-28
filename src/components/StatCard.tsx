@@ -1,28 +1,24 @@
+import { LucideIcon } from 'lucide-react';
+
 interface StatCardProps {
-  icon: React.ReactNode
-  label: string
-  value: number | string
-  color: string
-  suffix?: string
+  label: string;
+  value: number | string;
+  icon: LucideIcon;
+  color: string;
 }
 
-const StatCard = ({ icon, label, value, color, suffix = '' }: StatCardProps) => (
-  <div className="glass-card rounded-xl p-4 md:p-5 relative overflow-hidden">
-    <div className="flex justify-between items-start">
-      <p className="text-xs font-semibold uppercase tracking-wider text-(--muted-foreground)">
-        {label}
-      </p>
-      <div
-        className="w-9 h-9 rounded-lg flex items-center justify-center bg-(--muted) shrink-0"
-        style={{ color }}
-      >
-        {icon}
+const StatCard = ({ label, value, icon: Icon, color }: StatCardProps) => (
+  <div className="glass-card rounded-xl p-4">
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
+        <p className="mt-1 font-display text-2xl font-bold">{value}</p>
+      </div>
+      <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${color}`}>
+        <Icon className="h-5 w-5" />
       </div>
     </div>
-    <p className="font-bold text-2xl md:text-3xl mt-2">
-      {value}{suffix}
-    </p>
   </div>
-)
+);
 
-export default StatCard
+export default StatCard;

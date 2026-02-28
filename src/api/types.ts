@@ -16,17 +16,43 @@ export interface CategoryInfo {
 }
 
 export const PREP_CATEGORIES: CategoryInfo[] = [
-  { value: "dsa", label: "Data Structures & Algorithms", description: "Coding problems, algorithmic thinking, and data structure usage" },
-  { value: "system_design", label: "System Design", description: "Designing scalable systems, architecture, and trade-off analysis" },
-  { value: "behavioral", label: "Behavioral", description: "Behavioral and situational interview questions" },
-  { value: "machine_coding", label: "Machine Coding", description: "Live coding rounds building small applications or features" },
-  { value: "language_framework", label: "Language & Framework", description: "Language-specific and framework-specific knowledge" },
-  { value: "theory", label: "Theory", description: "CS fundamentals and theoretical concepts" },
+  {
+    value: "dsa",
+    label: "Data Structures & Algorithms",
+    description:
+      "Coding problems, algorithmic thinking, and data structure usage",
+  },
+  {
+    value: "system_design",
+    label: "System Design",
+    description:
+      "Designing scalable systems, architecture, and trade-off analysis",
+  },
+  {
+    value: "behavioral",
+    label: "Behavioral",
+    description: "Behavioral and situational interview questions",
+  },
+  {
+    value: "machine_coding",
+    label: "Machine Coding",
+    description: "Live coding rounds building small applications or features",
+  },
+  {
+    value: "language_framework",
+    label: "Language & Framework",
+    description: "Language-specific and framework-specific knowledge",
+  },
+  {
+    value: "theory",
+    label: "Theory",
+    description: "CS fundamentals and theoretical concepts",
+  },
   { value: "quiz", label: "Quiz", description: "Quick quiz-style questions" },
 ];
 
 export const CATEGORY_LABEL: Record<PrepCategory, string> = Object.fromEntries(
-  PREP_CATEGORIES.map((c) => [c.value, c.label])
+  PREP_CATEGORIES.map((c) => [c.value, c.label]),
 ) as Record<PrepCategory, string>;
 
 export const DIFFICULTIES = [

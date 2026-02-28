@@ -1,75 +1,60 @@
-import { lazy, Suspense, useEffect } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { useAuthStore } from '@store/useAuthStore'
-import Navbar from '@components/Navbar'
-import ColorModeToggle from '@components/ColorModeToggle'
-import ErrorBoundary from '@components/ErrorBoundary'
+import { lazy, Suspense, type ReactNode } from "react";
+import { Toaster } from "@components/ui/toaster";
+import { Toaster as Sonner } from "@components/ui/sonner";
+import { TooltipProvider } from "@components/ui/tooltip";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useAuthStore } from "@store/useAuthStore";
+import ErrorBoundary from "@components/ErrorBoundary";
+import { Loader2 } from "lucide-react";
 
-const Login = lazy(() => import('@pages/Login/Login'))
-const Dashboard = lazy(() => import('@pages/Dashboard/Dashboard'))
-const Questions = lazy(() => import('@pages/Questions/Questions'))
-const QuestionForm = lazy(() => import('@pages/Questions/QuestionForm'))
-const QuestionDetail = lazy(() => import('@pages/Questions/QuestionDetail'))
-const Backlog = lazy(() => import('@pages/Backlog/Backlog'))
-const Stats = lazy(() => import('@pages/Stats/Stats'))
-const Settings = lazy(() => import('@pages/Settings/Settings'))
+const DashboardPage = lazy(() => import("@pages/DashboardPage"));
+const QuestionsPage = lazy(() => import("@pages/QuestionsPage"));
+const QuestionDetailPage = lazy(() => import("@pages/QuestionDetailPage"));
+const NewQuestionPage = lazy(() => import("@pages/NewQuestionPage"));
+const BacklogPage = lazy(() => import("@pages/BacklogPage"));
+const StatsPage = lazy(() => import("@pages/StatsPage"));
+const SettingsPage = lazy(() => import("@pages/SettingsPage"));
+const LoginPage = lazy(() => import("@pages/LoginPage"));
+const RegisterPage = lazy(() => import("@pages/RegisterPage"));
+const AuthCallbackPage = lazy(() => import("@pages/AuthCallbackPage"));
+const NotFound = lazy(() => import("@pages/NotFound"));
 
 const PageLoader = () => (
-  <div className="flex flex-1 items-center justify-center py-20">
-    <div className="h-8 w-8 animate-spin rounded-full border-4 border-(--muted) border-t-(--color-primary)" />
+  <div className="flex min-h-screen items-center justify-center">
+    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
   </div>
-)
+);
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuthStore()
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
-  }
-  return children
-}
+const ProtectedRoute = ({ children }: { children: ReactNode }) => {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  if (!isAuthenticated) return <Navigate to="/auth/login" replace />;
+  return <>{children}</>;
+};
 
-const GuestRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated } = useAuthStore()
-  if (isAuthenticated) {
-    return <Navigate to="/" replace />
-  }
-  return children
-}
-
-const App = () => {
-  const hydrate = useAuthStore((s) => s.hydrate)
-  const isHydrated = useAuthStore((s) => s.isHydrated)
-  useEffect(() => { hydrate() }, [hydrate])
-
-  if (!isHydrated) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-(--muted) border-t-(--color-primary)" />
-      </div>
-    )
-  }
-
-  return (
-    <ErrorBoundary>
-      <div className="min-h-screen">
-        <Navbar />
+const App = () => (
+  <ErrorBoundary>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
         <Suspense fallback={<PageLoader />}>
           <Routes>
-            <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
-            <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/questions" element={<ProtectedRoute><Questions /></ProtectedRoute>} />
-            <Route path="/questions/new" element={<ProtectedRoute><QuestionForm /></ProtectedRoute>} />
-            <Route path="/questions/:id" element={<ProtectedRoute><QuestionDetail /></ProtectedRoute>} />
-            <Route path="/backlog" element={<ProtectedRoute><Backlog /></ProtectedRoute>} />
-            <Route path="/stats" element={<ProtectedRoute><Stats /></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/auth/login" element={<LoginPage />} />
+            <Route path="/auth/register" element={<RegisterPage />} />
+            <Route path="/auth/callback" element={<AuthCallbackPage />} />
+            <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+            <Route path="/questions" element={<ProtectedRoute><QuestionsPage /></ProtectedRoute>} />
+            <Route path="/questions/:id" element={<ProtectedRoute><QuestionDetailPage /></ProtectedRoute>} />
+            <Route path="/new" element={<ProtectedRoute><NewQuestionPage /></ProtectedRoute>} />
+            <Route path="/backlog" element={<ProtectedRoute><BacklogPage /></ProtectedRoute>} />
+            <Route path="/stats" element={<ProtectedRoute><StatsPage /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
-        <ColorModeToggle />
-      </div>
-    </ErrorBoundary>
-  )
-}
+      </BrowserRouter>
+    </TooltipProvider>
+  </ErrorBoundary>
+);
 
-export default App
+export default App;

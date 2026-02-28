@@ -86,34 +86,51 @@ export interface DifficultyByCategory {
 // ---- API ----
 
 export const statsApi = {
-  getOverview: async () => apiFetch<OverviewResponse>(`${API_BASE_URL}/stats/overview`),
+  getOverview: async () =>
+    apiFetch<OverviewResponse>(`${API_BASE_URL}/stats/overview`),
 
-  getCategoryBreakdown: async () => apiFetch<CategoryBreakdown[]>(`${API_BASE_URL}/stats/categories`),
+  getCategoryBreakdown: async () =>
+    apiFetch<CategoryBreakdown[]>(`${API_BASE_URL}/stats/categories`),
 
-  getDifficultyBreakdown: async () => apiFetch<DifficultyBreakdown[]>(`${API_BASE_URL}/stats/difficulties`),
+  getDifficultyBreakdown: async () =>
+    apiFetch<DifficultyBreakdown[]>(`${API_BASE_URL}/stats/difficulties`),
 
   getTopicBreakdown: async (category?: PrepCategory) => {
     const query = category ? `?category=${category}` : "";
     return apiFetch<TopicBreakdown[]>(`${API_BASE_URL}/stats/topics${query}`);
   },
 
-  getSourceBreakdown: async () => apiFetch<SourceBreakdown[]>(`${API_BASE_URL}/stats/sources`),
+  getSourceBreakdown: async () =>
+    apiFetch<SourceBreakdown[]>(`${API_BASE_URL}/stats/sources`),
 
-  getCompanyTagBreakdown: async () => apiFetch<CompanyTagBreakdown[]>(`${API_BASE_URL}/stats/company-tags`),
+  getCompanyTagBreakdown: async () =>
+    apiFetch<CompanyTagBreakdown[]>(`${API_BASE_URL}/stats/company-tags`),
 
-  getTagBreakdown: async () => apiFetch<TagBreakdown[]>(`${API_BASE_URL}/stats/tags`),
+  getTagBreakdown: async () =>
+    apiFetch<TagBreakdown[]>(`${API_BASE_URL}/stats/tags`),
 
-  getProgress: async (days = 30) => apiFetch<ProgressDay[]>(`${API_BASE_URL}/stats/progress?days=${days}`),
+  getProgress: async (days = 30) =>
+    apiFetch<ProgressDay[]>(`${API_BASE_URL}/stats/progress?days=${days}`),
 
-  getWeeklyProgress: async (weeks = 12) => apiFetch<WeeklyProgress[]>(`${API_BASE_URL}/stats/weekly-progress?weeks=${weeks}`),
+  getWeeklyProgress: async (weeks = 12) =>
+    apiFetch<WeeklyProgress[]>(
+      `${API_BASE_URL}/stats/weekly-progress?weeks=${weeks}`,
+    ),
 
   getCumulativeProgress: async (days = 90) =>
-    apiFetch<CumulativeProgress[]>(`${API_BASE_URL}/stats/cumulative-progress?days=${days}`),
+    apiFetch<CumulativeProgress[]>(
+      `${API_BASE_URL}/stats/cumulative-progress?days=${days}`,
+    ),
 
   getHeatmap: async (year?: number) => {
     const query = year ? `?year=${year}` : "";
-    return apiFetch<Record<string, number>>(`${API_BASE_URL}/stats/heatmap${query}`);
+    return apiFetch<Record<string, number>>(
+      `${API_BASE_URL}/stats/heatmap${query}`,
+    );
   },
 
-  getDifficultyByCategory: async () => apiFetch<DifficultyByCategory[]>(`${API_BASE_URL}/stats/difficulty-by-category`),
+  getDifficultyByCategory: async () =>
+    apiFetch<DifficultyByCategory[]>(
+      `${API_BASE_URL}/stats/difficulty-by-category`,
+    ),
 };
