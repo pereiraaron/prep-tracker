@@ -17,7 +17,7 @@ const useAuth = () =>
       logout: s.logout,
       clearError: s.clearError,
       hydrate: s.hydrate,
-    })),
+    }))
   );
 
 export default useAuth;

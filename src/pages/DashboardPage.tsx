@@ -1,11 +1,10 @@
 import usePageTitle from "@hooks/usePageTitle";
-import { useEffect } from "react";
 import Layout from "@components/Layout";
 import StatCard from "@components/StatCard";
 import ActivityItem from "@components/ActivityItem";
 import QuickAction from "@components/QuickAction";
-import useStats from "@hooks/useStats";
-import useQuestions from "@hooks/useQuestions";
+import { useOverview, useInsights, useStreaks } from "@queries/useStats";
+import { useRecentQuestions } from "@queries/useQuestions";
 import {
   BookOpen,
   CheckCircle,
@@ -16,6 +15,7 @@ import {
   Flame,
   Clock,
   Loader2,
+  Lightbulb,
 } from "lucide-react";
 
 const getGreeting = () => {
@@ -27,19 +27,16 @@ const getGreeting = () => {
 
 const Dashboard = () => {
   usePageTitle("Dashboard");
-  const { overview, isLoading: statsLoading, fetchOverview } = useStats();
-  const { recentSolved, recentLoading, fetchRecent } = useQuestions();
-
-  useEffect(() => {
-    fetchOverview();
-    fetchRecent();
-  }, [fetchOverview, fetchRecent]);
+  const { data: overview, isLoading: statsLoading } = useOverview();
+  const { data: recentData, isLoading: recentLoading } = useRecentQuestions();
+  const { data: insights } = useInsights();
+  const { data: streaks } = useStreaks();
+  const tips = insights?.tips ?? [];
+  const recentSolved = recentData?.data ?? [];
 
   const total = overview ? overview.total + overview.backlogCount : 0;
   const solved = overview?.byStatus?.solved ?? 0;
   const backlog = overview?.backlogCount ?? 0;
-  const completionRate = total > 0 ? Math.round((solved / total) * 100) : 0;
-
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
@@ -82,39 +79,49 @@ const Dashboard = () => {
           color="bg-stat-orange/10 text-stat-orange"
         />
         <StatCard
-          label="Completion"
-          value={statsLoading ? "..." : total > 0 ? `${completionRate}%` : "—"}
+          label="Streak"
+          value={
+            statsLoading
+              ? "..."
+              : `${streaks?.currentStreak ?? 0} ${(streaks?.currentStreak ?? 0) === 1 ? "day" : "days"}`
+          }
           icon={Flame}
           color="bg-stat-purple/10 text-stat-purple"
         />
       </div>
 
-      {/* Progress bar */}
-      <div className="glass-card mb-6 rounded-xl p-4">
-        <div className="mb-2 flex items-center justify-between text-sm">
-          <span className="font-display font-semibold">Overall Progress</span>
-          <span className="text-muted-foreground">
-            {solved}/{total}
-          </span>
+      {/* Tips */}
+      {tips.length > 0 && (
+        <div className="glass-card mb-6 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Lightbulb className="h-4 w-4 text-stat-blue" />
+            <h2 className="font-display text-sm font-semibold">Tips</h2>
+          </div>
+          <div className="space-y-2">
+            {tips.map((tip, i) => (
+              <div key={i} className="flex items-start gap-3 rounded-lg border border-border bg-secondary/30 p-3">
+                <span
+                  className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium ${
+                    tip.priority === "high"
+                      ? "bg-destructive/10 text-destructive"
+                      : tip.priority === "medium"
+                        ? "bg-stat-orange/10 text-stat-orange"
+                        : "bg-stat-green/10 text-stat-green"
+                  }`}
+                >
+                  {tip.priority}
+                </span>
+                <p className="text-sm">{tip.text}</p>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="h-2.5 overflow-hidden rounded-full bg-secondary">
-          <div
-            className="h-full rounded-full transition-all"
-            style={{
-              width: `${completionRate}%`,
-              background:
-                "linear-gradient(90deg, hsl(230, 65%, 55%), hsl(170, 70%, 45%))",
-            }}
-          />
-        </div>
-      </div>
+      )}
 
       <div className="grid gap-6 md:grid-cols-5">
         {/* Recent activity */}
         <div className="md:col-span-3">
-          <h2 className="font-display text-base font-bold mb-3">
-            Recent Activity
-          </h2>
+          <h2 className="font-display text-base font-bold mb-3">Recent Activity</h2>
           <div className="glass-card rounded-xl">
             {recentLoading ? (
               <div className="flex items-center justify-center py-8">
@@ -123,9 +130,7 @@ const Dashboard = () => {
             ) : recentSolved.length === 0 ? (
               <div className="py-10 text-center">
                 <p className="font-display font-medium text-sm">Nothing here yet</p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Start solving questions and they'll show up here
-                </p>
+                <p className="mt-1 text-xs text-muted-foreground">Start solving questions and they'll show up here</p>
               </div>
             ) : (
               <div className="divide-y divide-border">
@@ -139,34 +144,12 @@ const Dashboard = () => {
 
         {/* Quick actions */}
         <div className="md:col-span-2">
-          <h2 className="font-display text-base font-bold mb-3">
-            Quick Actions
-          </h2>
+          <h2 className="font-display text-base font-bold mb-3">Quick Actions</h2>
           <div className="space-y-2">
-            <QuickAction
-              to="/new"
-              icon={Plus}
-              label="New Question"
-              description="Log a solved question"
-            />
-            <QuickAction
-              to="/questions"
-              icon={BookOpen}
-              label="Browse All"
-              description="View & filter questions"
-            />
-            <QuickAction
-              to="/backlog"
-              icon={Archive}
-              label="Backlog"
-              description="Save for later"
-            />
-            <QuickAction
-              to="/stats"
-              icon={BarChart3}
-              label="View Stats"
-              description="Charts & insights"
-            />
+            <QuickAction to="/new" icon={Plus} label="New Question" description="Log a solved question" />
+            <QuickAction to="/questions" icon={BookOpen} label="Browse All" description="View & filter questions" />
+            <QuickAction to="/backlog" icon={Archive} label="Backlog" description="Save for later" />
+            <QuickAction to="/stats" icon={BarChart3} label="View Stats" description="Charts & insights" />
           </div>
         </div>
       </div>

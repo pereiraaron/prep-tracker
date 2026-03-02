@@ -2,7 +2,7 @@ import usePageTitle from "@hooks/usePageTitle";
 import { useState } from "react";
 import Layout from "@components/Layout";
 import { useNavigate } from "react-router-dom";
-import useQuestions from "@hooks/useQuestions";
+import { useCreateQuestion } from "@queries/useQuestions";
 import type { QuestionSource } from "@api/questions";
 import type { PrepCategory, Difficulty } from "@api/types";
 import { CATEGORY_LABEL } from "@api/types";
@@ -12,7 +12,8 @@ import { ArrowLeft, Save, Loader2 } from "lucide-react";
 const NewQuestionPage = () => {
   usePageTitle("New Question");
   const navigate = useNavigate();
-  const { createQuestion, mutating } = useQuestions();
+  const createMutation = useCreateQuestion();
+  const mutating = createMutation.isPending;
   const [title, setTitle] = useState("");
   const [solution, setSolution] = useState("");
   const [category, setCategory] = useState<PrepCategory | "">("");
@@ -29,7 +30,7 @@ const NewQuestionPage = () => {
   const handleSubmit = async () => {
     if (!canSubmit) return;
     try {
-      await createQuestion({
+      await createMutation.mutateAsync({
         title: title.trim(),
         solution: solution.trim(),
         category: category as PrepCategory,
@@ -38,8 +39,18 @@ const NewQuestionPage = () => {
         topic: topic.trim() || undefined,
         source: (source as QuestionSource) || undefined,
         url: url.trim() || undefined,
-        tags: tags ? tags.split(",").map((t) => t.trim()).filter(Boolean) : undefined,
-        companyTags: companyTags ? companyTags.split(",").map((t) => t.trim()).filter(Boolean) : undefined,
+        tags: tags
+          ? tags
+              .split(",")
+              .map((t) => t.trim())
+              .filter(Boolean)
+          : undefined,
+        companyTags: companyTags
+          ? companyTags
+              .split(",")
+              .map((t) => t.trim())
+              .filter(Boolean)
+          : undefined,
       });
       toast.success("Question saved");
       navigate("/questions");
@@ -52,8 +63,7 @@ const NewQuestionPage = () => {
     "h-11 w-full rounded-xl border border-border bg-background px-4 text-base md:text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30";
   const textareaClass =
     "w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30 resize-none";
-  const labelClass =
-    "mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground";
+  const labelClass = "mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground";
 
   return (
     <Layout>
@@ -205,11 +215,7 @@ const NewQuestionPage = () => {
             disabled={!canSubmit || mutating}
             className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:shadow-xl disabled:opacity-40 disabled:shadow-none"
           >
-            {mutating ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
+            {mutating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             Save Question
           </button>
           <button

@@ -19,14 +19,12 @@ export const PREP_CATEGORIES: CategoryInfo[] = [
   {
     value: "dsa",
     label: "Data Structures & Algorithms",
-    description:
-      "Coding problems, algorithmic thinking, and data structure usage",
+    description: "Coding problems, algorithmic thinking, and data structure usage",
   },
   {
     value: "system_design",
     label: "System Design",
-    description:
-      "Designing scalable systems, architecture, and trade-off analysis",
+    description: "Designing scalable systems, architecture, and trade-off analysis",
   },
   {
     value: "behavioral",
@@ -52,7 +50,7 @@ export const PREP_CATEGORIES: CategoryInfo[] = [
 ];
 
 export const CATEGORY_LABEL: Record<PrepCategory, string> = Object.fromEntries(
-  PREP_CATEGORIES.map((c) => [c.value, c.label]),
+  PREP_CATEGORIES.map((c) => [c.value, c.label])
 ) as Record<PrepCategory, string>;
 
 export const DIFFICULTIES = [
@@ -92,7 +90,7 @@ export const DIFFICULTY_COLOR: Record<string, string> = {
 };
 
 export const SOURCE_LABEL: Record<string, string> = Object.fromEntries(
-  QUESTION_SOURCES.map((s) => [s.value, s.label]),
+  QUESTION_SOURCES.map((s) => [s.value, s.label])
 ) as Record<string, string>;
 
 export const SOURCE_COLOR: Record<string, string> = {

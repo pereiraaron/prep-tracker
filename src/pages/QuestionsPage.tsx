@@ -1,7 +1,7 @@
 import usePageTitle from "@hooks/usePageTitle";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Layout from "@components/Layout";
-import useQuestions from "@hooks/useQuestions";
+import { useQuestionsList, useDeleteQuestion, useStarQuestion } from "@queries/useQuestions";
 import type { PrepCategory, Difficulty } from "@api/types";
 import { CATEGORY_LABEL } from "@api/types";
 import {
@@ -45,28 +45,21 @@ const QuestionsPage = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const {
-    questions,
-    pagination,
-    listLoading: isLoading,
-    fetchQuestions,
-    deleteQuestion,
-    starQuestion,
-  } = useQuestions();
+  const { data, isLoading } = useQuestionsList({
+    search: search || undefined,
+    status: "solved",
+    category: categoryFilter || undefined,
+    difficulty: difficultyFilter || undefined,
+    page: currentPage,
+    limit: ITEMS_PER_PAGE,
+  });
+  const questions = data?.data ?? [];
+  const pagination = data?.pagination ?? null;
+  const deleteMutation = useDeleteQuestion();
+  const starMutation = useStarQuestion();
 
   const totalPages = pagination?.totalPages ?? 1;
   const total = pagination?.total ?? 0;
-
-  useEffect(() => {
-    fetchQuestions({
-      search: search || undefined,
-      status: "solved",
-      category: categoryFilter || undefined,
-      difficulty: difficultyFilter || undefined,
-      page: currentPage,
-      limit: ITEMS_PER_PAGE,
-    });
-  }, [search, categoryFilter, difficultyFilter, currentPage, fetchQuestions]);
 
   const handleSearch = (val: string) => {
     setSearch(val);
@@ -83,16 +76,8 @@ const QuestionsPage = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      await deleteQuestion(id);
+      await deleteMutation.mutateAsync(id);
       toast.success("Question deleted");
-      fetchQuestions({
-        search: search || undefined,
-        status: "solved",
-        category: categoryFilter || undefined,
-        difficulty: difficultyFilter || undefined,
-        page: currentPage,
-        limit: ITEMS_PER_PAGE,
-      });
     } catch {
       toast.error("Failed to delete");
     }
@@ -104,9 +89,7 @@ const QuestionsPage = () => {
         <div className="min-w-0">
           <h1 className="font-display text-xl font-bold">Questions</h1>
           <p className="text-sm text-muted-foreground truncate">
-            {total > 0
-              ? `${total} solved question${total === 1 ? "" : "s"}`
-              : "Your solved questions will appear here"}
+            {total > 0 ? `${total} solved question${total === 1 ? "" : "s"}` : "Your solved questions will appear here"}
           </p>
         </div>
         <Link
@@ -143,9 +126,7 @@ const QuestionsPage = () => {
           <div className="flex flex-wrap gap-2">
             <select
               value={categoryFilter}
-              onChange={(e) =>
-                handleCategoryFilter(e.target.value as PrepCategory | "")
-              }
+              onChange={(e) => handleCategoryFilter(e.target.value as PrepCategory | "")}
               className="h-11 rounded-lg border border-border bg-card px-3 text-base md:text-sm outline-none focus:ring-2 focus:ring-primary/30"
             >
               <option value="">All Categories</option>
@@ -157,9 +138,7 @@ const QuestionsPage = () => {
             </select>
             <select
               value={difficultyFilter}
-              onChange={(e) =>
-                handleDifficultyFilter(e.target.value as Difficulty | "")
-              }
+              onChange={(e) => handleDifficultyFilter(e.target.value as Difficulty | "")}
               className="h-11 rounded-lg border border-border bg-card px-3 text-base md:text-sm outline-none focus:ring-2 focus:ring-primary/30"
             >
               <option value="">All Difficulties</option>
@@ -247,9 +226,7 @@ const QuestionsPage = () => {
                         {tag}
                       </span>
                     ))}
-                    {q.companyTags.length > 0 && (
-                      <span className="mx-1 h-3 w-px bg-border" />
-                    )}
+                    {q.companyTags.length > 0 && <span className="mx-1 h-3 w-px bg-border" />}
                     {q.companyTags.map((tag) => (
                       <span
                         key={tag}
@@ -271,13 +248,11 @@ const QuestionsPage = () => {
                 <button
                   onClick={(e) => {
                     e.preventDefault();
-                    starQuestion(q.id);
+                    starMutation.mutate(q.id);
                   }}
                   className={`rounded-lg p-2 transition-colors ${q.starred ? "text-stat-orange" : "text-muted-foreground"}`}
                 >
-                  <Star
-                    className={`h-4 w-4 ${q.starred ? "fill-stat-orange" : ""}`}
-                  />
+                  <Star className={`h-4 w-4 ${q.starred ? "fill-stat-orange" : ""}`} />
                 </button>
                 <button
                   onClick={(e) => {
@@ -297,16 +272,12 @@ const QuestionsPage = () => {
               {search || categoryFilter || difficultyFilter ? (
                 <>
                   <p className="font-display font-medium">No matching questions</p>
-                  <p className="text-sm text-muted-foreground">
-                    Try adjusting your search or filters
-                  </p>
+                  <p className="text-sm text-muted-foreground">Try adjusting your search or filters</p>
                 </>
               ) : (
                 <>
                   <p className="font-display font-medium">No questions yet</p>
-                  <p className="text-sm text-muted-foreground">
-                    Log your first solved question to get started
-                  </p>
+                  <p className="text-sm text-muted-foreground">Log your first solved question to get started</p>
                 </>
               )}
             </div>

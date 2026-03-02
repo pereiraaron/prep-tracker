@@ -29,6 +29,7 @@
       "@store/*": ["src/store/*"],
       "@api/*": ["src/api/*"],
       "@hooks/*": ["src/hooks/*"],
+      "@queries/*": ["src/queries/*"],
       "@lib/*": ["src/lib/*"]
     }
   },

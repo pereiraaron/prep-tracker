@@ -7,7 +7,7 @@ const useToast = () =>
       toasts: s.toasts,
       toast: s.toast,
       dismiss: s.dismiss,
-    })),
+    }))
   );
 
 export default useToast;
