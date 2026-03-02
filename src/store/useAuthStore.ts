@@ -18,21 +18,10 @@ interface AuthState {
   isHydrated: boolean;
   isLoading: boolean;
   error: string | null;
-  login: (
-    email: string,
-    password: string,
-    rememberMe?: boolean,
-  ) => Promise<void>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   passkeyLogin: (email?: string, rememberMe?: boolean) => Promise<void>;
-  passkeyConditionalLogin: (
-    signal: AbortSignal,
-    rememberMe?: boolean,
-  ) => Promise<void>;
-  signup: (
-    email: string,
-    password: string,
-    rememberMe?: boolean,
-  ) => Promise<void>;
+  passkeyConditionalLogin: (signal: AbortSignal, rememberMe?: boolean) => Promise<void>;
+  signup: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   socialLogin: (provider: string, code: string, redirectUri: string, rememberMe?: boolean) => Promise<void>;
   logout: () => void;
   clearError: () => void;
@@ -45,12 +34,7 @@ const getStorage = () => {
   return remember ? localStorage : sessionStorage;
 };
 
-const persistTokens = (
-  accessToken: string,
-  refreshToken: string,
-  userData: User,
-  rememberMe: boolean,
-) => {
+const persistTokens = (accessToken: string, refreshToken: string, userData: User, rememberMe: boolean) => {
   const storage = rememberMe ? localStorage : sessionStorage;
   storage.setItem("token", accessToken);
   storage.setItem("refreshToken", refreshToken);
@@ -70,10 +54,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (email: string, password: string, rememberMe = true) => {
     set({ isLoading: true, error: null });
     try {
-      const { accessToken, refreshToken, user } = await auth.login(
-        email,
-        password,
-      );
+      const { accessToken, refreshToken, user } = await auth.login(email, password);
       const userData = {
         id: user.id,
         email,
@@ -101,10 +82,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const { options, challengeId } = await passkeyApi.getLoginOptions(email);
       const credential = await startAuthentication({ optionsJSON: options });
-      const { accessToken, refreshToken, user } = await passkeyApi.verifyLogin(
-        challengeId,
-        credential,
-      );
+      const { accessToken, refreshToken, user } = await passkeyApi.verifyLogin(challengeId, credential);
       const userData = {
         id: user.id,
         email: email || "",
@@ -133,19 +111,12 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   passkeyConditionalLogin: async (signal: AbortSignal, rememberMe = true) => {
     try {
-      const { options, challengeId } = await passkeyApi.getLoginOptions(
-        undefined,
-        signal,
-      );
+      const { options, challengeId } = await passkeyApi.getLoginOptions(undefined, signal);
       const credential = await startAuthentication({
         optionsJSON: options,
         useBrowserAutofill: true,
       });
-      const { accessToken, refreshToken, user } = await passkeyApi.verifyLogin(
-        challengeId,
-        credential,
-        signal,
-      );
+      const { accessToken, refreshToken, user } = await passkeyApi.verifyLogin(challengeId, credential, signal);
       const userData = {
         id: user.id,
         email: "",
@@ -170,10 +141,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       await auth.register(email, password);
-      const { accessToken, refreshToken, user } = await auth.login(
-        email,
-        password,
-      );
+      const { accessToken, refreshToken, user } = await auth.login(email, password);
       const userData = {
         id: user.id,
         email,
@@ -199,8 +167,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   socialLogin: async (provider: string, code: string, redirectUri: string, rememberMe = true) => {
     set({ isLoading: true, error: null });
     try {
-      const { accessToken, refreshToken, user } =
-        await auth.socialLogin(provider, code, redirectUri);
+      const { accessToken, refreshToken, user } = await auth.socialLogin(provider, code, redirectUri);
       const userData = {
         id: user.id,
         email: "",

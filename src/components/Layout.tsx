@@ -1,14 +1,6 @@
 import { ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import {
-  LayoutDashboard,
-  BookOpen,
-  BarChart3,
-  Archive,
-  Settings,
-  Zap,
-  LogOut,
-} from "lucide-react";
+import { LayoutDashboard, BookOpen, BarChart3, Archive, Settings, Zap, LogOut } from "lucide-react";
 import useAuth from "@hooks/useAuth";
 
 const navItems = [
@@ -40,9 +32,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Zap className="h-4 w-4" />
           </div>
-          <span className="font-display text-base font-bold tracking-tight">
-            PrepTracker
-          </span>
+          <span className="font-display text-base font-bold tracking-tight">PrepTracker</span>
         </div>
 
         <nav className="flex-1 space-y-0.5 px-3 py-4">
@@ -63,9 +53,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
                 <>
                   <item.icon className="h-4 w-4" />
                   <span className="flex-1">{item.label}</span>
-                  {isActive && (
-                    <span className="h-2 w-2 rounded-full bg-primary" />
-                  )}
+                  {isActive && <span className="h-2 w-2 rounded-full bg-primary" />}
                 </>
               )}
             </NavLink>
@@ -80,11 +68,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium truncate">{displayName}</p>
-              {displayEmail && (
-                <p className="text-xs text-muted-foreground truncate">
-                  {displayEmail}
-                </p>
-              )}
+              {displayEmail && <p className="text-xs text-muted-foreground truncate">{displayEmail}</p>}
             </div>
             <button
               onClick={handleLogout}
@@ -118,9 +102,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
       {/* Main content */}
       <main className="flex-1 md:ml-56">
-        <div className="w-full px-4 py-5 pb-24 md:px-16 md:py-8 md:pb-8 animate-fade-in">
-          {children}
-        </div>
+        <div className="w-full px-4 py-5 pb-24 md:px-16 md:py-8 md:pb-8 animate-fade-in">{children}</div>
       </main>
     </div>
   );

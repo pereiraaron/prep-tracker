@@ -36,7 +36,9 @@ const ActivityItem = ({ question }: ActivityItemProps) => {
   const borderColor = cat ? borderColors[cat] || "border-l-border" : "border-l-border";
 
   return (
-    <div className={`flex items-center gap-3 border-l-[3px] ${borderColor} px-4 py-3 transition-colors hover:bg-secondary/50`}>
+    <div
+      className={`flex items-center gap-3 border-l-[3px] ${borderColor} px-4 py-3 transition-colors hover:bg-secondary/50`}
+    >
       <div className="min-w-0 flex-1">
         <p className="text-sm font-semibold font-display">{question.title}</p>
         <div className="flex items-center gap-2 mt-1">
@@ -47,9 +49,7 @@ const ActivityItem = ({ question }: ActivityItemProps) => {
           )}
         </div>
       </div>
-      {solvedDate && (
-        <span className="shrink-0 text-xs text-muted-foreground">{solvedDate}</span>
-      )}
+      {solvedDate && <span className="shrink-0 text-xs text-muted-foreground">{solvedDate}</span>}
     </div>
   );
 };

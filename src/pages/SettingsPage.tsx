@@ -1,13 +1,6 @@
 import usePageTitle from "@hooks/usePageTitle";
 import Layout from "@components/Layout";
-import {
-  User,
-  Moon,
-  Sun,
-  Settings as SettingsIcon,
-  Palette,
-  Shield,
-} from "lucide-react";
+import { User, Moon, Sun, Settings as SettingsIcon, Palette, Shield } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@store/useAuthStore";
 
@@ -55,8 +48,7 @@ const SettingsPage = () => {
             <div
               className="flex h-12 w-12 items-center justify-center rounded-xl font-display text-lg font-bold text-primary-foreground"
               style={{
-                background:
-                  "linear-gradient(135deg, hsl(230, 65%, 55%), hsl(170, 70%, 45%))",
+                background: "linear-gradient(135deg, hsl(230, 65%, 55%), hsl(170, 70%, 45%))",
               }}
             >
               {(user?.username || user?.email || "U")[0].toUpperCase()}
@@ -65,9 +57,7 @@ const SettingsPage = () => {
               <p className="font-display text-sm font-semibold">
                 {user?.username || user?.email?.split("@")[0] || "User"}
               </p>
-              {user?.email && (
-                <p className="text-xs text-muted-foreground">{user.email}</p>
-              )}
+              {user?.email && <p className="text-xs text-muted-foreground">{user.email}</p>}
             </div>
           </div>
         </div>
@@ -81,19 +71,11 @@ const SettingsPage = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary">
-                {isDark ? (
-                  <Moon className="h-4 w-4" />
-                ) : (
-                  <Sun className="h-4 w-4" />
-                )}
+                {isDark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
               </div>
               <div>
-                <p className="text-sm font-medium">
-                  {isDark ? "Dark" : "Light"} Mode
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Toggle your preferred theme
-                </p>
+                <p className="text-sm font-medium">{isDark ? "Dark" : "Light"} Mode</p>
+                <p className="text-xs text-muted-foreground">Toggle your preferred theme</p>
               </div>
             </div>
             <button
@@ -114,8 +96,7 @@ const SettingsPage = () => {
             <h2 className="font-display text-sm font-semibold">Security</h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            Passkey and authentication settings will appear here once connected
-            to a backend.
+            Passkey and authentication settings will appear here once connected to a backend.
           </p>
         </div>
       </div>

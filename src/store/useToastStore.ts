@@ -48,9 +48,7 @@ export const useToastStore = create<ToastState>((set) => {
         state.toasts.forEach((t) => addToRemoveQueue(t.id));
       }
       return {
-        toasts: state.toasts.map((t) =>
-          t.id === toastId || toastId === undefined ? { ...t, open: false } : t,
-        ),
+        toasts: state.toasts.map((t) => (t.id === toastId || toastId === undefined ? { ...t, open: false } : t)),
       };
     });
   };
@@ -70,7 +68,14 @@ export const useToastStore = create<ToastState>((set) => {
 
       set((state) => ({
         toasts: [
-          { ...props, id, open: true, onOpenChange: (open) => { if (!open) dismissThis(); } },
+          {
+            ...props,
+            id,
+            open: true,
+            onOpenChange: (open) => {
+              if (!open) dismissThis();
+            },
+          },
           ...state.toasts,
         ].slice(0, TOAST_LIMIT),
       }));
@@ -83,5 +88,4 @@ export const useToastStore = create<ToastState>((set) => {
 });
 
 // Convenience export for use outside React components
-export const toast = (...args: Parameters<ToastState["toast"]>) =>
-  useToastStore.getState().toast(...args);
+export const toast = (...args: Parameters<ToastState["toast"]>) => useToastStore.getState().toast(...args);

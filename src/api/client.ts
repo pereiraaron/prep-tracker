@@ -6,9 +6,7 @@ const AUTH_API_KEY = import.meta.env.VITE_AUTH_API_KEY as string;
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
 
 if (!AUTH_BASE_URL || !AUTH_API_KEY || !API_BASE_URL) {
-  throw new Error(
-    "Missing required environment variables. Copy .env.example to .env and fill in the values.",
-  );
+  throw new Error("Missing required environment variables. Copy .env.example to .env and fill in the values.");
 }
 
 export { AUTH_BASE_URL, API_BASE_URL };
@@ -41,10 +39,7 @@ const unwrapEnvelope = <T>(raw: any): T => {
 /** For auth endpoints (login, register, passkey login) — no auto-logout on 401. */
 export const handleAuthResponse = async <T>(res: Response): Promise<T> => {
   const data = await res.json();
-  if (!res.ok)
-    throw new Error(
-      data.error?.message || data.message || "Something went wrong",
-    );
+  if (!res.ok) throw new Error(data.error?.message || data.message || "Something went wrong");
   return data as T;
 };
 
@@ -76,10 +71,7 @@ const tryRefresh = async (): Promise<boolean> => {
  * For protected endpoints — auto-refreshes token on 401, retries once.
  * Falls back to logout + redirect if refresh fails.
  */
-export const handleResponse = async <T>(
-  res: Response,
-  retryRequest?: () => Promise<Response>,
-): Promise<T> => {
+export const handleResponse = async <T>(res: Response, retryRequest?: () => Promise<Response>): Promise<T> => {
   if (res.status === 401 && retryRequest) {
     const refreshed = await tryRefresh();
     if (refreshed) {
@@ -99,10 +91,7 @@ export const handleResponse = async <T>(
     throw new Error("Session expired");
   }
   const data = await res.json();
-  if (!res.ok)
-    throw new Error(
-      data.error?.message || data.message || "Something went wrong",
-    );
+  if (!res.ok) throw new Error(data.error?.message || data.message || "Something went wrong");
   return unwrapEnvelope<T>(data);
 };
 
@@ -110,12 +99,7 @@ export const handleResponse = async <T>(
  * Fetch wrapper for protected API endpoints.
  * Automatically attaches auth headers and retries on 401 after token refresh.
  */
-export const apiFetch = async <T>(
-  url: string,
-  init?: RequestInit,
-): Promise<T> => {
+export const apiFetch = async <T>(url: string, init?: RequestInit): Promise<T> => {
   const res = await fetch(url, { ...init, headers: apiHeaders() });
-  return handleResponse<T>(res, () =>
-    fetch(url, { ...init, headers: apiHeaders() }),
-  );
+  return handleResponse<T>(res, () => fetch(url, { ...init, headers: apiHeaders() }));
 };

@@ -1,19 +1,17 @@
 import usePageTitle from "@hooks/usePageTitle";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Layout from "@components/Layout";
-import useBacklog from "@hooks/useBacklog";
+import {
+  useBacklogList,
+  useCreateBacklogItem,
+  useDeleteBacklogItem,
+  useStarBacklogItem,
+  useSolveBacklogItem,
+} from "@queries/useBacklog";
 import { CATEGORY_LABEL } from "@api/types";
 import type { PrepCategory } from "@api/types";
 import { toast } from "@components/ui/sonner";
-import {
-  Star,
-  Trash2,
-  ExternalLink,
-  CheckCircle,
-  Plus,
-  Archive,
-  Loader2,
-} from "lucide-react";
+import { Star, Trash2, ExternalLink, CheckCircle, Plus, Archive, Loader2 } from "lucide-react";
 
 const difficultyColors: Record<string, string> = {
   easy: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
@@ -26,26 +24,19 @@ const BacklogPage = () => {
   const [solvingId, setSolvingId] = useState<string | null>(null);
   const [newTitle, setNewTitle] = useState("");
 
-  const {
-    items: backlog,
-    isLoading,
-    creating,
-    fetchBacklog,
-    createBacklogItem,
-    deleteBacklogItem,
-    starBacklogItem,
-    solveBacklogItem,
-  } = useBacklog();
-
-  useEffect(() => {
-    fetchBacklog();
-  }, [fetchBacklog]);
+  const { data: backlogData, isLoading } = useBacklogList();
+  const backlog = backlogData?.data ?? [];
+  const createMutation = useCreateBacklogItem();
+  const deleteMutation = useDeleteBacklogItem();
+  const starMutation = useStarBacklogItem();
+  const solveMutation = useSolveBacklogItem();
+  const creating = createMutation.isPending;
 
   const handleAdd = async () => {
     const title = newTitle.trim();
     if (!title) return;
     try {
-      await createBacklogItem({ title });
+      await createMutation.mutateAsync({ title });
       setNewTitle("");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to add");
@@ -54,7 +45,7 @@ const BacklogPage = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      await deleteBacklogItem(id);
+      await deleteMutation.mutateAsync(id);
       toast.success("Removed from backlog");
     } catch {
       toast.error("Failed to remove");
@@ -63,7 +54,7 @@ const BacklogPage = () => {
 
   const handleSolve = async (id: string, category: string) => {
     try {
-      await solveBacklogItem(id, category as PrepCategory);
+      await solveMutation.mutateAsync({ id, category: category as PrepCategory });
       toast.success("Marked as solved");
       setSolvingId(null);
     } catch {
@@ -105,11 +96,7 @@ const BacklogPage = () => {
             disabled={creating || !newTitle.trim()}
             className="flex items-center gap-2 rounded-xl bg-primary px-5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:shadow-xl disabled:opacity-40"
           >
-            {creating ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Plus className="h-4 w-4" />
-            )}
+            {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
             Add
           </button>
         </div>
@@ -141,11 +128,7 @@ const BacklogPage = () => {
                       {q.topic}
                     </span>
                   )}
-                  {q.source && (
-                    <span className="text-[10px] font-mono text-muted-foreground">
-                      {q.source}
-                    </span>
-                  )}
+                  {q.source && <span className="text-[10px] font-mono text-muted-foreground">{q.source}</span>}
                 </div>
               </div>
 
@@ -161,12 +144,10 @@ const BacklogPage = () => {
                   </a>
                 )}
                 <button
-                  onClick={() => starBacklogItem(q.id)}
+                  onClick={() => starMutation.mutate(q.id)}
                   className="rounded-lg p-2 text-muted-foreground hover:text-stat-orange transition-colors hover:bg-stat-orange/10"
                 >
-                  <Star
-                    className={`h-4 w-4 ${q.starred ? "fill-stat-orange text-stat-orange" : ""}`}
-                  />
+                  <Star className={`h-4 w-4 ${q.starred ? "fill-stat-orange text-stat-orange" : ""}`} />
                 </button>
 
                 {solvingId === q.id ? (
@@ -210,9 +191,7 @@ const BacklogPage = () => {
             <div className="py-16 text-center">
               <Archive className="mx-auto mb-3 h-8 w-8 text-muted-foreground/40" />
               <p className="font-display font-medium">Backlog is empty</p>
-              <p className="text-sm text-muted-foreground">
-                Add questions you want to solve later
-              </p>
+              <p className="text-sm text-muted-foreground">Add questions you want to solve later</p>
             </div>
           )}
         </div>

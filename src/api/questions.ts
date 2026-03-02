@@ -4,13 +4,7 @@ import type { Difficulty, PrepCategory } from "./types";
 // ---- Enums ----
 
 export type QuestionStatus = "pending" | "solved";
-export type QuestionSource =
-  | "leetcode"
-  | "greatfrontend"
-  | "geeksforgeeks"
-  | "linkedin"
-  | "medium"
-  | "other";
+export type QuestionSource = "leetcode" | "greatfrontend" | "geeksforgeeks" | "linkedin" | "medium" | "other";
 
 // ---- Question ----
 
@@ -118,8 +112,7 @@ export const questionsApi = {
     if (filter?.solvedAfter) params.set("solvedAfter", filter.solvedAfter);
     if (filter?.solvedBefore) params.set("solvedBefore", filter.solvedBefore);
     if (filter?.createdAfter) params.set("createdAfter", filter.createdAfter);
-    if (filter?.createdBefore)
-      params.set("createdBefore", filter.createdBefore);
+    if (filter?.createdBefore) params.set("createdBefore", filter.createdBefore);
     if (filter?.sort) params.set("sort", filter.sort);
     if (filter?.page) params.set("page", String(filter.page));
     if (filter?.limit) params.set("limit", String(filter.limit));
@@ -127,8 +120,7 @@ export const questionsApi = {
     return apiFetch<PaginatedQuestions>(`${API_BASE_URL}/questions${query}`);
   },
 
-  getById: async (id: string) =>
-    apiFetch<Question>(`${API_BASE_URL}/questions/${id}`),
+  getById: async (id: string) => apiFetch<Question>(`${API_BASE_URL}/questions/${id}`),
 
   create: async (body: CreateQuestionBody) =>
     apiFetch<Question>(`${API_BASE_URL}/questions`, {
@@ -169,26 +161,21 @@ export const questionsApi = {
       difficulty?: Difficulty;
       page?: number;
       limit?: number;
-    },
+    }
   ) => {
     const params = new URLSearchParams({ q });
     if (filters?.status) params.set("status", filters.status);
     if (filters?.difficulty) params.set("difficulty", filters.difficulty);
     if (filters?.page) params.set("page", String(filters.page));
     if (filters?.limit) params.set("limit", String(filters.limit));
-    return apiFetch<PaginatedQuestions>(
-      `${API_BASE_URL}/questions/search?${params}`,
-    );
+    return apiFetch<PaginatedQuestions>(`${API_BASE_URL}/questions/search?${params}`);
   },
 
   bulkDelete: async (ids: string[]) =>
-    apiFetch<{ message: string; deletedCount: number }>(
-      `${API_BASE_URL}/questions/bulk-delete`,
-      {
-        method: "POST",
-        body: JSON.stringify({ ids }),
-      },
-    ),
+    apiFetch<{ message: string; deletedCount: number }>(`${API_BASE_URL}/questions/bulk-delete`, {
+      method: "POST",
+      body: JSON.stringify({ ids }),
+    }),
 
   // ---- Backlog ----
 
@@ -205,9 +192,7 @@ export const questionsApi = {
     if (filter?.page) params.set("page", String(filter.page));
     if (filter?.limit) params.set("limit", String(filter.limit));
     const query = params.toString() ? `?${params}` : "";
-    return apiFetch<PaginatedQuestions>(
-      `${API_BASE_URL}/questions/backlog${query}`,
-    );
+    return apiFetch<PaginatedQuestions>(`${API_BASE_URL}/questions/backlog${query}`);
   },
 
   createBacklog: async (body: CreateBacklogQuestionBody) =>

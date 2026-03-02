@@ -3,12 +3,7 @@ import type {
   PublicKeyCredentialRequestOptionsJSON,
 } from "@simplewebauthn/browser";
 import { useAuthStore } from "@store/useAuthStore";
-import {
-  AUTH_BASE_URL,
-  authHeaders,
-  handleAuthResponse,
-  handleResponse,
-} from "./client";
+import { AUTH_BASE_URL, authHeaders, handleAuthResponse, handleResponse } from "./client";
 
 const BASE = `${AUTH_BASE_URL}/auth/passkey`;
 
@@ -19,9 +14,7 @@ const bearerHeaders = (): HeadersInit => {
 
 const passkeyFetch = async <T>(url: string, init?: RequestInit): Promise<T> => {
   const res = await fetch(url, { ...init, headers: bearerHeaders() });
-  return handleResponse<T>(res, () =>
-    fetch(url, { ...init, headers: bearerHeaders() }),
-  );
+  return handleResponse<T>(res, () => fetch(url, { ...init, headers: bearerHeaders() }));
 };
 
 // ---- Types ----
@@ -73,11 +66,7 @@ export const passkeyApi = {
     return handleAuthResponse<AuthenticationOptionsResponse>(res);
   },
 
-  verifyLogin: async (
-    challengeId: string,
-    credential: unknown,
-    signal?: AbortSignal,
-  ) => {
+  verifyLogin: async (challengeId: string, credential: unknown, signal?: AbortSignal) => {
     const res = await fetch(`${BASE}/login/verify`, {
       method: "POST",
       headers: authHeaders(),
@@ -93,28 +82,20 @@ export const passkeyApi = {
       method: "POST",
     }),
 
-  verifyRegister: async (
-    challengeId: string,
-    credential: unknown,
-    name?: string,
-  ) =>
+  verifyRegister: async (challengeId: string, credential: unknown, name?: string) =>
     passkeyFetch<RegisterVerifyResponse>(`${BASE}/register/verify`, {
       method: "POST",
       body: JSON.stringify({ challengeId, credential, name }),
     }),
 
   // Credential management (Bearer token required)
-  listCredentials: async () =>
-    passkeyFetch<{ credentials: PasskeyCredential[] }>(`${BASE}/credentials`),
+  listCredentials: async () => passkeyFetch<{ credentials: PasskeyCredential[] }>(`${BASE}/credentials`),
 
   renameCredential: async (id: string, name: string) =>
-    passkeyFetch<{ credential: PasskeyCredential }>(
-      `${BASE}/credentials/${id}`,
-      {
-        method: "PATCH",
-        body: JSON.stringify({ name }),
-      },
-    ),
+    passkeyFetch<{ credential: PasskeyCredential }>(`${BASE}/credentials/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ name }),
+    }),
 
   deleteCredential: async (id: string) => {
     const res = await fetch(`${BASE}/credentials/${id}`, {
@@ -126,7 +107,7 @@ export const passkeyApi = {
       fetch(`${BASE}/credentials/${id}`, {
         method: "DELETE",
         headers: bearerHeaders(),
-      }),
+      })
     );
   },
 

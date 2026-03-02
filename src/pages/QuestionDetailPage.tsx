@@ -1,8 +1,8 @@
 import usePageTitle from "@hooks/usePageTitle";
-import { useState, useMemo, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@components/Layout";
-import useQuestions from "@hooks/useQuestions";
+import { useQuestionDetail, useUpdateQuestion, useStarQuestion } from "@queries/useQuestions";
 import type { PrepCategory } from "@api/types";
 import { CATEGORY_LABEL } from "@api/types";
 import { toast } from "@components/ui/sonner";
@@ -25,11 +25,7 @@ import {
   Loader2,
 } from "lucide-react";
 
-const codingCategories: PrepCategory[] = [
-  "dsa",
-  "machine_coding",
-  "language_framework",
-];
+const codingCategories: PrepCategory[] = ["dsa", "machine_coding", "language_framework"];
 
 const difficultyColors: Record<string, string> = {
   easy: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
@@ -52,39 +48,30 @@ const QuestionDetailPage = () => {
   usePageTitle("Question Details");
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const {
-    currentQuestion: question,
-    detailLoading: isLoading,
-    mutating,
-    fetchById,
-    updateQuestion,
-    starQuestion,
-  } = useQuestions();
+  const { data: question, isLoading } = useQuestionDetail(id);
+  const updateMutation = useUpdateQuestion();
+  const starMutation = useStarQuestion();
+  const mutating = updateMutation.isPending;
 
   const [isEditing, setIsEditing] = useState(false);
-  const [solution, setSolution] = useState("");
-  const [notes, setNotes] = useState("");
+  const [solution, setSolution] = useState(question?.solution || "");
+  const [notes, setNotes] = useState(question?.notes || "");
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    if (id) fetchById(id);
-  }, [id, fetchById]);
-
-  useEffect(() => {
-    if (question && !isEditing) {
-      setSolution(question.solution || "");
-      setNotes(question.notes || "");
-    }
-  }, [question, isEditing]);
+  // Sync form state when question data loads or editing ends
+  const questionSolution = question?.solution || "";
+  const questionNotes = question?.notes || "";
+  if (!isEditing && solution !== questionSolution) setSolution(questionSolution);
+  if (!isEditing && notes !== questionNotes) setNotes(questionNotes);
 
   const cat = question?.category ?? null;
   const diff = question?.difficulty;
   const isCodeQuestion = cat ? codingCategories.includes(cat) : false;
-  const solutionLines = useMemo(() => (question?.solution || "").split("\n"), [question?.solution]);
+  const solutionLines = (question?.solution || "").split("\n");
 
   const handleSave = async () => {
     try {
-      await updateQuestion(id!, { solution, notes });
+      await updateMutation.mutateAsync({ id: id!, body: { solution, notes } });
       toast.success("Saved");
       setIsEditing(false);
     } catch (err) {
@@ -112,13 +99,8 @@ const QuestionDetailPage = () => {
     return (
       <Layout>
         <div className="py-20 text-center">
-          <p className="font-display text-lg font-semibold">
-            Question not found
-          </p>
-          <button
-            onClick={() => navigate("/questions")}
-            className="mt-4 text-sm text-primary hover:underline"
-          >
+          <p className="font-display text-lg font-semibold">Question not found</p>
+          <button onClick={() => navigate("/questions")} className="mt-4 text-sm text-primary hover:underline">
             Back to Questions
           </button>
         </div>
@@ -141,21 +123,15 @@ const QuestionDetailPage = () => {
         <div className="glass-card rounded-xl p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h1 className="font-display text-xl font-bold">
-                {question.title}
-              </h1>
+              <h1 className="font-display text-xl font-bold">{question.title}</h1>
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 {diff && (
-                  <span
-                    className={`rounded-md px-2 py-0.5 text-xs font-semibold ${difficultyColors[diff] || ""}`}
-                  >
+                  <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${difficultyColors[diff] || ""}`}>
                     {diff}
                   </span>
                 )}
                 {cat && (
-                  <span
-                    className={`rounded-md px-2 py-0.5 text-xs font-semibold ${categoryColors[cat] || ""}`}
-                  >
+                  <span className={`rounded-md px-2 py-0.5 text-xs font-semibold ${categoryColors[cat] || ""}`}>
                     {CATEGORY_LABEL[cat] || cat}
                   </span>
                 )}
@@ -178,12 +154,10 @@ const QuestionDetailPage = () => {
                 </a>
               )}
               <button
-                onClick={() => starQuestion(id!)}
+                onClick={() => starMutation.mutate(id!)}
                 className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-muted-foreground hover:text-stat-orange hover:bg-stat-orange/10 transition-all"
               >
-                <Star
-                  className={`h-4 w-4 ${question.starred ? "fill-stat-orange text-stat-orange" : ""}`}
-                />
+                <Star className={`h-4 w-4 ${question.starred ? "fill-stat-orange text-stat-orange" : ""}`} />
               </button>
               <button
                 onClick={() => {
@@ -209,17 +183,13 @@ const QuestionDetailPage = () => {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_280px]">
           {/* Main content */}
           <div className="space-y-4">
-            <div
-              className={`rounded-xl overflow-hidden ${isCodeQuestion && !isEditing ? "" : "glass-card p-6"}`}
-            >
+            <div className={`rounded-xl overflow-hidden ${isCodeQuestion && !isEditing ? "" : "glass-card p-6"}`}>
               <div
                 className={`flex items-center justify-between ${isCodeQuestion && !isEditing ? "bg-[hsl(220,13%,18%)] px-4 py-3 rounded-t-xl" : "mb-4"}`}
               >
                 <div className="flex items-center gap-2">
                   {isCodeQuestion ? (
-                    <Code2
-                      className={`h-4 w-4 ${!isEditing ? "text-emerald-400" : "text-stat-blue"}`}
-                    />
+                    <Code2 className={`h-4 w-4 ${!isEditing ? "text-emerald-400" : "text-stat-blue"}`} />
                   ) : (
                     <FileText className="h-4 w-4 text-stat-blue" />
                   )}
@@ -234,11 +204,7 @@ const QuestionDetailPage = () => {
                     onClick={handleCopy}
                     className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
                   >
-                    {copied ? (
-                      <Check className="h-3.5 w-3.5 text-emerald-400" />
-                    ) : (
-                      <Copy className="h-3.5 w-3.5" />
-                    )}
+                    {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
                     {copied ? "Copied!" : "Copy"}
                   </button>
                 )}
@@ -261,10 +227,7 @@ const QuestionDetailPage = () => {
                         <table className="w-full border-collapse">
                           <tbody>
                             {solutionLines.map((line, i) => (
-                              <tr
-                                key={i}
-                                className="hover:bg-white/5 transition-colors"
-                              >
+                              <tr key={i} className="hover:bg-white/5 transition-colors">
                                 <td className="select-none border-r border-white/5 px-4 py-0 text-right font-mono text-xs leading-6 text-gray-600 w-12">
                                   {i + 1}
                                 </td>
@@ -282,9 +245,7 @@ const QuestionDetailPage = () => {
                       </pre>
                     )
                   ) : (
-                    <p className="text-sm text-muted-foreground italic">
-                      No solution yet. Click Edit to add one.
-                    </p>
+                    <p className="text-sm text-muted-foreground italic">No solution yet. Click Edit to add one.</p>
                   )}
                 </div>
               )}
@@ -306,13 +267,9 @@ const QuestionDetailPage = () => {
               ) : (
                 <div>
                   {question.notes ? (
-                    <p className="text-sm leading-relaxed text-foreground/80">
-                      {question.notes}
-                    </p>
+                    <p className="text-sm leading-relaxed text-foreground/80">{question.notes}</p>
                   ) : (
-                    <p className="text-sm text-muted-foreground italic">
-                      No notes yet. Click Edit to add some.
-                    </p>
+                    <p className="text-sm text-muted-foreground italic">No notes yet. Click Edit to add some.</p>
                   )}
                 </div>
               )}
@@ -324,11 +281,7 @@ const QuestionDetailPage = () => {
                     disabled={mutating}
                     className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 disabled:opacity-50"
                   >
-                    {mutating ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <Save className="h-3.5 w-3.5" />
-                    )}
+                    {mutating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
                     Save Changes
                   </button>
                   <button
@@ -358,18 +311,14 @@ const QuestionDetailPage = () => {
                   <div className="flex items-center gap-3 text-sm">
                     <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                     <span className="text-muted-foreground">Topic</span>
-                    <span className="ml-auto font-medium">
-                      {question.topic}
-                    </span>
+                    <span className="ml-auto font-medium">{question.topic}</span>
                   </div>
                 )}
                 {question.source && (
                   <div className="flex items-center gap-3 text-sm">
                     <Globe className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                     <span className="text-muted-foreground">Source</span>
-                    <span className="ml-auto font-mono text-xs">
-                      {question.source}
-                    </span>
+                    <span className="ml-auto font-mono text-xs">{question.source}</span>
                   </div>
                 )}
                 {question.solvedAt && (

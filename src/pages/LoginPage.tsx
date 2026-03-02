@@ -1,10 +1,6 @@
 import usePageTitle from "@hooks/usePageTitle";
 import { useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@components/ui/card";
+import { Card, CardContent, CardHeader } from "@components/ui/card";
 import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
 import { Label } from "@components/ui/label";
@@ -16,8 +12,7 @@ import GoogleSignInButton from "@components/GoogleSignInButton";
 const LoginPage = () => {
   usePageTitle("Login");
   const navigate = useNavigate();
-  const { login, passkeyLogin, isLoading, error, isAuthenticated, clearError } =
-    useAuth();
+  const { login, passkeyLogin, isLoading, error, isAuthenticated, clearError } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated) navigate("/", { replace: true });
@@ -38,12 +33,8 @@ const LoginPage = () => {
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-2">
             <KeyRound className="w-7 h-7 text-primary" />
           </div>
-          <h1 className="text-3xl font-display font-bold text-foreground">
-            Welcome Back
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            Sign in to your interview prep tracker
-          </p>
+          <h1 className="text-3xl font-display font-bold text-foreground">Welcome Back</h1>
+          <p className="text-muted-foreground text-sm">Sign in to your interview prep tracker</p>
         </div>
 
         <Card className="glass-card">
@@ -116,12 +107,7 @@ const LoginPage = () => {
 
             <GoogleSignInButton label="Sign in with Google" disabled={isLoading} />
 
-            <Button
-              variant="outline"
-              className="w-full gap-2"
-              disabled={isLoading}
-              onClick={() => passkeyLogin()}
-            >
+            <Button variant="outline" className="w-full gap-2" disabled={isLoading} onClick={() => passkeyLogin()}>
               <Fingerprint className="w-4 h-4" />
               Sign in with Passkey
             </Button>
@@ -130,10 +116,7 @@ const LoginPage = () => {
 
         <p className="text-center text-sm text-muted-foreground">
           Don't have an account?{" "}
-          <Link
-            to="/auth/register"
-            className="text-primary underline-offset-4 hover:underline font-medium"
-          >
+          <Link to="/auth/register" className="text-primary underline-offset-4 hover:underline font-medium">
             Sign up
           </Link>
         </p>

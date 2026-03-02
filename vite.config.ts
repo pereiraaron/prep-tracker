@@ -27,6 +27,7 @@ export default defineConfig(() => ({
       "@store": path.resolve(__dirname, "./src/store"),
       "@api": path.resolve(__dirname, "./src/api"),
       "@hooks": path.resolve(__dirname, "./src/hooks"),
+      "@queries": path.resolve(__dirname, "./src/queries"),
       "@lib": path.resolve(__dirname, "./src/lib"),
     },
   },

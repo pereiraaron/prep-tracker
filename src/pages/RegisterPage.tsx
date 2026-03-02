@@ -1,10 +1,6 @@
 import usePageTitle from "@hooks/usePageTitle";
 import { useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@components/ui/card";
+import { Card, CardContent, CardHeader } from "@components/ui/card";
 import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
 import { Label } from "@components/ui/label";
@@ -37,12 +33,8 @@ const RegisterPage = () => {
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-2">
             <KeyRound className="w-7 h-7 text-primary" />
           </div>
-          <h1 className="text-3xl font-display font-bold text-foreground">
-            Create Account
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            Sign up to start tracking your prep
-          </p>
+          <h1 className="text-3xl font-display font-bold text-foreground">Create Account</h1>
+          <p className="text-muted-foreground text-sm">Sign up to start tracking your prep</p>
         </div>
 
         <Card className="glass-card">
@@ -119,10 +111,7 @@ const RegisterPage = () => {
 
         <p className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link
-            to="/auth/login"
-            className="text-primary underline-offset-4 hover:underline font-medium"
-          >
+          <Link to="/auth/login" className="text-primary underline-offset-4 hover:underline font-medium">
             Sign in
           </Link>
         </p>
