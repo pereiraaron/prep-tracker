@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { startAuthentication } from "@simplewebauthn/browser";
 import { auth } from "@api/auth";
 import { passkeyApi } from "@api/passkey";
 
@@ -81,6 +80,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const { options, challengeId } = await passkeyApi.getLoginOptions(email);
+      const { startAuthentication } = await import("@simplewebauthn/browser");
       const credential = await startAuthentication({ optionsJSON: options });
       const { accessToken, refreshToken, user } = await passkeyApi.verifyLogin(challengeId, credential);
       const userData = {
@@ -112,6 +112,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   passkeyConditionalLogin: async (signal: AbortSignal, rememberMe = true) => {
     try {
       const { options, challengeId } = await passkeyApi.getLoginOptions(undefined, signal);
+      const { startAuthentication } = await import("@simplewebauthn/browser");
       const credential = await startAuthentication({
         optionsJSON: options,
         useBrowserAutofill: true,

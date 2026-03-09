@@ -1,21 +1,7 @@
 import usePageTitle from "@hooks/usePageTitle";
 import Layout from "@components/Layout";
 import StatCard from "@components/StatCard";
-import {
-  useOverview,
-  useCategoryBreakdown,
-  useDifficultyBreakdown,
-  useProgress,
-  useWeeklyProgress,
-  useCumulativeProgress,
-  useTopicBreakdown,
-  useSourceBreakdown,
-  useCompanyTagBreakdown,
-  useHeatmap,
-  useDifficultyByCategory,
-  useStreaks,
-  useInsights,
-} from "@queries/useStats";
+import { useStatsBatch } from "@queries/useStats";
 import { CATEGORY_LABEL, SOURCE_LABEL } from "@api/types";
 import {
   BookOpen,
@@ -90,19 +76,21 @@ const ChartCard = ({
 
 const StatsPage = () => {
   usePageTitle("Stats & Insights");
-  const { data: overview, isLoading: overviewLoading } = useOverview();
-  const { data: categoryBreakdown } = useCategoryBreakdown();
-  const { data: difficultyBreakdown } = useDifficultyBreakdown();
-  const { data: progressData } = useProgress();
-  const { data: weeklyData } = useWeeklyProgress();
-  const { data: cumulativeData } = useCumulativeProgress();
-  const { data: topicBreakdown } = useTopicBreakdown();
-  const { data: sourceBreakdown } = useSourceBreakdown();
-  const { data: companyBreakdown } = useCompanyTagBreakdown();
-  const { data: heatmapData } = useHeatmap();
-  const { data: diffByCategory } = useDifficultyByCategory();
-  const { data: streaks } = useStreaks();
-  const { data: insights } = useInsights();
+  const { data: batch, isLoading: overviewLoading } = useStatsBatch();
+
+  const overview = batch?.overview;
+  const categoryBreakdown = batch?.categories;
+  const difficultyBreakdown = batch?.difficulties;
+  const progressData = batch?.progress;
+  const weeklyData = batch?.weeklyProgress;
+  const cumulativeData = batch?.cumulativeProgress;
+  const topicBreakdown = batch?.topics;
+  const sourceBreakdown = batch?.sources;
+  const companyBreakdown = batch?.companyTags;
+  const heatmapData = batch?.heatmap;
+  const diffByCategory = batch?.difficultyByCategory;
+  const streaks = batch?.streaks;
+  const insights = batch?.insights;
 
   // --- Derived data ---
 
