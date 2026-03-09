@@ -143,4 +143,25 @@ export const statsApi = {
     const query = refresh ? "?refresh=true" : "";
     return apiFetch<InsightsResponse>(`${API_BASE_URL}/stats/insights${query}`);
   },
+
+  getBatch: async (keys?: string[]) => {
+    const query = keys ? `?keys=${keys.join(",")}` : "";
+    return apiFetch<BatchStatsResponse>(`${API_BASE_URL}/stats/batch${query}`);
+  },
 };
+
+export interface BatchStatsResponse {
+  overview?: OverviewResponse;
+  categories?: CategoryBreakdown[];
+  difficulties?: DifficultyBreakdown[];
+  progress?: ProgressDay[];
+  weeklyProgress?: WeeklyProgress[];
+  cumulativeProgress?: CumulativeProgress[];
+  topics?: TopicBreakdown[];
+  sources?: SourceBreakdown[];
+  companyTags?: CompanyTagBreakdown[];
+  heatmap?: Record<string, number>;
+  difficultyByCategory?: DifficultyByCategory[];
+  streaks?: StreaksResponse;
+  insights?: InsightsResponse;
+}

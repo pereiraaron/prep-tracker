@@ -1,5 +1,4 @@
 import { createRoot } from "react-dom/client";
-import Clarity from "@microsoft/clarity";
 import App from "./App.tsx";
 import "./index.css";
 import { useAuthStore } from "@store/useAuthStore";
@@ -11,6 +10,8 @@ if (theme === "dark" || (!theme && window.matchMedia("(prefers-color-scheme: dar
 }
 
 useAuthStore.getState().hydrate();
-Clarity.init("voau1fwlw1");
 
 createRoot(document.getElementById("root")!).render(<App />);
+
+// Load analytics after render (non-blocking)
+import("@microsoft/clarity").then((Clarity) => Clarity.default.init("voau1fwlw1"));
