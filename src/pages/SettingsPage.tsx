@@ -31,7 +31,7 @@ const SettingsPage = () => {
             <SettingsIcon className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="font-display text-xl font-bold">Settings</h1>
+            <h1 className="font-display text-lg md:text-xl font-bold">Settings</h1>
             <p className="text-sm text-muted-foreground">Manage your account</p>
           </div>
         </div>

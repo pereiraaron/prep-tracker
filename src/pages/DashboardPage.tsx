@@ -52,7 +52,7 @@ const Dashboard = () => {
             <Clock className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="font-display text-xl font-bold">{getGreeting()}</h1>
+            <h1 className="font-display text-lg md:text-xl font-bold">{getGreeting()}</h1>
             <p className="text-sm text-muted-foreground">{today}</p>
           </div>
         </div>
@@ -118,11 +118,11 @@ const Dashboard = () => {
         </div>
       )}
 
-      <div className="grid gap-6 md:grid-cols-5">
+      <div className="grid gap-6 md:grid-cols-5 min-w-0">
         {/* Recent activity */}
-        <div className="md:col-span-3">
+        <div className="md:col-span-3 min-w-0">
           <h2 className="font-display text-base font-bold mb-3">Recent Activity</h2>
-          <div className="glass-card rounded-xl">
+          <div className="glass-card rounded-xl overflow-hidden">
             {recentLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />

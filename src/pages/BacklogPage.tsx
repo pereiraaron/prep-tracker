@@ -12,12 +12,7 @@ import { CATEGORY_LABEL } from "@api/types";
 import type { PrepCategory } from "@api/types";
 import { toast } from "@components/ui/sonner";
 import { Star, Trash2, ExternalLink, CheckCircle, Plus, Archive, Loader2 } from "lucide-react";
-
-const difficultyColors: Record<string, string> = {
-  easy: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
-  medium: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
-  hard: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
-};
+import { DifficultyBadge, TopicBadge, SourceBadge } from "@components/Badge";
 
 const BacklogPage = () => {
   usePageTitle("Backlog");
@@ -70,7 +65,7 @@ const BacklogPage = () => {
             <Archive className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="font-display text-xl font-bold">Backlog</h1>
+            <h1 className="font-display text-lg md:text-xl font-bold">Backlog</h1>
             <p className="text-sm text-muted-foreground">
               {backlog.length === 0
                 ? "Save questions you want to tackle later"
@@ -116,19 +111,9 @@ const BacklogPage = () => {
               <div className="min-w-0 flex-1">
                 <h3 className="font-display text-sm font-bold">{q.title}</h3>
                 <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                  {q.difficulty && (
-                    <span
-                      className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase ${difficultyColors[q.difficulty] || ""}`}
-                    >
-                      {q.difficulty}
-                    </span>
-                  )}
-                  {q.topic && (
-                    <span className="rounded-md bg-secondary px-2 py-0.5 text-[10px] font-medium text-foreground">
-                      {q.topic}
-                    </span>
-                  )}
-                  {q.source && <span className="text-[10px] font-mono text-muted-foreground">{q.source}</span>}
+                  {q.difficulty && <DifficultyBadge value={q.difficulty} />}
+                  {q.topic && <TopicBadge value={q.topic} />}
+                  {q.source && <SourceBadge value={q.source} />}
                 </div>
               </div>
 

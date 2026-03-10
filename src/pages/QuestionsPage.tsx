@@ -3,7 +3,9 @@ import { useState } from "react";
 import Layout from "@components/Layout";
 import { useQuestionsList, useDeleteQuestion, useStarQuestion } from "@queries/useQuestions";
 import type { PrepCategory, Difficulty } from "@api/types";
-import { PREP_CATEGORIES, DIFFICULTIES, CATEGORY_LABEL } from "@api/types";
+import { PREP_CATEGORIES, DIFFICULTIES } from "@api/types";
+import { DIFFICULTY_COLORS, CHIP_BASE, CHIP_ACTIVE, CHIP_INACTIVE } from "@lib/styles";
+import { DifficultyBadge, CategoryBadge, TopicBadge, SourceBadge, TagBadge, CompanyTagBadge } from "@components/Badge";
 import {
   Search,
   Plus,
@@ -21,25 +23,6 @@ import { toast } from "@components/ui/sonner";
 
 const ITEMS_PER_PAGE = 10;
 
-const difficultyColors: Record<string, string> = {
-  easy: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  medium: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  hard: "bg-red-500/10 text-red-400 border-red-500/20",
-};
-
-const categoryColors: Record<string, string> = {
-  dsa: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  system_design: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-  machine_coding: "bg-orange-500/10 text-orange-400 border-orange-500/20",
-  language_framework: "bg-teal-500/10 text-teal-400 border-teal-500/20",
-  behavioral: "bg-pink-500/10 text-pink-400 border-pink-500/20",
-  theory: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
-  quiz: "bg-rose-500/10 text-rose-400 border-rose-500/20",
-};
-
-const chipBase = "rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-all";
-const chipActive = "border-primary/40 bg-primary/15 text-primary";
-const chipInactive = "border-border bg-secondary/50 text-muted-foreground hover:border-primary/20 hover:text-foreground";
 
 const QuestionsPage = () => {
   usePageTitle("Questions");
@@ -98,7 +81,7 @@ const QuestionsPage = () => {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="font-display text-xl font-bold">Questions</h1>
+          <h1 className="font-display text-lg md:text-xl font-bold">Questions</h1>
           <p className="text-sm text-muted-foreground truncate">
             {total > 0 ? `${total} solved question${total === 1 ? "" : "s"}` : "Your solved questions will appear here"}
           </p>
@@ -126,14 +109,14 @@ const QuestionsPage = () => {
       </div>
 
       {/* Filter Chips */}
-      <div className="mb-5 space-y-3">
+      <div className="mb-4 md:mb-5 space-y-2 md:space-y-3">
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mr-1">Category</span>
           {PREP_CATEGORIES.map((cat) => (
             <button
               key={cat.value}
               onClick={() => handleCategoryFilter(categoryFilter === cat.value ? "" : cat.value)}
-              className={`${chipBase} ${categoryFilter === cat.value ? chipActive : chipInactive}`}
+              className={`${CHIP_BASE} ${categoryFilter === cat.value ? CHIP_ACTIVE : CHIP_INACTIVE}`}
             >
               {cat.label}
             </button>
@@ -145,10 +128,10 @@ const QuestionsPage = () => {
             <button
               key={d.value}
               onClick={() => handleDifficultyFilter(difficultyFilter === d.value ? "" : d.value)}
-              className={`${chipBase} ${
+              className={`${CHIP_BASE} ${
                 difficultyFilter === d.value
-                  ? difficultyColors[d.value]
-                  : chipInactive
+                  ? DIFFICULTY_COLORS[d.value]
+                  : CHIP_INACTIVE
               }`}
             >
               {d.label}
@@ -201,47 +184,17 @@ const QuestionsPage = () => {
                   <h3 className="font-display text-sm font-bold group-hover:text-primary transition-colors">
                     {q.title}
                   </h3>
-                  {q.difficulty && (
-                    <span className={`rounded-md border px-1.5 py-0.5 text-[10px] font-bold uppercase ${difficultyColors[q.difficulty] || ""}`}>
-                      {q.difficulty}
-                    </span>
-                  )}
-                  {q.category && (
-                    <span className={`rounded-md border px-1.5 py-0.5 text-[10px] font-semibold ${categoryColors[q.category] || ""}`}>
-                      {CATEGORY_LABEL[q.category] || q.category}
-                    </span>
-                  )}
+                  {q.difficulty && <DifficultyBadge value={q.difficulty} />}
+                  {q.category && <CategoryBadge value={q.category} />}
                 </div>
 
                 {/* Tags row */}
                 {(q.topic || q.tags.length > 0 || q.companyTags.length > 0 || q.source) && (
                   <div className="flex flex-wrap items-center gap-1.5">
-                    {q.topic && (
-                      <span className="rounded-md bg-secondary px-2 py-0.5 text-[10px] font-medium text-foreground">
-                        {q.topic}
-                      </span>
-                    )}
-                    {q.source && (
-                      <span className="rounded-md bg-muted px-2 py-0.5 text-[10px] font-mono text-muted-foreground">
-                        {q.source}
-                      </span>
-                    )}
-                    {q.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-md bg-primary/5 border border-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary/80"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                    {q.companyTags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-md bg-stat-blue/5 border border-stat-blue/10 px-1.5 py-0.5 text-[10px] font-medium text-stat-blue/80"
-                      >
-                        {tag}
-                      </span>
-                    ))}
+                    {q.topic && <TopicBadge value={q.topic} />}
+                    {q.source && <SourceBadge value={q.source} />}
+                    {q.tags.map((tag) => <TagBadge key={tag} value={tag} />)}
+                    {q.companyTags.map((tag) => <CompanyTagBadge key={tag} value={tag} />)}
                   </div>
                 )}
 
