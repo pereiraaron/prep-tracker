@@ -14,7 +14,13 @@ export const useQuestionsList = (params: ListParams = {}) => {
     queryKey: queryKeys.questions.list(params),
     queryFn: () =>
       search
-        ? questionsApi.search(search, { difficulty: filter.difficulty, page: filter.page, limit: filter.limit })
+        ? questionsApi.search(search, {
+            status: filter.status,
+            difficulty: filter.difficulty,
+            category: filter.category,
+            page: filter.page,
+            limit: filter.limit,
+          })
         : questionsApi.getAll(filter),
   });
 };

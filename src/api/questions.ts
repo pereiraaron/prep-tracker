@@ -159,6 +159,7 @@ export const questionsApi = {
     filters?: {
       status?: QuestionStatus;
       difficulty?: Difficulty;
+      category?: PrepCategory;
       page?: number;
       limit?: number;
     }
@@ -166,6 +167,7 @@ export const questionsApi = {
     const params = new URLSearchParams({ q });
     if (filters?.status) params.set("status", filters.status);
     if (filters?.difficulty) params.set("difficulty", filters.difficulty);
+    if (filters?.category) params.set("category", filters.category);
     if (filters?.page) params.set("page", String(filters.page));
     if (filters?.limit) params.set("limit", String(filters.limit));
     return apiFetch<PaginatedQuestions>(`${API_BASE_URL}/questions/search?${params}`);

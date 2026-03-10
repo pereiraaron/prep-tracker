@@ -23,7 +23,8 @@ export const queryKeys = {
   },
   questions: {
     all: ["questions"] as const,
-    list: (params: QuestionListParams) => [...queryKeys.questions.all, "list", params] as const,
+    list: (params: QuestionListParams) =>
+      [...queryKeys.questions.all, "list", JSON.parse(JSON.stringify(params))] as const,
     detail: (id: string) => [...queryKeys.questions.all, "detail", id] as const,
     recent: () => [...queryKeys.questions.all, "recent"] as const,
   },

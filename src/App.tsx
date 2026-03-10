@@ -79,7 +79,7 @@ const App = () => (
                 }
               />
               <Route
-                path="/new"
+                path="/question/new"
                 element={
                   <ProtectedRoute>
                     <NewQuestionPage />
