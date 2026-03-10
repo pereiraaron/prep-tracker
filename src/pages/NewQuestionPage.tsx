@@ -7,7 +7,9 @@ import type { QuestionSource } from "@api/questions";
 import type { PrepCategory, Difficulty } from "@api/types";
 import { PREP_CATEGORIES, DIFFICULTIES, QUESTION_SOURCES } from "@api/types";
 import { toast } from "@components/ui/sonner";
-import { ArrowLeft, Save, Loader2, X } from "lucide-react";
+import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import ChipSelect from "@components/ChipSelect";
+import { DIFFICULTY_COLORS, CHIP_BASE, CHIP_ACTIVE, CHIP_INACTIVE } from "@lib/styles";
 
 const PRESET_TOPICS = [
   "Arrays",
@@ -67,82 +69,11 @@ const PRESET_COMPANIES = [
   "Morgan Stanley",
 ];
 
-const DIFFICULTY_STYLE: Record<string, string> = {
-  easy: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
-  medium: "bg-amber-500/10 text-amber-400 border-amber-500/30",
-  hard: "bg-red-500/10 text-red-400 border-red-500/30",
-};
-
-const chipBase = "rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-all";
-const chipActive = "border-primary/40 bg-primary/15 text-primary";
-const chipInactive = "border-border bg-secondary/50 text-muted-foreground hover:border-primary/20 hover:text-foreground";
 const inputBase =
   "h-11 w-full rounded-xl border border-border bg-background px-4 text-base md:text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30";
 const textareaBase =
   "w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30 resize-none";
 
-interface ChipSelectProps {
-  presets: string[];
-  selected: string[];
-  onToggle: (value: string) => void;
-  onAdd: (value: string) => void;
-  onRemove: (value: string) => void;
-  placeholder: string;
-}
-
-const ChipSelect = ({ presets, selected, onToggle, onAdd, onRemove, placeholder }: ChipSelectProps) => {
-  const [input, setInput] = useState("");
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if ((e.key === "Enter" || e.key === ",") && input.trim()) {
-      e.preventDefault();
-      const val = input.trim();
-      if (!selected.includes(val)) onAdd(val);
-      setInput("");
-    }
-  };
-
-  const custom = selected.filter((s) => !presets.includes(s));
-
-  return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap gap-1.5">
-        {presets.map((p) => (
-          <button
-            key={p}
-            type="button"
-            onClick={() => onToggle(p)}
-            className={`${chipBase} ${selected.includes(p) ? chipActive : chipInactive}`}
-          >
-            {p}
-          </button>
-        ))}
-      </div>
-      {custom.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {custom.map((c) => (
-            <span
-              key={c}
-              className={`inline-flex items-center gap-1 ${chipBase} ${chipActive}`}
-            >
-              {c}
-              <button type="button" onClick={() => onRemove(c)} className="hover:text-destructive transition-colors">
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          ))}
-        </div>
-      )}
-      <input
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={handleKeyDown}
-        className={inputBase}
-        placeholder={placeholder}
-      />
-    </div>
-  );
-};
 
 const NewQuestionPage = () => {
   usePageTitle("New Question");
@@ -213,13 +144,13 @@ const NewQuestionPage = () => {
           <ArrowLeft className="h-4 w-4" />
           Back
         </button>
-        <h1 className="font-display text-xl font-bold">New Question</h1>
+        <h1 className="font-display text-lg md:text-xl font-bold">New Question</h1>
         <p className="text-sm text-muted-foreground">Log a solved question to track your progress</p>
       </div>
 
       <div className="mt-6 space-y-4">
         {/* Title & Solution */}
-        <section className="glass-card rounded-xl p-5 space-y-4">
+        <section className="glass-card rounded-xl p-4 md:p-5 space-y-4">
           <div>
             <label className={labelClass}>
               Title <span className="text-destructive">*</span>
@@ -247,7 +178,7 @@ const NewQuestionPage = () => {
         </section>
 
         {/* Category & Difficulty */}
-        <section className="glass-card rounded-xl p-5 space-y-4">
+        <section className="glass-card rounded-xl p-4 md:p-5 space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <label className={labelClass}>
@@ -259,7 +190,7 @@ const NewQuestionPage = () => {
                     key={cat.value}
                     type="button"
                     onClick={() => setCategory(cat.value)}
-                    className={`${chipBase} ${category === cat.value ? chipActive : chipInactive}`}
+                    className={`${CHIP_BASE} ${category === cat.value ? CHIP_ACTIVE : CHIP_INACTIVE}`}
                   >
                     {cat.label}
                   </button>
@@ -275,10 +206,10 @@ const NewQuestionPage = () => {
                     key={d.value}
                     type="button"
                     onClick={() => setDifficulty(difficulty === d.value ? "" : d.value)}
-                    className={`flex-1 ${chipBase} ${
+                    className={`flex-1 ${CHIP_BASE} ${
                       difficulty === d.value
-                        ? DIFFICULTY_STYLE[d.value]
-                        : chipInactive
+                        ? DIFFICULTY_COLORS[d.value]
+                        : CHIP_INACTIVE
                     }`}
                   >
                     {d.label}
@@ -290,7 +221,7 @@ const NewQuestionPage = () => {
         </section>
 
         {/* Topic + Source & URL */}
-        <section className="glass-card rounded-xl p-5 space-y-4">
+        <section className="glass-card rounded-xl p-4 md:p-5 space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-3">
               <label className={labelClass}>Topic</label>
@@ -351,7 +282,7 @@ const NewQuestionPage = () => {
         </section>
 
         {/* Tags & Company Tags */}
-        <section className="glass-card rounded-xl p-5 space-y-4">
+        <section className="glass-card rounded-xl p-4 md:p-5 space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-3">
               <label className={labelClass}>Tags</label>

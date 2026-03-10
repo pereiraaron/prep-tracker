@@ -101,7 +101,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
       </nav>
 
       {/* Main content */}
-      <main className="flex-1 md:ml-56">
+      <main className="flex-1 md:ml-56 min-w-0">
         <div className="w-full px-4 py-5 pb-24 md:px-16 md:py-8 md:pb-8 animate-fade-in">{children}</div>
       </main>
     </div>
