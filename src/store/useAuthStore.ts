@@ -2,6 +2,14 @@ import { create } from "zustand";
 import { auth } from "@api/auth";
 import { passkeyApi } from "@api/passkey";
 
+const friendlyError = (err: unknown, fallback: string): string => {
+  if (!(err instanceof Error)) return fallback;
+  const msg = err.message.toLowerCase();
+  if (msg.includes("failed to fetch") || msg.includes("networkerror") || msg.includes("load failed"))
+    return "Unable to reach the server. Please check your connection and try again.";
+  return err.message || fallback;
+};
+
 interface User {
   id: string;
   email: string;
@@ -71,7 +79,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch (err) {
       set({
         isLoading: false,
-        error: err instanceof Error ? err.message : "Login failed",
+        error: friendlyError(err, "Login failed"),
       });
     }
   },
@@ -104,7 +112,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       }
       set({
         isLoading: false,
-        error: err instanceof Error ? err.message : "Passkey login failed",
+        error: friendlyError(err, "No passkey found for this account. Sign in with email first, then register a passkey in Settings."),
       });
     }
   },
@@ -160,7 +168,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch (err) {
       set({
         isLoading: false,
-        error: err instanceof Error ? err.message : "Signup failed",
+        error: friendlyError(err, "Signup failed"),
       });
     }
   },
@@ -186,7 +194,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch (err) {
       set({
         isLoading: false,
-        error: err instanceof Error ? err.message : "Social login failed",
+        error: friendlyError(err, "Social login failed"),
       });
     }
   },

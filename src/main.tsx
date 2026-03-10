@@ -13,5 +13,7 @@ useAuthStore.getState().hydrate();
 
 createRoot(document.getElementById("root")!).render(<App />);
 
-// Load analytics after render (non-blocking)
-import("@microsoft/clarity").then((Clarity) => Clarity.default.init("voau1fwlw1"));
+// Load analytics after render (non-blocking, production only)
+if (import.meta.env.PROD) {
+  import("@microsoft/clarity").then((Clarity) => Clarity.default.init("voau1fwlw1"));
+}
