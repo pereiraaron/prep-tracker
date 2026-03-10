@@ -146,7 +146,7 @@ const Dashboard = () => {
         <div className="md:col-span-2">
           <h2 className="font-display text-base font-bold mb-3">Quick Actions</h2>
           <div className="space-y-2">
-            <QuickAction to="/new" icon={Plus} label="New Question" description="Log a solved question" />
+            <QuickAction to="/question/new" icon={Plus} label="New Question" description="Log a solved question" />
             <QuickAction to="/questions" icon={BookOpen} label="Browse All" description="View & filter questions" />
             <QuickAction to="/backlog" icon={Archive} label="Backlog" description="Save for later" />
             <QuickAction to="/stats" icon={BarChart3} label="View Stats" description="Charts & insights" />

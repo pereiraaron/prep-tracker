@@ -5,27 +5,174 @@ import { useNavigate } from "react-router-dom";
 import { useCreateQuestion } from "@queries/useQuestions";
 import type { QuestionSource } from "@api/questions";
 import type { PrepCategory, Difficulty } from "@api/types";
-import { CATEGORY_LABEL } from "@api/types";
+import { PREP_CATEGORIES, DIFFICULTIES, QUESTION_SOURCES } from "@api/types";
 import { toast } from "@components/ui/sonner";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, X } from "lucide-react";
+
+const PRESET_TOPICS = [
+  "Arrays",
+  "Strings",
+  "Hash Map",
+  "Two Pointers",
+  "Sliding Window",
+  "Binary Search",
+  "Linked List",
+  "Stack",
+  "Queue",
+  "Trees",
+  "Binary Trees",
+  "BST",
+  "Graphs",
+  "BFS",
+  "DFS",
+  "Dynamic Programming",
+  "Recursion",
+  "Backtracking",
+  "Greedy",
+  "Heap",
+  "Trie",
+  "Sorting",
+  "Math",
+  "Bit Manipulation",
+];
+
+const PRESET_TAGS = [
+  "blind-75",
+  "neetcode-150",
+  "top-interview",
+  "revisit",
+  "tricky",
+  "optimization",
+  "brute-force",
+  "pattern",
+  "math-heavy",
+  "edge-cases",
+];
+
+const PRESET_COMPANIES = [
+  "Google",
+  "Meta",
+  "Amazon",
+  "Apple",
+  "Microsoft",
+  "Netflix",
+  "Uber",
+  "Stripe",
+  "Adobe",
+  "Oracle",
+  "Flipkart",
+  "Atlassian",
+  "Intuit",
+  "Goldman Sachs",
+  "Morgan Stanley",
+];
+
+const DIFFICULTY_STYLE: Record<string, string> = {
+  easy: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+  medium: "bg-amber-500/10 text-amber-400 border-amber-500/30",
+  hard: "bg-red-500/10 text-red-400 border-red-500/30",
+};
+
+const chipBase = "rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-all";
+const chipActive = "border-primary/40 bg-primary/15 text-primary";
+const chipInactive = "border-border bg-secondary/50 text-muted-foreground hover:border-primary/20 hover:text-foreground";
+const inputBase =
+  "h-11 w-full rounded-xl border border-border bg-background px-4 text-base md:text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30";
+const textareaBase =
+  "w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30 resize-none";
+
+interface ChipSelectProps {
+  presets: string[];
+  selected: string[];
+  onToggle: (value: string) => void;
+  onAdd: (value: string) => void;
+  onRemove: (value: string) => void;
+  placeholder: string;
+}
+
+const ChipSelect = ({ presets, selected, onToggle, onAdd, onRemove, placeholder }: ChipSelectProps) => {
+  const [input, setInput] = useState("");
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if ((e.key === "Enter" || e.key === ",") && input.trim()) {
+      e.preventDefault();
+      const val = input.trim();
+      if (!selected.includes(val)) onAdd(val);
+      setInput("");
+    }
+  };
+
+  const custom = selected.filter((s) => !presets.includes(s));
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-1.5">
+        {presets.map((p) => (
+          <button
+            key={p}
+            type="button"
+            onClick={() => onToggle(p)}
+            className={`${chipBase} ${selected.includes(p) ? chipActive : chipInactive}`}
+          >
+            {p}
+          </button>
+        ))}
+      </div>
+      {custom.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {custom.map((c) => (
+            <span
+              key={c}
+              className={`inline-flex items-center gap-1 ${chipBase} ${chipActive}`}
+            >
+              {c}
+              <button type="button" onClick={() => onRemove(c)} className="hover:text-destructive transition-colors">
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+      <input
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={handleKeyDown}
+        className={inputBase}
+        placeholder={placeholder}
+      />
+    </div>
+  );
+};
 
 const NewQuestionPage = () => {
   usePageTitle("New Question");
   const navigate = useNavigate();
   const createMutation = useCreateQuestion();
   const mutating = createMutation.isPending;
+
   const [title, setTitle] = useState("");
   const [solution, setSolution] = useState("");
   const [category, setCategory] = useState<PrepCategory | "">("");
   const [notes, setNotes] = useState("");
   const [difficulty, setDifficulty] = useState<Difficulty | "">("");
-  const [topic, setTopic] = useState("");
+  const [topics, setTopics] = useState<string[]>([]);
   const [source, setSource] = useState<QuestionSource | "">("");
   const [url, setUrl] = useState("");
-  const [tags, setTags] = useState("");
-  const [companyTags, setCompanyTags] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [companyTags, setCompanyTags] = useState<string[]>([]);
 
-  const canSubmit = title.trim() && solution.trim() && category;
+  const isValidUrl = (value: string) => {
+    if (!value) return true;
+    try {
+      new URL(value);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const urlValid = isValidUrl(url.trim());
+  const canSubmit = title.trim() && solution.trim() && category && urlValid;
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
@@ -36,21 +183,11 @@ const NewQuestionPage = () => {
         category: category as PrepCategory,
         notes: notes.trim() || undefined,
         difficulty: (difficulty as Difficulty) || undefined,
-        topic: topic.trim() || undefined,
+        topic: topics.length ? topics.join(", ") : undefined,
         source: (source as QuestionSource) || undefined,
         url: url.trim() || undefined,
-        tags: tags
-          ? tags
-              .split(",")
-              .map((t) => t.trim())
-              .filter(Boolean)
-          : undefined,
-        companyTags: companyTags
-          ? companyTags
-              .split(",")
-              .map((t) => t.trim())
-              .filter(Boolean)
-          : undefined,
+        tags: tags.length ? tags : undefined,
+        companyTags: companyTags.length ? companyTags : undefined,
       });
       toast.success("Question saved");
       navigate("/questions");
@@ -59,28 +196,30 @@ const NewQuestionPage = () => {
     }
   };
 
-  const inputClass =
-    "h-11 w-full rounded-xl border border-border bg-background px-4 text-base md:text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30";
-  const textareaClass =
-    "w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30 resize-none";
-  const labelClass = "mb-1.5 block text-xs font-medium uppercase tracking-wider text-muted-foreground";
+  const toggleItem = (list: string[], setList: React.Dispatch<React.SetStateAction<string[]>>, value: string) => {
+    setList(list.includes(value) ? list.filter((i) => i !== value) : [...list, value]);
+  };
+
+  const labelClass = "mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground";
 
   return (
     <Layout>
-      <div className="space-y-6">
+      {/* Header */}
+      <div className="space-y-1">
         <button
           onClick={() => navigate("/questions")}
-          className="mb-4 flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="mb-3 flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Questions
+          Back
         </button>
         <h1 className="font-display text-xl font-bold">New Question</h1>
-        <p className="text-sm text-muted-foreground">Log a solved question</p>
+        <p className="text-sm text-muted-foreground">Log a solved question to track your progress</p>
       </div>
 
-      <div className="mt-6 space-y-6">
-        <div className="glass-card space-y-5 rounded-xl p-6">
+      <div className="mt-6 space-y-4">
+        {/* Title & Solution */}
+        <section className="glass-card rounded-xl p-5 space-y-4">
           <div>
             <label className={labelClass}>
               Title <span className="text-destructive">*</span>
@@ -88,8 +227,8 @@ const NewQuestionPage = () => {
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className={inputClass}
-              placeholder="e.g. Two Sum"
+              className={inputBase}
+              placeholder="e.g. Two Sum, Merge K Sorted Lists"
             />
           </div>
 
@@ -101,119 +240,162 @@ const NewQuestionPage = () => {
               value={solution}
               onChange={(e) => setSolution(e.target.value)}
               rows={6}
-              className={textareaClass}
+              className={textareaBase}
               placeholder="Describe your approach, include code snippets..."
             />
           </div>
+        </section>
 
-          <div>
-            <label className={labelClass}>
-              Category <span className="text-destructive">*</span>
-            </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value as PrepCategory)}
-              className={inputClass}
-            >
-              <option value="">Select category</option>
-              {Object.entries(CATEGORY_LABEL).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
-
+        {/* Category & Difficulty */}
+        <section className="glass-card rounded-xl p-5 space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <label className={labelClass}>
+                Category <span className="text-destructive">*</span>
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {PREP_CATEGORIES.map((cat) => (
+                  <button
+                    key={cat.value}
+                    type="button"
+                    onClick={() => setCategory(cat.value)}
+                    className={`${chipBase} ${category === cat.value ? chipActive : chipInactive}`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div>
               <label className={labelClass}>Difficulty</label>
-              <select
-                value={difficulty}
-                onChange={(e) => setDifficulty(e.target.value as Difficulty)}
-                className={inputClass}
-              >
-                <option value="">Select</option>
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-              </select>
-            </div>
-            <div>
-              <label className={labelClass}>Source</label>
-              <select
-                value={source}
-                onChange={(e) => setSource(e.target.value as QuestionSource)}
-                className={inputClass}
-              >
-                <option value="">Select</option>
-                <option value="leetcode">LeetCode</option>
-                <option value="greatfrontend">GreatFrontEnd</option>
-                <option value="geeksforgeeks">GeeksforGeeks</option>
-                <option value="linkedin">LinkedIn</option>
-                <option value="medium">Medium</option>
-                <option value="other">Other</option>
-              </select>
+              <div className="flex gap-2">
+                {DIFFICULTIES.map((d) => (
+                  <button
+                    key={d.value}
+                    type="button"
+                    onClick={() => setDifficulty(difficulty === d.value ? "" : d.value)}
+                    className={`flex-1 ${chipBase} ${
+                      difficulty === d.value
+                        ? DIFFICULTY_STYLE[d.value]
+                        : chipInactive
+                    }`}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
+        </section>
 
-          <div>
-            <label className={labelClass}>Topic</label>
-            <input
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              className={inputClass}
-              placeholder="e.g. Arrays, Binary Trees"
-            />
-          </div>
-
-          <div>
-            <label className={labelClass}>URL</label>
-            <input
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              className={inputClass}
-              placeholder="https://..."
-            />
-          </div>
-
-          <div>
-            <label className={labelClass}>Notes</label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-              className={textareaClass}
-              placeholder="Personal notes, edge cases, tips..."
-            />
-          </div>
-
+        {/* Topic + Source & URL */}
+        <section className="glass-card rounded-xl p-5 space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
-              <label className={labelClass}>Tags</label>
-              <input
-                value={tags}
-                onChange={(e) => setTags(e.target.value)}
-                className={inputClass}
-                placeholder="dp, greedy (comma separated)"
+            <div className="space-y-3">
+              <label className={labelClass}>Topic</label>
+              <ChipSelect
+                presets={PRESET_TOPICS}
+                selected={topics}
+                onToggle={(v) => toggleItem(topics, setTopics, v)}
+                onAdd={(v) => setTopics([...topics, v])}
+                onRemove={(v) => setTopics(topics.filter((t) => t !== v))}
+                placeholder="Custom topic + Enter..."
               />
             </div>
-            <div>
+
+            <div className="space-y-4">
+              <div>
+                <label className={labelClass}>Source</label>
+                <div className="relative">
+                  <select
+                    value={source}
+                    onChange={(e) => setSource(e.target.value as QuestionSource)}
+                    className={`${inputBase} appearance-none pr-10`}
+                  >
+                    <option value="">Select</option>
+                    {QUESTION_SOURCES.map((s) => (
+                      <option key={s.value} value={s.value}>
+                        {s.label}
+                      </option>
+                    ))}
+                  </select>
+                  <svg
+                    className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </div>
+              </div>
+              <div>
+                <label className={labelClass}>URL</label>
+                <input
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  className={`${inputBase} ${url && !urlValid ? "border-destructive! focus:ring-destructive/30!" : ""}`}
+                  placeholder="https://..."
+                />
+                {url && !urlValid && (
+                  <p className="mt-1 text-xs text-destructive">Please enter a valid URL</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Tags & Company Tags */}
+        <section className="glass-card rounded-xl p-5 space-y-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="space-y-3">
+              <label className={labelClass}>Tags</label>
+              <ChipSelect
+                presets={PRESET_TAGS}
+                selected={tags}
+                onToggle={(v) => toggleItem(tags, setTags, v)}
+                onAdd={(v) => setTags([...tags, v])}
+                onRemove={(v) => setTags(tags.filter((t) => t !== v))}
+                placeholder="Custom tag + Enter..."
+              />
+            </div>
+            <div className="space-y-3">
               <label className={labelClass}>Company Tags</label>
-              <input
-                value={companyTags}
-                onChange={(e) => setCompanyTags(e.target.value)}
-                className={inputClass}
-                placeholder="Google, Meta"
+              <ChipSelect
+                presets={PRESET_COMPANIES}
+                selected={companyTags}
+                onToggle={(v) => toggleItem(companyTags, setCompanyTags, v)}
+                onAdd={(v) => setCompanyTags([...companyTags, v])}
+                onRemove={(v) => setCompanyTags(companyTags.filter((t) => t !== v))}
+                placeholder="Company name + Enter..."
               />
             </div>
           </div>
-        </div>
+        </section>
 
-        <div className="flex gap-3">
+        {/* Notes */}
+        <section className="glass-card rounded-xl p-5 space-y-3">
+          <label className={labelClass}>Notes</label>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={3}
+            className={textareaBase}
+            placeholder="Personal notes, edge cases, tips..."
+          />
+        </section>
+
+        {/* Actions */}
+        <div className="flex gap-3 pb-6">
           <button
             onClick={handleSubmit}
             disabled={!canSubmit || mutating}
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:shadow-xl disabled:opacity-40 disabled:shadow-none"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:shadow-xl disabled:opacity-40 disabled:shadow-none"
           >
             {mutating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             Save Question
