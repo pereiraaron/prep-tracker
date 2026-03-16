@@ -67,6 +67,7 @@ export const QUESTION_STATUSES = [
 export const QUESTION_SOURCES = [
   { value: "leetcode", label: "LeetCode" },
   { value: "greatfrontend", label: "GreatFrontend" },
+  { value: "minichallenges", label: "MiniChallenges" },
   { value: "geeksforgeeks", label: "GeeksforGeeks" },
   { value: "linkedin", label: "LinkedIn" },
   { value: "medium", label: "Medium" },
@@ -96,6 +97,7 @@ export const SOURCE_LABEL: Record<string, string> = Object.fromEntries(
 export const SOURCE_COLOR: Record<string, string> = {
   leetcode: "orange",
   greatfrontend: "teal",
+  minichallenges: "purple",
   geeksforgeeks: "green",
   linkedin: "blue",
   medium: "gray",

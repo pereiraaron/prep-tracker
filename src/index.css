@@ -108,6 +108,9 @@
   --stat-orange: 28 90% 55%;
   --stat-purple: 265 60% 55%;
 
+  --code-bg: 220 13% 95%;
+  --code-fg: 220 13% 30%;
+
   --sidebar-background: 0 0% 100%;
   --sidebar-foreground: 224 30% 12%;
   --sidebar-primary: 230 65% 55%;
@@ -151,6 +154,9 @@
   --stat-green: 155 65% 50%;
   --stat-orange: 28 90% 60%;
   --stat-purple: 265 60% 62%;
+
+  --code-bg: 220 13% 18%;
+  --code-fg: 220 10% 75%;
 
   --sidebar-background: 224 30% 10%;
   --sidebar-foreground: 220 15% 93%;
@@ -196,4 +202,13 @@ h1, h2, h3, h4, h5, h6 {
 
 @utility safe-area-pb {
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@utility animate-slide-up {
+  animation: slide-up 0.3s ease-out both;
 }

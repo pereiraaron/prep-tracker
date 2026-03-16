@@ -32,11 +32,47 @@ export default defineConfig(() => ({
     },
   },
   build: {
+    chunkSizeWarningLimit: 700,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ["react", "react-dom", "react-router-dom", "@tanstack/react-query"],
-          charts: ["recharts"],
+        manualChunks(id) {
+          // React core — shared by everything
+          if (id.includes("node_modules/react/") || id.includes("node_modules/react-dom/")) {
+            return "react";
+          }
+          // Router
+          if (id.includes("node_modules/react-router")) {
+            return "router";
+          }
+          // React Query
+          if (id.includes("node_modules/@tanstack")) {
+            return "react-query";
+          }
+          // Recharts (only used by StatsPage)
+          if (id.includes("node_modules/recharts") || id.includes("node_modules/d3-")) {
+            return "charts";
+          }
+          // CodeMirror (lazy-loaded by QuestionDetailPage)
+          if (id.includes("node_modules/@codemirror") || id.includes("node_modules/@uiw") || id.includes("node_modules/@lezer")) {
+            return "codemirror";
+          }
+          // Icons
+          if (id.includes("node_modules/lucide-react")) {
+            return "icons";
+          }
+          // Radix UI primitives
+          if (id.includes("node_modules/@radix-ui")) {
+            return "radix";
+          }
+          // Utility libs (cva, clsx, tailwind-merge, sonner)
+          if (
+            id.includes("node_modules/sonner") ||
+            id.includes("node_modules/class-variance-authority") ||
+            id.includes("node_modules/clsx") ||
+            id.includes("node_modules/tailwind-merge")
+          ) {
+            return "ui-utils";
+          }
         },
       },
     },

@@ -58,7 +58,7 @@ const ChipSelect = ({ presets, selected, onToggle, onAdd, onRemove, placeholder 
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
-        className="h-11 w-full rounded-xl border border-border bg-background px-4 text-base md:text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30"
+        className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30"
         placeholder={placeholder}
       />
     </div>

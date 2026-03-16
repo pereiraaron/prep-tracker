@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { questionsApi, type QuestionsFilter, type CreateQuestionBody, type UpdateQuestionBody } from "@api/questions";
 import { queryKeys } from "@lib/queryKeys";
 
@@ -8,7 +8,7 @@ interface ListParams extends QuestionsFilter {
   search?: string;
 }
 
-export const useQuestionsList = (params: ListParams = {}) => {
+export const useQuestionsList = (params: ListParams = {}, enabled = true) => {
   const { search, ...filter } = params;
   return useQuery({
     queryKey: queryKeys.questions.list(params),
@@ -22,6 +22,31 @@ export const useQuestionsList = (params: ListParams = {}) => {
             limit: filter.limit,
           })
         : questionsApi.getAll(filter),
+    enabled,
+  });
+};
+
+export const useQuestionsInfinite = (params: Omit<ListParams, "page"> & { limit: number; enabled?: boolean }) => {
+  const { search, limit, enabled = true, ...filter } = params;
+  const keyParams = { ...params, page: undefined, enabled: undefined };
+  return useInfiniteQuery({
+    enabled,
+    queryKey: queryKeys.questions.infinite(keyParams),
+    queryFn: ({ pageParam = 1 }) =>
+      search
+        ? questionsApi.search(search, {
+            status: filter.status,
+            difficulty: filter.difficulty,
+            category: filter.category,
+            page: pageParam,
+            limit,
+          })
+        : questionsApi.getAll({ ...filter, page: pageParam, limit }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
   });
 };
 
@@ -78,7 +103,43 @@ export const useStarQuestion = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => questionsApi.star(id),
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.questions.all });
+      const previousQueries = queryClient.getQueriesData({ queryKey: queryKeys.questions.all });
+
+      // Optimistically toggle starred in all question caches
+      queryClient.setQueriesData({ queryKey: queryKeys.questions.all }, (old: unknown) => {
+        if (!old || typeof old !== "object") return old;
+        // Paginated shape: { data: Question[], pagination }
+        if ("data" in old && Array.isArray((old as { data: unknown[] }).data)) {
+          const typed = old as { data: { id: string; starred: boolean }[] };
+          return { ...typed, data: typed.data.map((q) => q.id === id ? { ...q, starred: !q.starred } : q) };
+        }
+        // Infinite shape: { pages: [...], pageParams }
+        if ("pages" in old && Array.isArray((old as { pages: unknown[] }).pages)) {
+          const typed = old as { pages: { data: { id: string; starred: boolean }[] }[]; pageParams: unknown[] };
+          return {
+            ...typed,
+            pages: typed.pages.map((page) => ({
+              ...page,
+              data: page.data.map((q) => q.id === id ? { ...q, starred: !q.starred } : q),
+            })),
+          };
+        }
+        return old;
+      });
+
+      return { previousQueries };
+    },
+    onError: (_err, _id, context) => {
+      // Rollback on error
+      if (context?.previousQueries) {
+        for (const [key, data] of context.previousQueries) {
+          queryClient.setQueryData(key, data);
+        }
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.all });
     },
   });

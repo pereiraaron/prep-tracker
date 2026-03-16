@@ -7,73 +7,76 @@ import type { QuestionSource } from "@api/questions";
 import type { PrepCategory, Difficulty } from "@api/types";
 import { PREP_CATEGORIES, DIFFICULTIES, QUESTION_SOURCES } from "@api/types";
 import { toast } from "@components/ui/sonner";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, FileText, Layers, Tag, Building2, StickyNote, Link2, ChevronDown } from "lucide-react";
 import ChipSelect from "@components/ChipSelect";
+import FormSectionHeader from "@components/FormSectionHeader";
 import { DIFFICULTY_COLORS, CHIP_BASE, CHIP_ACTIVE, CHIP_INACTIVE } from "@lib/styles";
 
-const PRESET_TOPICS = [
-  "Arrays",
-  "Strings",
-  "Hash Map",
-  "Two Pointers",
-  "Sliding Window",
-  "Binary Search",
-  "Linked List",
-  "Stack",
-  "Queue",
-  "Trees",
-  "Binary Trees",
-  "BST",
-  "Graphs",
-  "BFS",
-  "DFS",
-  "Dynamic Programming",
-  "Recursion",
-  "Backtracking",
-  "Greedy",
-  "Heap",
-  "Trie",
-  "Sorting",
-  "Math",
-  "Bit Manipulation",
-];
+// ---- Topic presets per category ----
+
+const TOPICS_BY_CATEGORY: Record<PrepCategory, string[]> = {
+  dsa: [
+    "Arrays", "Strings", "Hash Map", "Two Pointers", "Sliding Window",
+    "Binary Search", "Linked List", "Stack", "Queue", "Trees",
+    "Binary Trees", "BST", "Graphs", "BFS", "DFS",
+    "Dynamic Programming", "Recursion", "Backtracking", "Greedy",
+    "Heap", "Trie", "Sorting", "Math", "Bit Manipulation",
+  ],
+  system_design: [
+    "Scalability", "Load Balancing", "Caching", "Database Design",
+    "Message Queues", "Microservices", "API Design", "CDN",
+    "Consistency", "Availability", "Rate Limiting", "Sharding",
+    "Event-Driven", "CAP Theorem", "SQL vs NoSQL",
+  ],
+  machine_coding: [
+    "React", "Vanilla JS", "DOM Manipulation", "State Management",
+    "Event Handling", "Component Design", "Async Patterns",
+    "Debounce/Throttle", "Drag & Drop", "Virtual Scrolling",
+    "Form Validation", "Accessibility", "CSS Layout", "Canvas/SVG",
+  ],
+  language_framework: [
+    "Closures", "Promises", "Async/Await", "Prototypes",
+    "Event Loop", "Hoisting", "Scope", "Generics",
+    "Type System", "Hooks", "Context API", "Middleware",
+    "Decorators", "Iterators", "Modules",
+  ],
+  behavioral: [
+    "Leadership", "Conflict Resolution", "Teamwork",
+    "Problem Solving", "Communication", "Prioritization",
+    "Failure & Learning", "Decision Making", "Mentoring",
+    "Cross-Team Collaboration",
+  ],
+  theory: [
+    "OS Concepts", "Networking", "DBMS", "OOP",
+    "Design Patterns", "SOLID Principles", "Complexity Analysis",
+    "Concurrency", "Memory Management", "Compilers",
+    "Distributed Systems",
+  ],
+  quiz: [
+    "JavaScript", "TypeScript", "React", "CSS",
+    "HTML", "Node.js", "SQL", "General CS",
+    "Web APIs", "Security",
+  ],
+};
 
 const PRESET_TAGS = [
-  "blind-75",
-  "neetcode-150",
-  "top-interview",
-  "revisit",
-  "tricky",
-  "optimization",
-  "brute-force",
-  "pattern",
-  "math-heavy",
-  "edge-cases",
+  "revisit", "tricky", "important", "weak-area", "interview-ready",
+  "needs-review", "blind-75", "neetcode-150", "top-interview",
+  "asked-in-interview", "one-liner", "follow-up",
 ];
 
 const PRESET_COMPANIES = [
-  "Google",
-  "Meta",
-  "Amazon",
-  "Apple",
-  "Microsoft",
-  "Netflix",
-  "Uber",
-  "Stripe",
-  "Adobe",
-  "Oracle",
-  "Flipkart",
-  "Atlassian",
-  "Intuit",
-  "Goldman Sachs",
-  "Morgan Stanley",
+  "Google", "Meta", "Amazon", "Apple", "Microsoft", "Netflix",
+  "Uber", "Stripe", "Adobe", "Oracle", "Flipkart", "Atlassian",
+  "Intuit", "Goldman Sachs", "Morgan Stanley",
 ];
 
-const inputBase =
-  "h-11 w-full rounded-xl border border-border bg-background px-4 text-base md:text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30";
-const textareaBase =
-  "w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30 resize-none";
+const inputCls =
+  "h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30 disabled:opacity-50";
+const textareaCls =
+  "w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30 resize-none disabled:opacity-50";
 
+const SectionHeader = FormSectionHeader;
 
 const NewQuestionPage = () => {
   usePageTitle("New Question");
@@ -83,9 +86,9 @@ const NewQuestionPage = () => {
 
   const [title, setTitle] = useState("");
   const [solution, setSolution] = useState("");
-  const [category, setCategory] = useState<PrepCategory | "">("");
+  const [category, setCategory] = useState<PrepCategory>("dsa");
   const [notes, setNotes] = useState("");
-  const [difficulty, setDifficulty] = useState<Difficulty | "">("");
+  const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [topics, setTopics] = useState<string[]>([]);
   const [source, setSource] = useState<QuestionSource | "">("");
   const [url, setUrl] = useState("");
@@ -94,16 +97,18 @@ const NewQuestionPage = () => {
 
   const isValidUrl = (value: string) => {
     if (!value) return true;
-    try {
-      new URL(value);
-      return true;
-    } catch {
-      return false;
-    }
+    try { new URL(value); return true; } catch { return false; }
   };
 
   const urlValid = isValidUrl(url.trim());
-  const canSubmit = title.trim() && solution.trim() && category && urlValid;
+  const canSubmit = title.trim() && solution.trim() && category && difficulty && urlValid;
+
+  const handleCategoryChange = (val: PrepCategory) => {
+    setCategory(val);
+    // Clear topics that don't belong to the new category
+    const newPresets = TOPICS_BY_CATEGORY[val] ?? [];
+    setTopics((prev) => prev.filter((t) => newPresets.includes(t)));
+  };
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
@@ -111,9 +116,9 @@ const NewQuestionPage = () => {
       await createMutation.mutateAsync({
         title: title.trim(),
         solution: solution.trim(),
-        category: category as PrepCategory,
+        category,
         notes: notes.trim() || undefined,
-        difficulty: (difficulty as Difficulty) || undefined,
+        difficulty,
         topic: topics.length ? topics.join(", ") : undefined,
         source: (source as QuestionSource) || undefined,
         url: url.trim() || undefined,
@@ -131,57 +136,75 @@ const NewQuestionPage = () => {
     setList(list.includes(value) ? list.filter((i) => i !== value) : [...list, value]);
   };
 
-  const labelClass = "mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted-foreground";
+  const labelCls = "mb-1.5 block text-xs font-semibold text-muted-foreground";
+  const topicPresets = TOPICS_BY_CATEGORY[category] ?? [];
 
   return (
     <Layout>
       {/* Header */}
-      <div className="space-y-1">
+      <div className="mb-8">
         <button
           onClick={() => navigate("/questions")}
-          className="mb-3 flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="mb-4 flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
-          <ArrowLeft className="h-4 w-4" />
-          Back
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back to Questions
         </button>
-        <h1 className="font-display text-lg md:text-xl font-bold">New Question</h1>
-        <p className="text-sm text-muted-foreground">Log a solved question to track your progress</p>
+        <div className="flex items-center gap-3.5">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <FileText className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="font-display text-lg md:text-xl font-bold">Log a Question</h1>
+            <p className="text-sm text-muted-foreground">
+              Fields marked with <span className="text-destructive">*</span> are required
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-6 space-y-4">
-        {/* Title & Solution */}
-        <section className="glass-card rounded-xl p-4 md:p-5 space-y-4">
-          <div>
-            <label className={labelClass}>
-              Title <span className="text-destructive">*</span>
-            </label>
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className={inputBase}
-              placeholder="e.g. Two Sum, Merge K Sorted Lists"
-            />
-          </div>
+      <div className="space-y-5 pb-8">
+        {/* ---- Essentials ---- */}
+        <section className="glass-card rounded-xl p-5">
+          <SectionHeader icon={FileText} title="Essentials" />
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="q-title" className={labelCls}>
+                Title <span className="text-destructive">*</span>
+              </label>
+              <input
+                id="q-title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className={inputCls}
+                placeholder="e.g. Two Sum, Merge K Sorted Lists"
+                disabled={mutating}
+              />
+            </div>
 
-          <div>
-            <label className={labelClass}>
-              Solution <span className="text-destructive">*</span>
-            </label>
-            <textarea
-              value={solution}
-              onChange={(e) => setSolution(e.target.value)}
-              rows={6}
-              className={textareaBase}
-              placeholder="Describe your approach, include code snippets..."
-            />
+            <div>
+              <label htmlFor="q-solution" className={labelCls}>
+                Solution <span className="text-destructive">*</span>
+              </label>
+              <textarea
+                id="q-solution"
+                value={solution}
+                onChange={(e) => setSolution(e.target.value)}
+                rows={6}
+                className={textareaCls}
+                placeholder="Describe your approach, include code snippets..."
+                disabled={mutating}
+              />
+            </div>
           </div>
         </section>
 
-        {/* Category & Difficulty */}
-        <section className="glass-card rounded-xl p-4 md:p-5 space-y-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {/* ---- Classification ---- */}
+        <section className="glass-card rounded-xl p-5">
+          <SectionHeader icon={Layers} title="Classification" />
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <div>
-              <label className={labelClass}>
+              <label className={labelCls}>
                 Category <span className="text-destructive">*</span>
               </label>
               <div className="flex flex-wrap gap-1.5">
@@ -189,7 +212,7 @@ const NewQuestionPage = () => {
                   <button
                     key={cat.value}
                     type="button"
-                    onClick={() => setCategory(cat.value)}
+                    onClick={() => handleCategoryChange(cat.value)}
                     className={`${CHIP_BASE} ${category === cat.value ? CHIP_ACTIVE : CHIP_INACTIVE}`}
                   >
                     {cat.label}
@@ -199,18 +222,16 @@ const NewQuestionPage = () => {
             </div>
 
             <div>
-              <label className={labelClass}>Difficulty</label>
+              <label className={labelCls}>
+                Difficulty <span className="text-destructive">*</span>
+              </label>
               <div className="flex gap-2">
                 {DIFFICULTIES.map((d) => (
                   <button
                     key={d.value}
                     type="button"
-                    onClick={() => setDifficulty(difficulty === d.value ? "" : d.value)}
-                    className={`flex-1 ${CHIP_BASE} ${
-                      difficulty === d.value
-                        ? DIFFICULTY_COLORS[d.value]
-                        : CHIP_INACTIVE
-                    }`}
+                    onClick={() => setDifficulty(d.value)}
+                    className={`flex-1 ${CHIP_BASE} ${difficulty === d.value ? DIFFICULTY_COLORS[d.value] : CHIP_INACTIVE}`}
                   >
                     {d.label}
                   </button>
@@ -218,74 +239,66 @@ const NewQuestionPage = () => {
               </div>
             </div>
           </div>
+
+          {/* Topics — based on selected category */}
+          <div className="mt-5">
+            <label className={labelCls}>Topics</label>
+            <ChipSelect
+              presets={topicPresets}
+              selected={topics}
+              onToggle={(v) => toggleItem(topics, setTopics, v)}
+              onAdd={(v) => setTopics([...topics, v])}
+              onRemove={(v) => setTopics(topics.filter((t) => t !== v))}
+              placeholder="Custom topic + Enter..."
+            />
+          </div>
         </section>
 
-        {/* Topic + Source & URL */}
-        <section className="glass-card rounded-xl p-4 md:p-5 space-y-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="space-y-3">
-              <label className={labelClass}>Topic</label>
-              <ChipSelect
-                presets={PRESET_TOPICS}
-                selected={topics}
-                onToggle={(v) => toggleItem(topics, setTopics, v)}
-                onAdd={(v) => setTopics([...topics, v])}
-                onRemove={(v) => setTopics(topics.filter((t) => t !== v))}
-                placeholder="Custom topic + Enter..."
-              />
+        {/* ---- Source & URL ---- */}
+        <section className="glass-card rounded-xl p-5">
+          <SectionHeader icon={Link2} title="Source" />
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div>
+              <label htmlFor="q-source" className={labelCls}>Platform</label>
+              <div className="relative">
+                <select
+                  id="q-source"
+                  value={source}
+                  onChange={(e) => setSource(e.target.value as QuestionSource)}
+                  className={`${inputCls} appearance-none pr-10`}
+                  disabled={mutating}
+                >
+                  <option value="">Select platform</option>
+                  {QUESTION_SOURCES.map((s) => (
+                    <option key={s.value} value={s.value}>{s.label}</option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              </div>
             </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className={labelClass}>Source</label>
-                <div className="relative">
-                  <select
-                    value={source}
-                    onChange={(e) => setSource(e.target.value as QuestionSource)}
-                    className={`${inputBase} appearance-none pr-10`}
-                  >
-                    <option value="">Select</option>
-                    {QUESTION_SOURCES.map((s) => (
-                      <option key={s.value} value={s.value}>
-                        {s.label}
-                      </option>
-                    ))}
-                  </select>
-                  <svg
-                    className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="m6 9 6 6 6-6" />
-                  </svg>
-                </div>
-              </div>
-              <div>
-                <label className={labelClass}>URL</label>
-                <input
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  className={`${inputBase} ${url && !urlValid ? "border-destructive! focus:ring-destructive/30!" : ""}`}
-                  placeholder="https://..."
-                />
-                {url && !urlValid && (
-                  <p className="mt-1 text-xs text-destructive">Please enter a valid URL</p>
-                )}
-              </div>
+            <div>
+              <label htmlFor="q-url" className={labelCls}>Problem URL</label>
+              <input
+                id="q-url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                className={`${inputCls} ${url && !urlValid ? "border-destructive focus:ring-destructive/30" : ""}`}
+                placeholder="https://leetcode.com/problems/..."
+                disabled={mutating}
+              />
+              {url && !urlValid && (
+                <p className="mt-1 text-xs text-destructive">Please enter a valid URL</p>
+              )}
             </div>
           </div>
         </section>
 
-        {/* Tags & Company Tags */}
-        <section className="glass-card rounded-xl p-4 md:p-5 space-y-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="space-y-3">
-              <label className={labelClass}>Tags</label>
+        {/* ---- Tags ---- */}
+        <section className="glass-card rounded-xl p-5">
+          <SectionHeader icon={Tag} title="Tags" />
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div>
+              <label className={labelCls}>Tags</label>
               <ChipSelect
                 presets={PRESET_TAGS}
                 selected={tags}
@@ -295,8 +308,11 @@ const NewQuestionPage = () => {
                 placeholder="Custom tag + Enter..."
               />
             </div>
-            <div className="space-y-3">
-              <label className={labelClass}>Company Tags</label>
+            <div>
+              <label className={`${labelCls} flex items-center gap-1.5`}>
+                <Building2 className="h-3 w-3" />
+                Company Tags
+              </label>
               <ChipSelect
                 presets={PRESET_COMPANIES}
                 selected={companyTags}
@@ -309,34 +325,40 @@ const NewQuestionPage = () => {
           </div>
         </section>
 
-        {/* Notes */}
-        <section className="glass-card rounded-xl p-5 space-y-3">
-          <label className={labelClass}>Notes</label>
+        {/* ---- Notes ---- */}
+        <section className="glass-card rounded-xl p-5">
+          <SectionHeader icon={StickyNote} title="Notes" />
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
-            className={textareaBase}
+            className={textareaCls}
             placeholder="Personal notes, edge cases, tips..."
+            disabled={mutating}
           />
         </section>
 
-        {/* Actions */}
-        <div className="flex gap-3 pb-6">
+        {/* ---- Actions ---- */}
+        <div className="flex items-center gap-3 pt-2">
           <button
             onClick={handleSubmit}
             disabled={!canSubmit || mutating}
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:shadow-xl disabled:opacity-40 disabled:shadow-none"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:brightness-110 active:scale-[0.98] disabled:opacity-40 disabled:shadow-none disabled:active:scale-100"
           >
             {mutating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             Save Question
           </button>
           <button
             onClick={() => navigate("/questions")}
-            className="rounded-xl border border-border px-5 py-2.5 text-sm font-medium transition-all hover:bg-secondary"
+            className="rounded-xl border border-border px-5 py-2.5 text-sm font-medium transition-all hover:bg-secondary active:scale-[0.98]"
           >
             Cancel
           </button>
+          {!canSubmit && title.trim() && (
+            <p className="text-xs text-muted-foreground ml-auto">
+              {!category ? "Pick a category" : !difficulty ? "Pick difficulty" : !solution.trim() ? "Add a solution" : !urlValid ? "Fix the URL" : ""}
+            </p>
+          )}
         </div>
       </div>
     </Layout>

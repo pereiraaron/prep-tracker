@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { LayoutDashboard, BookOpen, BarChart3, Archive, Settings, Zap, LogOut } from "lucide-react";
 import useAuth from "@hooks/useAuth";
+import useKeyboardShortcuts from "@hooks/useKeyboardShortcuts";
 
 const navItems = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
@@ -12,6 +13,7 @@ const navItems = [
 ];
 
 const Layout = ({ children }: { children: ReactNode }) => {
+  useKeyboardShortcuts();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
@@ -26,6 +28,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
   return (
     <div className="flex min-h-screen bg-background">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:shadow-lg">Skip to content</a>
       {/* Sidebar */}
       <aside className="fixed left-0 top-0 z-30 hidden h-screen w-56 flex-col border-r border-border bg-card md:flex">
         <div className="flex h-14 items-center gap-2.5 px-5">
@@ -73,6 +76,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
             <button
               onClick={handleLogout}
               className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+              aria-label="Log out"
               title="Log out"
             >
               <LogOut className="h-4 w-4" />
@@ -83,25 +87,25 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
       {/* Mobile bottom nav */}
       <nav className="fixed bottom-0 left-0 right-0 z-30 flex border-t border-border bg-card safe-area-pb md:hidden">
-        {navItems.slice(0, 4).map((item) => (
+        {navItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.to === "/"}
             className={({ isActive }) =>
-              `flex flex-1 flex-col items-center gap-1 py-3 text-[11px] font-medium transition-colors ${
+              `flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium transition-colors ${
                 isActive ? "text-primary" : "text-muted-foreground"
               }`
             }
           >
-            <item.icon className="h-5 w-5" />
+            <item.icon className="h-4.5 w-4.5" />
             {item.label}
           </NavLink>
         ))}
       </nav>
 
       {/* Main content */}
-      <main className="flex-1 md:ml-56 min-w-0">
+      <main id="main-content" className="flex-1 md:ml-56 min-w-0">
         <div className="w-full px-4 py-5 pb-24 md:px-16 md:py-8 md:pb-8 animate-fade-in">{children}</div>
       </main>
     </div>

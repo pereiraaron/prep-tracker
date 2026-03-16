@@ -11,7 +11,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import { DIFF_COLORS, SOLVED_COLOR, PENDING_COLOR, PRIMARY_COLOR } from "./constants";
+import { DIFF_COLORS, SOLVED_COLOR, PENDING_COLOR, PRIMARY_COLOR, getGridColor } from "./constants";
 import { ChartCard, NoData } from "./shared";
 
 interface BreakdownChartsProps {
@@ -72,7 +72,7 @@ const BreakdownCharts = ({
         {diffByCatData.length > 0 ? (
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={diffByCatData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 90%)" />
+              <CartesianGrid strokeDasharray="3 3" stroke={getGridColor()} />
               <XAxis dataKey="name" tick={{ fontSize: 9 }} />
               <YAxis allowDecimals={false} tick={{ fontSize: 10 }} width={30} />
               <Tooltip />
