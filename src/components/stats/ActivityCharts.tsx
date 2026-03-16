@@ -1,5 +1,5 @@
 import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
-import { PRIMARY_COLOR, TEAL_COLOR } from "./constants";
+import { PRIMARY_COLOR, TEAL_COLOR, getGridColor } from "./constants";
 import { ChartCard, NoData } from "./shared";
 
 interface ActivityChartsProps {
@@ -20,7 +20,7 @@ const ActivityCharts = ({ dailyData, weeklyData, cumulativeData }: ActivityChart
                 <stop offset="95%" stopColor={PRIMARY_COLOR} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 90%)" />
+            <CartesianGrid strokeDasharray="3 3" stroke={getGridColor()} />
             <XAxis dataKey="date" tick={{ fontSize: 9 }} interval="preserveStartEnd" />
             <YAxis allowDecimals={false} tick={{ fontSize: 10 }} width={30} />
             <Tooltip />
@@ -36,7 +36,7 @@ const ActivityCharts = ({ dailyData, weeklyData, cumulativeData }: ActivityChart
       {weeklyData.length > 0 ? (
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={weeklyData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 90%)" />
+            <CartesianGrid strokeDasharray="3 3" stroke={getGridColor()} />
             <XAxis dataKey="week" tick={{ fontSize: 9 }} interval="preserveStartEnd" />
             <YAxis allowDecimals={false} tick={{ fontSize: 10 }} width={30} />
             <Tooltip />
@@ -58,7 +58,7 @@ const ActivityCharts = ({ dailyData, weeklyData, cumulativeData }: ActivityChart
                 <stop offset="95%" stopColor={TEAL_COLOR} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 90%)" />
+            <CartesianGrid strokeDasharray="3 3" stroke={getGridColor()} />
             <XAxis dataKey="date" tick={{ fontSize: 9 }} interval="preserveStartEnd" />
             <YAxis allowDecimals={false} tick={{ fontSize: 10 }} width={30} />
             <Tooltip />

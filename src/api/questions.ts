@@ -4,7 +4,7 @@ import type { Difficulty, PrepCategory } from "./types";
 // ---- Enums ----
 
 export type QuestionStatus = "pending" | "solved";
-export type QuestionSource = "leetcode" | "greatfrontend" | "geeksforgeeks" | "linkedin" | "medium" | "other";
+export type QuestionSource = "leetcode" | "greatfrontend" | "minichallenges" | "geeksforgeeks" | "linkedin" | "medium" | "other";
 
 // ---- Question ----
 

@@ -1,12 +1,14 @@
 import { lazy, Suspense, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@components/ui/toaster";
-import { Toaster as Sonner } from "@components/ui/sonner";
-import { TooltipProvider } from "@components/ui/tooltip";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuthStore } from "@store/useAuthStore";
 import ErrorBoundary from "@components/ErrorBoundary";
+import RouteErrorBoundary from "@components/RouteErrorBoundary";
 import { Loader2 } from "lucide-react";
+
+const Toaster = lazy(() => import("@components/ui/toaster").then((m) => ({ default: m.Toaster })));
+const Sonner = lazy(() => import("@components/ui/sonner").then((m) => ({ default: m.Toaster })));
+const TooltipProvider = lazy(() => import("@components/ui/tooltip").then((m) => ({ default: m.TooltipProvider })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,14 +20,17 @@ const queryClient = new QueryClient({
   },
 });
 
-const DashboardPage = lazy(() => import("@pages/DashboardPage"));
-const QuestionsPage = lazy(() => import("@pages/QuestionsPage"));
+// Eagerly load primary pages to avoid lazy-load waterfall on LCP
+import DashboardPage from "@pages/DashboardPage";
+import LoginPage from "@pages/LoginPage";
+import QuestionsPage from "@pages/QuestionsPage";
+import StatsPage from "@pages/StatsPage";
+
+// Lazy-load everything else
 const QuestionDetailPage = lazy(() => import("@pages/QuestionDetailPage"));
 const NewQuestionPage = lazy(() => import("@pages/NewQuestionPage"));
 const BacklogPage = lazy(() => import("@pages/BacklogPage"));
-const StatsPage = lazy(() => import("@pages/StatsPage"));
 const SettingsPage = lazy(() => import("@pages/SettingsPage"));
-const LoginPage = lazy(() => import("@pages/LoginPage"));
 const RegisterPage = lazy(() => import("@pages/RegisterPage"));
 const AuthCallbackPage = lazy(() => import("@pages/AuthCallbackPage"));
 const NotFound = lazy(() => import("@pages/NotFound"));
@@ -45,76 +50,33 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ErrorBoundary>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Suspense fallback={<PageLoader />}>
+      {/* Lazy-load toast/tooltip providers — not needed for initial render */}
+      <Suspense fallback={null}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+        </TooltipProvider>
+      </Suspense>
+
+      <BrowserRouter>
+        <Suspense fallback={<PageLoader />}>
+          <RouteErrorBoundary>
             <Routes>
               <Route path="/auth/login" element={<LoginPage />} />
               <Route path="/auth/register" element={<RegisterPage />} />
               <Route path="/auth/callback" element={<AuthCallbackPage />} />
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <DashboardPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/questions"
-                element={
-                  <ProtectedRoute>
-                    <QuestionsPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/questions/:id"
-                element={
-                  <ProtectedRoute>
-                    <QuestionDetailPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/question/new"
-                element={
-                  <ProtectedRoute>
-                    <NewQuestionPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/backlog"
-                element={
-                  <ProtectedRoute>
-                    <BacklogPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/stats"
-                element={
-                  <ProtectedRoute>
-                    <StatsPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/settings"
-                element={
-                  <ProtectedRoute>
-                    <SettingsPage />
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+              <Route path="/questions" element={<ProtectedRoute><QuestionsPage /></ProtectedRoute>} />
+              <Route path="/questions/:id" element={<ProtectedRoute><QuestionDetailPage /></ProtectedRoute>} />
+              <Route path="/question/new" element={<ProtectedRoute><NewQuestionPage /></ProtectedRoute>} />
+              <Route path="/backlog" element={<ProtectedRoute><BacklogPage /></ProtectedRoute>} />
+              <Route path="/stats" element={<ProtectedRoute><StatsPage /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </Suspense>
-        </BrowserRouter>
-      </TooltipProvider>
+          </RouteErrorBoundary>
+        </Suspense>
+      </BrowserRouter>
     </ErrorBoundary>
   </QueryClientProvider>
 );

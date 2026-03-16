@@ -1,11 +1,17 @@
 const MOBILE_WEEKS = 16;
 
+const HEATMAP_LIGHT = ["hsl(220, 15%, 90%)", "hsl(155, 50%, 75%)", "hsl(155, 55%, 58%)", "hsl(155, 60%, 42%)", "hsl(155, 65%, 30%)"];
+const HEATMAP_DARK = ["hsl(224, 20%, 18%)", "hsl(155, 40%, 25%)", "hsl(155, 50%, 35%)", "hsl(155, 55%, 45%)", "hsl(155, 60%, 55%)"];
+
+const isDark = () => document.documentElement.classList.contains("dark");
+
 const heatmapColor = (count: number): string => {
-  if (count === 0) return "hsl(220, 15%, 90%)";
-  if (count === 1) return "hsl(155, 50%, 75%)";
-  if (count === 2) return "hsl(155, 55%, 58%)";
-  if (count <= 4) return "hsl(155, 60%, 42%)";
-  return "hsl(155, 65%, 30%)";
+  const palette = isDark() ? HEATMAP_DARK : HEATMAP_LIGHT;
+  if (count === 0) return palette[0];
+  if (count === 1) return palette[1];
+  if (count === 2) return palette[2];
+  if (count <= 4) return palette[3];
+  return palette[4];
 };
 
 interface HeatmapDay {

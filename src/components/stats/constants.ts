@@ -5,6 +5,11 @@ export const SOLVED_COLOR = "hsl(155, 65%, 42%)";
 export const PENDING_COLOR = "hsl(220, 15%, 80%)";
 export const PRIMARY_COLOR = "hsl(230, 65%, 55%)";
 export const TEAL_COLOR = "hsl(170, 70%, 45%)";
+export const GRID_COLOR_LIGHT = "hsl(220, 15%, 90%)";
+export const GRID_COLOR_DARK = "hsl(224, 20%, 22%)";
+
+export const getGridColor = () =>
+  document.documentElement.classList.contains("dark") ? GRID_COLOR_DARK : GRID_COLOR_LIGHT;
 
 export const categoryShort = (category: string) => {
   const label = CATEGORY_LABEL[category as keyof typeof CATEGORY_LABEL] || category;

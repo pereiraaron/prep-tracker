@@ -101,17 +101,17 @@ const QuestionDetailPage = () => {
       <div className="space-y-4">
         <button
           onClick={() => navigate(-1)}
-          className="mb-2 flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="mb-4 flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-3.5 w-3.5" />
           Back
         </button>
 
         {/* Header */}
-        <div className="glass-card rounded-xl p-4 md:p-5 space-y-4">
+        <div className="glass-card rounded-xl p-5 md:p-6 space-y-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="space-y-2">
-              <h1 className="font-display text-lg md:text-xl font-bold">{question.title}</h1>
+            <div className="space-y-2.5">
+              <h1 className="font-display text-lg md:text-xl font-bold leading-tight">{question.title}</h1>
               <div className="flex flex-wrap items-center gap-2">
                 {diff && <DifficultyBadge value={diff} />}
                 {cat && <CategoryBadge value={cat} />}
@@ -141,14 +141,16 @@ const QuestionDetailPage = () => {
                   href={question.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+                  aria-label="Open problem link"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-secondary active:scale-[0.95] transition-all"
                 >
                   <ExternalLink className="h-4 w-4" />
                 </a>
               )}
               <button
+                aria-label={question.starred ? "Unstar question" : "Star question"}
                 onClick={() => starMutation.mutate(id!)}
-                className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-muted-foreground hover:text-stat-orange hover:bg-stat-orange/10 transition-all"
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-border text-muted-foreground hover:text-stat-orange hover:bg-stat-orange/10 active:scale-[0.95] transition-all"
               >
                 <Star className={`h-4 w-4 ${question.starred ? "fill-stat-orange text-stat-orange" : ""}`} />
               </button>
@@ -240,24 +242,24 @@ const QuestionDetailPage = () => {
         {/* Solution */}
         {isCodeQuestion ? (
           <div className="rounded-xl overflow-hidden">
-            <div className="flex items-center justify-between bg-[hsl(220,13%,18%)] px-4 py-3 rounded-t-xl">
+            <div className="flex items-center justify-between bg-[hsl(var(--code-bg))] px-4 py-3 rounded-t-xl">
               <div className="flex items-center gap-2">
-                <Code2 className={`h-4 w-4 ${isEditing ? "text-stat-blue" : "text-emerald-400"}`} />
-                <h2 className="font-display text-sm font-semibold text-gray-300">Solution</h2>
+                <Code2 className={`h-4 w-4 ${isEditing ? "text-stat-blue" : "text-stat-green"}`} />
+                <h2 className="font-display text-sm font-semibold text-[hsl(var(--code-fg))]">Solution</h2>
               </div>
               {!isEditing && question.solution && (
                 <button
                   onClick={handleCopy}
-                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-foreground/10 transition-colors"
                 >
-                  {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copied ? <Check className="h-3.5 w-3.5 text-stat-green" /> : <Copy className="h-3.5 w-3.5" />}
                   {copied ? "Copied!" : "Copy"}
                 </button>
               )}
             </div>
 
             {question.solution || isEditing ? (
-              <Suspense fallback={<div className="bg-[hsl(220,13%,18%)] rounded-b-xl px-4 py-8 text-center"><p className="text-sm text-gray-500">Loading editor...</p></div>}>
+              <Suspense fallback={<div className="bg-[hsl(var(--code-bg))] rounded-b-xl px-4 py-8 text-center"><p className="text-sm text-muted-foreground">Loading editor...</p></div>}>
                 <CodeEditor
                   value={isEditing ? solution : question.solution || ""}
                   onChange={isEditing ? setSolution : undefined}
@@ -268,8 +270,8 @@ const QuestionDetailPage = () => {
                 />
               </Suspense>
             ) : (
-              <div className="bg-[hsl(220,13%,18%)] rounded-b-xl px-4 py-6 text-center">
-                <p className="text-sm text-gray-500 italic">No solution yet. Click Edit to add one.</p>
+              <div className="bg-[hsl(var(--code-bg))] rounded-b-xl px-4 py-6 text-center">
+                <p className="text-sm text-muted-foreground italic">No solution yet. Click Edit to add one.</p>
               </div>
             )}
           </div>
@@ -284,7 +286,8 @@ const QuestionDetailPage = () => {
                 value={solution}
                 onChange={(e) => setSolution(e.target.value)}
                 rows={10}
-                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 resize-none"
+                disabled={mutating}
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 resize-none disabled:opacity-50"
                 placeholder="Write your solution..."
               />
             ) : (
@@ -310,7 +313,8 @@ const QuestionDetailPage = () => {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={5}
-              className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 resize-none"
+              disabled={mutating}
+              className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 resize-none disabled:opacity-50"
               placeholder="Personal notes, edge cases, tips..."
             />
           ) : (
@@ -328,7 +332,7 @@ const QuestionDetailPage = () => {
               <button
                 onClick={handleSave}
                 disabled={mutating}
-                className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 transition-all"
               >
                 {mutating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
                 Save Changes
@@ -339,7 +343,7 @@ const QuestionDetailPage = () => {
                   setNotes(question.notes || "");
                   setIsEditing(false);
                 }}
-                className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-medium hover:bg-secondary transition-colors"
+                className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-medium hover:bg-secondary active:scale-[0.98] transition-all"
               >
                 <X className="h-3.5 w-3.5" />
                 Cancel

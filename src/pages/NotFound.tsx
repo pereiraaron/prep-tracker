@@ -1,20 +1,37 @@
 import usePageTitle from "@hooks/usePageTitle";
+import { Home, ArrowLeft } from "lucide-react";
 
 const NotFound = () => {
   usePageTitle("Page Not Found");
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="text-center">
-        <h1 className="font-display text-6xl font-bold text-muted-foreground/30">404</h1>
-        <p className="mt-2 font-display text-lg font-semibold">Page not found</p>
-        <p className="mt-1 text-sm text-muted-foreground">The page you're looking for doesn't exist</p>
-        <a
-          href="/"
-          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:shadow-xl"
-        >
-          Back to Dashboard
-        </a>
+      <div className="pointer-events-none fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-125 w-125 rounded-full bg-primary/5 blur-3xl" />
+
+      <div className="relative text-center animate-fade-in">
+        <p className="font-display text-8xl md:text-9xl font-bold text-primary/10 select-none">404</p>
+        <div className="-mt-6 md:-mt-8">
+          <p className="font-display text-xl md:text-2xl font-bold">Page not found</p>
+          <p className="mt-2 text-sm text-muted-foreground max-w-xs mx-auto">
+            The page you're looking for doesn't exist or has been moved
+          </p>
+        </div>
+        <div className="mt-8 flex items-center justify-center gap-3">
+          <button
+            onClick={() => window.history.back()}
+            className="flex items-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-medium hover:bg-secondary active:scale-[0.98] transition-all"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Go Back
+          </button>
+          <a
+            href="/"
+            className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:brightness-110 active:scale-[0.98] transition-all"
+          >
+            <Home className="h-4 w-4" />
+            Dashboard
+          </a>
+        </div>
       </div>
     </div>
   );

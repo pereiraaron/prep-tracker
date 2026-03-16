@@ -40,7 +40,20 @@ export const useStarBacklogItem = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => questionsApi.star(id),
-    onSuccess: () => {
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.backlog.all });
+      const previous = queryClient.getQueryData(queryKeys.backlog.all);
+      queryClient.setQueryData(queryKeys.backlog.all, (old: unknown) => {
+        if (!old || typeof old !== "object" || !("data" in old)) return old;
+        const typed = old as { data: { id: string; starred: boolean }[] };
+        return { ...typed, data: typed.data.map((q) => q.id === id ? { ...q, starred: !q.starred } : q) };
+      });
+      return { previous };
+    },
+    onError: (_err, _id, context) => {
+      if (context?.previous) queryClient.setQueryData(queryKeys.backlog.all, context.previous);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.backlog.all });
     },
   });

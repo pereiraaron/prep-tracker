@@ -1,16 +1,33 @@
 import usePageTitle from "@hooks/usePageTitle";
+import { lazy, Suspense } from "react";
 import Layout from "@components/Layout";
+import PageHeader from "@components/PageHeader";
+import Skeleton from "@components/Skeleton";
 import StatCard from "@components/StatCard";
+import { DashboardStatsSkeleton } from "@components/Skeleton";
 import { useStatsBatch } from "@queries/useStats";
 import { CATEGORY_LABEL, SOURCE_LABEL } from "@api/types";
-import { BookOpen, CheckCircle, ListTodo, TrendingUp, Loader2 } from "lucide-react";
+import { BookOpen, CheckCircle, ListTodo, TrendingUp, BarChart3, Loader2 } from "lucide-react";
 import { categoryShort, PRIMARY_COLOR, TEAL_COLOR } from "@components/stats/constants";
 import { SectionHeader } from "@components/stats/shared";
 import Heatmap, { buildHeatmapWeeks } from "@components/stats/Heatmap";
 import Streaks from "@components/stats/Streaks";
-import ActivityCharts from "@components/stats/ActivityCharts";
-import BreakdownCharts from "@components/stats/BreakdownCharts";
-import InsightsSection from "@components/stats/Insights";
+
+// Lazy-load chart-heavy components (recharts is 386KB)
+const ActivityCharts = lazy(() => import("@components/stats/ActivityCharts"));
+const BreakdownCharts = lazy(() => import("@components/stats/BreakdownCharts"));
+const InsightsSection = lazy(() => import("@components/stats/Insights"));
+
+const ChartSkeleton = () => (
+  <div className="mb-6 grid gap-6 md:grid-cols-3">
+    {Array.from({ length: 3 }).map((_, i) => (
+      <div key={i} className="glass-card rounded-xl p-5">
+        <Skeleton className="h-4 w-24 mb-4" />
+        <Skeleton className="h-48 w-full" />
+      </div>
+    ))}
+  </div>
+);
 
 const StatsPage = () => {
   usePageTitle("Stats & Insights");
@@ -89,15 +106,19 @@ const StatsPage = () => {
 
   return (
     <Layout>
-      <div className="mb-8">
-        <h1 className="font-display text-lg md:text-xl font-bold">Stats & Insights</h1>
-        <p className="text-sm text-muted-foreground">Track your interview prep progress</p>
-      </div>
+      <PageHeader
+        icon={BarChart3}
+        iconColor="bg-stat-purple/10 text-stat-purple"
+        title="Stats & Insights"
+        subtitle="Track your interview prep progress"
+      />
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
+        <>
+          <DashboardStatsSkeleton />
+          <Skeleton className="h-12 w-full rounded-xl mb-8" />
+          <ChartSkeleton />
+        </>
       ) : (
         <>
           {/* Overview */}
@@ -112,11 +133,11 @@ const StatsPage = () => {
           <div className="glass-card mb-8 rounded-xl p-4">
             <div className="mb-2 flex items-center justify-between text-sm">
               <span className="font-display font-semibold">Overall Progress</span>
-              <span className="text-muted-foreground">{solved}/{total}</span>
+              <span className="text-xs font-medium text-muted-foreground tabular-nums">{solved}/{total}</span>
             </div>
             <div className="h-2.5 overflow-hidden rounded-full bg-secondary">
               <div
-                className="h-full rounded-full transition-all"
+                className="h-full rounded-full transition-all duration-700"
                 style={{ width: `${completionRate}%`, background: `linear-gradient(90deg, ${PRIMARY_COLOR}, ${TEAL_COLOR})` }}
               />
             </div>
@@ -131,25 +152,36 @@ const StatsPage = () => {
             {Object.keys(heatmapData ?? {}).length > 0 ? (
               <Heatmap weeks={heatmapWeeks} />
             ) : (
-              <p className="py-8 text-center text-sm text-muted-foreground">
-                Solve some questions and your stats will appear here
-              </p>
+              <div className="py-8 text-center">
+                <p className="text-sm text-muted-foreground">Solve some questions and your heatmap will appear here</p>
+              </div>
             )}
           </div>
 
-          <ActivityCharts dailyData={dailyData} weeklyData={weeklyChartData} cumulativeData={cumulativeChartData} />
+          {/* Charts load lazily — recharts is 386KB */}
+          <Suspense fallback={<ChartSkeleton />}>
+            <ActivityCharts dailyData={dailyData} weeklyData={weeklyChartData} cumulativeData={cumulativeChartData} />
+          </Suspense>
 
           <SectionHeader title="Breakdowns" />
-          <BreakdownCharts
-            categoryData={categoryData}
-            diffData={diffData}
-            diffByCatData={diffByCatData}
-            topicData={topicData}
-            sourceData={sourceData}
-            companyData={companyData}
-          />
+          <Suspense fallback={<ChartSkeleton />}>
+            <BreakdownCharts
+              categoryData={categoryData}
+              diffData={diffData}
+              diffByCatData={diffByCatData}
+              topicData={topicData}
+              sourceData={sourceData}
+              companyData={companyData}
+            />
+          </Suspense>
 
-          {insights && <InsightsSection insights={insights} />}
+          <Suspense fallback={
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          }>
+            {insights && <InsightsSection insights={insights} />}
+          </Suspense>
         </>
       )}
     </Layout>
