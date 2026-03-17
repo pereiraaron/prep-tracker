@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, BookOpen, BarChart3, Archive, Settings, Zap, LogOut } from "lucide-react";
+import { LayoutDashboard, BookOpen, BarChart3, Archive, Settings, Zap, LogOut, Sun, Moon } from "lucide-react";
+import { useState } from "react";
 import useAuth from "@hooks/useAuth";
 import useKeyboardShortcuts from "@hooks/useKeyboardShortcuts";
 
@@ -16,6 +17,26 @@ const Layout = ({ children }: { children: ReactNode }) => {
   useKeyboardShortcuts();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+
+  const [isDark, setIsDark] = useState(() => {
+    const stored = localStorage.getItem("theme");
+    if (stored) return stored === "dark";
+    return document.documentElement.classList.contains("dark");
+  });
+
+  const toggleTheme = () => {
+    setIsDark((prev) => {
+      const next = !prev;
+      if (next) {
+        document.documentElement.classList.add("dark");
+        localStorage.setItem("theme", "dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+        localStorage.setItem("theme", "light");
+      }
+      return next;
+    });
+  };
 
   const handleLogout = () => {
     logout();
@@ -108,6 +129,15 @@ const Layout = ({ children }: { children: ReactNode }) => {
       <main id="main-content" className="flex-1 md:ml-56 min-w-0">
         <div className="w-full px-4 py-5 pb-24 md:px-16 md:py-8 md:pb-8 animate-fade-in">{children}</div>
       </main>
+
+      {/* Theme toggle — fixed bottom-right, desktop only */}
+      <button
+        onClick={toggleTheme}
+        className="hidden md:flex fixed bottom-6 right-6 z-40 h-10 w-10 items-center justify-center rounded-full bg-card border border-border shadow-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+        aria-label="Toggle theme"
+      >
+        {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      </button>
     </div>
   );
 };

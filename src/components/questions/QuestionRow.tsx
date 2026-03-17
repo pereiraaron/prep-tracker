@@ -13,7 +13,7 @@ interface QuestionRowProps {
 }
 
 const formatDate = (dateStr: string) =>
-  new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
 const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps) => {
   const borderColor = q.category ? CATEGORY_BORDER_COLORS[q.category] || "border-l-border" : "border-l-border";
@@ -83,13 +83,13 @@ const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps)
 
       {/* Desktop: source, date, hover-actions */}
       <div className="hidden md:flex items-center gap-4 shrink-0">
-        <span className="w-20 text-right text-[11px] font-mono text-muted-foreground/50 truncate">
+        <span className="w-28 text-center text-[11px] font-mono text-muted-foreground/50">
           {sourceLabel || "—"}
         </span>
-        <span className="w-16 text-right text-[11px] text-muted-foreground/50 tabular-nums">
+        <span className="w-24 text-center text-[11px] text-muted-foreground/50 tabular-nums">
           {q.solvedAt ? formatDate(q.solvedAt) : "—"}
         </span>
-        <div className="flex items-center w-24 justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-100">
+        <div className="flex items-center w-24 justify-end gap-0.5">
           {q.url && (
             <span
               role="button"
