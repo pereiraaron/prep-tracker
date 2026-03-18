@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react";
 
 const Toaster = lazy(() => import("@components/ui/toaster").then((m) => ({ default: m.Toaster })));
 const Sonner = lazy(() => import("@components/ui/sonner").then((m) => ({ default: m.Toaster })));
-const TooltipProvider = lazy(() => import("@components/ui/tooltip").then((m) => ({ default: m.TooltipProvider })));
+import { TooltipProvider } from "@components/ui/tooltip";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -50,15 +50,14 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ErrorBoundary>
-      {/* Lazy-load toast/tooltip providers — not needed for initial render */}
-      <Suspense fallback={null}>
-        <TooltipProvider>
+      <TooltipProvider>
+        {/* Lazy-load toast providers — not needed for initial render */}
+        <Suspense fallback={null}>
           <Toaster />
           <Sonner />
-        </TooltipProvider>
-      </Suspense>
+        </Suspense>
 
-      <BrowserRouter>
+        <BrowserRouter>
         <Suspense fallback={<PageLoader />}>
           <RouteErrorBoundary>
             <Routes>
@@ -77,6 +76,7 @@ const App = () => (
           </RouteErrorBoundary>
         </Suspense>
       </BrowserRouter>
+      </TooltipProvider>
     </ErrorBoundary>
   </QueryClientProvider>
 );

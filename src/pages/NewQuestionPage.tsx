@@ -1,8 +1,9 @@
 import usePageTitle from "@hooks/usePageTitle";
 import { useState } from "react";
 import Layout from "@components/Layout";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCreateQuestion } from "@queries/useQuestions";
+import { useCreateBacklogItem } from "@queries/useBacklog";
 import type { QuestionSource } from "@api/questions";
 import type { PrepCategory, Difficulty } from "@api/types";
 import { PREP_CATEGORIES, DIFFICULTIES, QUESTION_SOURCES } from "@api/types";
@@ -79,9 +80,13 @@ const textareaCls =
 const SectionHeader = FormSectionHeader;
 
 const NewQuestionPage = () => {
-  usePageTitle("New Question");
+  const [searchParams] = useSearchParams();
+  const isBacklogMode = searchParams.get("mode") === "backlog";
+  usePageTitle(isBacklogMode ? "Add to Backlog" : "New Question");
   const navigate = useNavigate();
-  const createMutation = useCreateQuestion();
+  const createQuestionMutation = useCreateQuestion();
+  const createBacklogMutation = useCreateBacklogItem();
+  const createMutation = isBacklogMode ? createBacklogMutation : createQuestionMutation;
   const mutating = createMutation.isPending;
 
   const [title, setTitle] = useState("");
@@ -101,7 +106,9 @@ const NewQuestionPage = () => {
   };
 
   const urlValid = isValidUrl(url.trim());
-  const canSubmit = title.trim() && solution.trim() && category && difficulty && urlValid;
+  const canSubmit = isBacklogMode
+    ? !!(title.trim() && category && url.trim() && urlValid)
+    : !!(title.trim() && solution.trim() && category && difficulty && urlValid);
 
   const handleCategoryChange = (val: PrepCategory) => {
     setCategory(val);
@@ -113,20 +120,36 @@ const NewQuestionPage = () => {
   const handleSubmit = async () => {
     if (!canSubmit) return;
     try {
-      await createMutation.mutateAsync({
-        title: title.trim(),
-        solution: solution.trim(),
-        category,
-        notes: notes.trim() || undefined,
-        difficulty,
-        topic: topics.length ? topics.join(", ") : undefined,
-        source: (source as QuestionSource) || undefined,
-        url: url.trim() || undefined,
-        tags: tags.length ? tags : undefined,
-        companyTags: companyTags.length ? companyTags : undefined,
-      });
-      toast.success("Question saved");
-      navigate("/questions");
+      if (isBacklogMode) {
+        await createBacklogMutation.mutateAsync({
+          title: title.trim(),
+          category,
+          url: url.trim(),
+          notes: notes.trim() || undefined,
+          difficulty: difficulty || undefined,
+          topic: topics.length ? topics.join(", ") : undefined,
+          source: (source as QuestionSource) || undefined,
+          tags: tags.length ? tags : undefined,
+          companyTags: companyTags.length ? companyTags : undefined,
+        });
+        toast.success("Added to backlog");
+        navigate("/backlog");
+      } else {
+        await createQuestionMutation.mutateAsync({
+          title: title.trim(),
+          solution: solution.trim(),
+          category,
+          notes: notes.trim() || undefined,
+          difficulty,
+          topic: topics.length ? topics.join(", ") : undefined,
+          source: (source as QuestionSource) || undefined,
+          url: url.trim() || undefined,
+          tags: tags.length ? tags : undefined,
+          companyTags: companyTags.length ? companyTags : undefined,
+        });
+        toast.success("Question saved");
+        navigate("/questions");
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to save");
     }
@@ -144,18 +167,20 @@ const NewQuestionPage = () => {
       {/* Header */}
       <div className="mb-8">
         <button
-          onClick={() => navigate("/questions")}
+          onClick={() => navigate(isBacklogMode ? "/backlog" : "/questions")}
           className="mb-4 flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Back to Questions
+          {isBacklogMode ? "Back to Backlog" : "Back to Questions"}
         </button>
         <div className="flex items-center gap-3.5">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <FileText className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="font-display text-lg md:text-xl font-bold">Log a Question</h1>
+            <h1 className="font-display text-lg md:text-xl font-bold">
+              {isBacklogMode ? "Add to Backlog" : "Log a Question"}
+            </h1>
             <p className="text-sm text-muted-foreground">
               Fields marked with <span className="text-destructive">*</span> are required
             </p>
@@ -182,20 +207,22 @@ const NewQuestionPage = () => {
               />
             </div>
 
-            <div>
-              <label htmlFor="q-solution" className={labelCls}>
-                Solution <span className="text-destructive">*</span>
-              </label>
-              <textarea
-                id="q-solution"
-                value={solution}
-                onChange={(e) => setSolution(e.target.value)}
-                rows={6}
-                className={textareaCls}
-                placeholder="Describe your approach, include code snippets..."
-                disabled={mutating}
-              />
-            </div>
+            {!isBacklogMode && (
+              <div>
+                <label htmlFor="q-solution" className={labelCls}>
+                  Solution <span className="text-destructive">*</span>
+                </label>
+                <textarea
+                  id="q-solution"
+                  value={solution}
+                  onChange={(e) => setSolution(e.target.value)}
+                  rows={6}
+                  className={textareaCls}
+                  placeholder="Describe your approach, include code snippets..."
+                  disabled={mutating}
+                />
+              </div>
+            )}
           </div>
         </section>
 
@@ -277,7 +304,9 @@ const NewQuestionPage = () => {
               </div>
             </div>
             <div>
-              <label htmlFor="q-url" className={labelCls}>Problem URL</label>
+              <label htmlFor="q-url" className={labelCls}>
+                Problem URL {isBacklogMode && <span className="text-destructive">*</span>}
+              </label>
               <input
                 id="q-url"
                 value={url}
@@ -346,17 +375,21 @@ const NewQuestionPage = () => {
             className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:brightness-110 active:scale-[0.98] disabled:opacity-40 disabled:shadow-none disabled:active:scale-100"
           >
             {mutating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Save Question
+            {isBacklogMode ? "Add to Backlog" : "Save Question"}
           </button>
           <button
-            onClick={() => navigate("/questions")}
+            onClick={() => navigate(isBacklogMode ? "/backlog" : "/questions")}
             className="rounded-xl border border-border px-5 py-2.5 text-sm font-medium transition-all hover:bg-secondary active:scale-[0.98]"
           >
             Cancel
           </button>
           {!canSubmit && title.trim() && (
             <p className="text-xs text-muted-foreground ml-auto">
-              {!category ? "Pick a category" : !difficulty ? "Pick difficulty" : !solution.trim() ? "Add a solution" : !urlValid ? "Fix the URL" : ""}
+              {!category
+                ? "Pick a category"
+                : isBacklogMode
+                  ? !url.trim() ? "Add problem URL" : !urlValid ? "Fix the URL" : ""
+                  : !difficulty ? "Pick difficulty" : !solution.trim() ? "Add a solution" : !urlValid ? "Fix the URL" : ""}
             </p>
           )}
         </div>

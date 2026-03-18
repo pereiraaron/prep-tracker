@@ -212,3 +212,16 @@ h1, h2, h3, h4, h5, h6 {
 @utility animate-slide-up {
   animation: slide-up 0.3s ease-out both;
 }
+
+@keyframes tip-pulse {
+  0%, 100% { box-shadow: inset 3px 0 0 var(--tip-color); }
+  50% { box-shadow: inset 3px 0 8px var(--tip-color); }
+}
+
+.tip-glow {
+  animation: tip-pulse 4s ease-in-out infinite;
+}
+
+.tip-glow-fast {
+  animation: tip-pulse 2s ease-in-out infinite;
+}

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { passkeyApi, type PasskeyCredential } from "@api/passkey";
 import { Button } from "@components/ui/button";
 import { Fingerprint, Plus, Trash2, Loader2 } from "lucide-react";
+import Skeleton from "@components/Skeleton";
 
 const PasskeySection = () => {
   const [credentials, setCredentials] = useState<PasskeyCredential[]>([]);
@@ -86,8 +87,17 @@ const PasskeySection = () => {
       )}
 
       {loading ? (
-        <div className="flex items-center justify-center py-6">
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        <div className="space-y-2">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3 rounded-lg border border-border/50 bg-secondary/30 px-3 py-2.5">
+              <Skeleton className="h-4 w-4 rounded shrink-0" />
+              <div className="flex-1 space-y-1.5">
+                <Skeleton className="h-3.5 w-24" />
+                <Skeleton className="h-3 w-32" />
+              </div>
+              <Skeleton className="h-4 w-4 rounded shrink-0" />
+            </div>
+          ))}
         </div>
       ) : credentials.length === 0 ? (
         <p className="text-sm text-muted-foreground">

@@ -1,15 +1,54 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { questionsApi, type CreateBacklogQuestionBody } from "@api/questions";
-import type { PrepCategory } from "@api/types";
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { questionsApi, type QuestionsFilter, type CreateBacklogQuestionBody } from "@api/questions";
 import { queryKeys } from "@lib/queryKeys";
 
-// ---- Query ----
+// ---- Queries ----
 
-export const useBacklogList = () =>
-  useQuery({
-    queryKey: queryKeys.backlog.all,
-    queryFn: () => questionsApi.getBacklog({ limit: 100 }),
+interface BacklogListParams extends QuestionsFilter {
+  search?: string;
+}
+
+export const useBacklogList = (params: BacklogListParams = {}, enabled = true) => {
+  const { search, ...filter } = params;
+  return useQuery({
+    queryKey: queryKeys.backlog.list(params),
+    queryFn: () =>
+      search
+        ? questionsApi.search(search, {
+            status: "pending",
+            difficulty: filter.difficulty,
+            category: filter.category,
+            page: filter.page,
+            limit: filter.limit,
+          })
+        : questionsApi.getBacklog(filter),
+    enabled,
   });
+};
+
+export const useBacklogInfinite = (params: Omit<BacklogListParams, "page"> & { limit: number; enabled?: boolean }) => {
+  const { search, limit, enabled = true, ...filter } = params;
+  const keyParams = { ...params, page: undefined, enabled: undefined };
+  return useInfiniteQuery({
+    enabled,
+    queryKey: queryKeys.backlog.infinite(keyParams),
+    queryFn: ({ pageParam = 1 }) =>
+      search
+        ? questionsApi.search(search, {
+            status: "pending",
+            difficulty: filter.difficulty,
+            category: filter.category,
+            page: pageParam,
+            limit,
+          })
+        : questionsApi.getBacklog({ ...filter, page: pageParam, limit }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
+  });
+};
 
 // ---- Mutations ----
 
@@ -42,16 +81,35 @@ export const useStarBacklogItem = () => {
     mutationFn: (id: string) => questionsApi.star(id),
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.backlog.all });
-      const previous = queryClient.getQueryData(queryKeys.backlog.all);
-      queryClient.setQueryData(queryKeys.backlog.all, (old: unknown) => {
-        if (!old || typeof old !== "object" || !("data" in old)) return old;
-        const typed = old as { data: { id: string; starred: boolean }[] };
-        return { ...typed, data: typed.data.map((q) => q.id === id ? { ...q, starred: !q.starred } : q) };
+      const previousQueries = queryClient.getQueriesData({ queryKey: queryKeys.backlog.all });
+
+      queryClient.setQueriesData({ queryKey: queryKeys.backlog.all }, (old: unknown) => {
+        if (!old || typeof old !== "object") return old;
+        if ("data" in old && Array.isArray((old as { data: unknown[] }).data)) {
+          const typed = old as { data: { id: string; starred: boolean }[] };
+          return { ...typed, data: typed.data.map((q) => q.id === id ? { ...q, starred: !q.starred } : q) };
+        }
+        if ("pages" in old && Array.isArray((old as { pages: unknown[] }).pages)) {
+          const typed = old as { pages: { data: { id: string; starred: boolean }[] }[]; pageParams: unknown[] };
+          return {
+            ...typed,
+            pages: typed.pages.map((page) => ({
+              ...page,
+              data: page.data.map((q) => q.id === id ? { ...q, starred: !q.starred } : q),
+            })),
+          };
+        }
+        return old;
       });
-      return { previous };
+
+      return { previousQueries };
     },
     onError: (_err, _id, context) => {
-      if (context?.previous) queryClient.setQueryData(queryKeys.backlog.all, context.previous);
+      if (context?.previousQueries) {
+        for (const [key, data] of context.previousQueries) {
+          queryClient.setQueryData(key, data);
+        }
+      }
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.backlog.all });
@@ -62,10 +120,8 @@ export const useStarBacklogItem = () => {
 export const useSolveBacklogItem = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, category }: { id: string; category: PrepCategory }) => {
-      await questionsApi.update(id, { category });
-      return questionsApi.solve(id);
-    },
+    mutationFn: ({ id, solution }: { id: string; solution: string }) =>
+      questionsApi.solve(id, { solution }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.backlog.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.stats.all });

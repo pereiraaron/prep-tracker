@@ -2,6 +2,7 @@ import type { Question } from "@api/questions";
 import { SOURCE_LABEL } from "@api/types";
 import { CATEGORY_BORDER_COLORS } from "@lib/styles";
 import { DifficultyBadge, CategoryBadge } from "@components/Badge";
+import IconButton from "@components/IconButton";
 import { Star, Trash2, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -26,8 +27,8 @@ const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps)
       style={{ animationDelay: `${index * 20}ms` }}
     >
       {/* Star */}
-      <button
-        aria-label={q.starred ? "Unstar" : "Star"}
+      <IconButton
+        label={q.starred ? "Remove from favorites" : "Add to favorites"}
         onClick={(e) => {
           e.preventDefault();
           onStar(q.id);
@@ -37,7 +38,7 @@ const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps)
         }`}
       >
         <Star className={`h-3.5 w-3.5 ${q.starred ? "fill-stat-orange" : ""}`} />
-      </button>
+      </IconButton>
 
       {/* Main content */}
       <div className="min-w-0 flex-1">
@@ -67,9 +68,8 @@ const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps)
       {/* Mobile actions — always visible */}
       <div className="flex md:hidden shrink-0 items-center gap-0.5">
         {q.url && (
-          <span
-            role="button"
-            aria-label="Open link"
+          <IconButton
+            label="Open problem"
             onClick={(e) => {
               e.preventDefault();
               window.open(q.url, "_blank");
@@ -77,7 +77,7 @@ const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps)
             className="rounded-md p-1.5 text-muted-foreground"
           >
             <ExternalLink className="h-3.5 w-3.5" />
-          </span>
+          </IconButton>
         )}
       </div>
 
@@ -91,9 +91,8 @@ const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps)
         </span>
         <div className="flex items-center w-24 justify-end gap-0.5">
           {q.url && (
-            <span
-              role="button"
-              aria-label="Open link"
+            <IconButton
+              label="Open problem"
               onClick={(e) => {
                 e.preventDefault();
                 window.open(q.url, "_blank");
@@ -101,15 +100,15 @@ const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps)
               className="rounded-md p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
             >
               <ExternalLink className="h-3.5 w-3.5" />
-            </span>
+            </IconButton>
           )}
-          <button
-            aria-label="Delete"
+          <IconButton
+            label="Delete question"
             onClick={(e) => onDelete(q.id, e)}
             className="rounded-md p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
           >
             <Trash2 className="h-3.5 w-3.5" />
-          </button>
+          </IconButton>
         </div>
       </div>
     </Link>

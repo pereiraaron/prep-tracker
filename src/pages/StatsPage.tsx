@@ -8,7 +8,7 @@ import { DashboardStatsSkeleton } from "@components/Skeleton";
 import { useStatsBatch } from "@queries/useStats";
 import { CATEGORY_LABEL, SOURCE_LABEL } from "@api/types";
 import { BookOpen, CheckCircle, ListTodo, TrendingUp, BarChart3, Loader2 } from "lucide-react";
-import { categoryShort, PRIMARY_COLOR, TEAL_COLOR } from "@components/stats/constants";
+import { categoryShort, CHART_BLUE, CHART_TEAL } from "@components/stats/constants";
 import { SectionHeader } from "@components/stats/shared";
 import Heatmap, { buildHeatmapWeeks } from "@components/stats/Heatmap";
 import Streaks from "@components/stats/Streaks";
@@ -47,7 +47,7 @@ const StatsPage = () => {
   const streaks = batch?.streaks;
   const insights = batch?.insights;
 
-  const total = overview ? overview.total + overview.backlogCount : 0;
+  const total = overview?.total ?? 0;
   const solved = overview?.byStatus?.solved ?? 0;
   const backlog = overview?.backlogCount ?? 0;
   const completionRate = total > 0 ? Math.round((solved / total) * 100) : 0;
@@ -138,7 +138,7 @@ const StatsPage = () => {
             <div className="h-2.5 overflow-hidden rounded-full bg-secondary">
               <div
                 className="h-full rounded-full transition-all duration-700"
-                style={{ width: `${completionRate}%`, background: `linear-gradient(90deg, ${PRIMARY_COLOR}, ${TEAL_COLOR})` }}
+                style={{ width: `${completionRate}%`, background: `linear-gradient(90deg, ${CHART_BLUE}, ${CHART_TEAL})` }}
               />
             </div>
           </div>
