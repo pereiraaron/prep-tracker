@@ -43,12 +43,12 @@ export interface CreateQuestionBody {
 
 export interface CreateBacklogQuestionBody {
   title: string;
+  category: PrepCategory;
+  url: string;
   notes?: string;
-  solution?: string;
   difficulty?: Difficulty;
   topic?: string;
   source?: QuestionSource;
-  url?: string;
   tags?: string[];
   companyTags?: string[];
 }
@@ -139,9 +139,10 @@ export const questionsApi = {
       method: "DELETE",
     }),
 
-  solve: async (id: string) =>
+  solve: async (id: string, body?: { solution: string }) =>
     apiFetch<Question>(`${API_BASE_URL}/questions/${id}/solve`, {
       method: "PATCH",
+      ...(body ? { body: JSON.stringify(body) } : {}),
     }),
 
   reset: async (id: string) =>
@@ -183,6 +184,7 @@ export const questionsApi = {
 
   getBacklog: async (filter?: Omit<QuestionsFilter, "backlog">) => {
     const params = new URLSearchParams();
+    if (filter?.category) params.set("category", filter.category);
     if (filter?.status) params.set("status", filter.status);
     if (filter?.difficulty) params.set("difficulty", filter.difficulty);
     if (filter?.topic) params.set("topic", filter.topic);

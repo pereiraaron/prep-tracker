@@ -37,7 +37,7 @@ const Dashboard = () => {
   const tips = insights?.tips ?? [];
   const recentSolved = recentData?.data ?? [];
 
-  const total = overview ? overview.total + overview.backlogCount : 0;
+  const total = overview?.total ?? 0;
   const solved = overview?.byStatus?.solved ?? 0;
   const backlog = overview?.backlogCount ?? 0;
   const today = new Date().toLocaleDateString("en-US", {
@@ -71,7 +71,12 @@ const Dashboard = () => {
           <StatCard label="Total" value={total || "—"} icon={BookOpen} color="bg-stat-blue/10 text-stat-blue" />
           <StatCard label="Solved" value={solved || "—"} icon={CheckCircle} color="bg-stat-green/10 text-stat-green" />
           <StatCard label="Backlog" value={backlog || "—"} icon={ListTodo} color="bg-stat-orange/10 text-stat-orange" />
-          <StatCard label="Streak" value={`${streaks?.currentStreak ?? 0}d`} icon={Flame} color="bg-stat-purple/10 text-stat-purple" />
+          <StatCard
+            label="Streak"
+            value={`${streaks?.currentStreak ?? 0}d`}
+            icon={Flame}
+            color="bg-stat-purple/10 text-stat-purple"
+          />
         </div>
       )}
 
@@ -83,22 +88,26 @@ const Dashboard = () => {
             <h2 className="font-display text-sm font-semibold">Tips</h2>
           </div>
           <div className="space-y-2">
-            {tips.map((tip, i) => (
-              <div key={i} className="flex items-start gap-3 rounded-lg border border-border bg-secondary/30 p-3 animate-slide-up" style={{ animationDelay: `${i * 50}ms` }}>
-                <span
-                  className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${
-                    tip.priority === "high"
-                      ? "bg-destructive/10 text-destructive"
-                      : tip.priority === "medium"
-                        ? "bg-stat-orange/10 text-stat-orange"
-                        : "bg-stat-green/10 text-stat-green"
+            {tips.map((tip, i) => {
+              const color = `hsl(var(${
+                tip.priority === "high" ? "--destructive" : tip.priority === "medium" ? "--stat-orange" : "--stat-green"
+              }))`;
+              return (
+                <div
+                  key={i}
+                  className={`rounded-lg bg-secondary/30 pl-4 pr-3.5 py-3 ${
+                    tip.priority === "high" ? "tip-glow-fast" : tip.priority === "medium" ? "tip-glow" : ""
                   }`}
+                  style={{
+                    border: `1px solid color-mix(in srgb, ${color} 25%, transparent)`,
+                    boxShadow: `inset 3px 0 0 ${color}`,
+                    ["--tip-color" as string]: color,
+                  }}
                 >
-                  {tip.priority}
-                </span>
-                <p className="text-sm leading-relaxed">{tip.text}</p>
-              </div>
-            ))}
+                  <p className="text-sm leading-relaxed text-foreground/90">{tip.text}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -109,7 +118,10 @@ const Dashboard = () => {
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-display text-base font-bold">Recent Activity</h2>
             {recentSolved.length > 0 && (
-              <Link to="/questions" className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-primary transition-colors">
+              <Link
+                to="/questions"
+                className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-primary transition-colors"
+              >
                 View all
                 <ArrowRight className="h-3 w-3" />
               </Link>

@@ -1,5 +1,5 @@
 import { AlertTriangle, Trophy } from "lucide-react";
-import { PRIMARY_COLOR, MILESTONE_ICONS } from "./constants";
+import { CHART_BLUE, MILESTONE_ICONS } from "./constants";
 import { SectionHeader } from "./shared";
 
 interface WeakArea {
@@ -89,7 +89,7 @@ const InsightsSection = ({ insights }: { insights: InsightsData }) => {
                       className="h-full rounded-full transition-all"
                       style={{
                         width: `${pct}%`,
-                        background: m.achieved ? "hsl(155, 65%, 42%)" : PRIMARY_COLOR,
+                        background: m.achieved ? "hsl(155, 65%, 42%)" : CHART_BLUE,
                       }}
                     />
                   </div>

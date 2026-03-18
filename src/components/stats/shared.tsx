@@ -1,3 +1,23 @@
+export const chartTooltipStyle = {
+  contentStyle: {
+    background: "hsl(var(--card))",
+    border: "1px solid hsl(var(--border))",
+    borderRadius: "0.5rem",
+    fontSize: "12px",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+  },
+  labelStyle: {
+    color: "hsl(var(--foreground))",
+    fontWeight: 600,
+    marginBottom: "2px",
+  },
+  itemStyle: {
+    color: "hsl(var(--foreground))",
+    fontSize: "11px",
+  },
+  cursor: { stroke: "hsl(var(--border))" },
+};
+
 export const NoData = () => (
   <div className="py-8 text-center">
     <p className="text-sm text-muted-foreground">Solve some questions and your stats will appear here</p>

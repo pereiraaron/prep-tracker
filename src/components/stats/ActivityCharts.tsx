@@ -1,6 +1,6 @@
 import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
-import { PRIMARY_COLOR, TEAL_COLOR, getGridColor } from "./constants";
-import { ChartCard, NoData } from "./shared";
+import { CHART_BLUE, CHART_VIOLET, CHART_TEAL, getGridColor, getTextColor } from "./constants";
+import { ChartCard, NoData, chartTooltipStyle } from "./shared";
 
 interface ActivityChartsProps {
   dailyData: { date: string; solved: number }[];
@@ -15,16 +15,16 @@ const ActivityCharts = ({ dailyData, weeklyData, cumulativeData }: ActivityChart
         <ResponsiveContainer width="100%" height={200}>
           <AreaChart data={dailyData}>
             <defs>
-              <linearGradient id="colorSolved" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={PRIMARY_COLOR} stopOpacity={0.15} />
-                <stop offset="95%" stopColor={PRIMARY_COLOR} stopOpacity={0} />
+              <linearGradient id="gradDaily" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={CHART_BLUE} stopOpacity={0.3} />
+                <stop offset="100%" stopColor={CHART_BLUE} stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke={getGridColor()} />
-            <XAxis dataKey="date" tick={{ fontSize: 9 }} interval="preserveStartEnd" />
-            <YAxis allowDecimals={false} tick={{ fontSize: 10 }} width={30} />
-            <Tooltip />
-            <Area type="monotone" dataKey="solved" stroke={PRIMARY_COLOR} fill="url(#colorSolved)" strokeWidth={2} />
+            <XAxis dataKey="date" tick={{ fontSize: 9, fill: getTextColor() }} interval="preserveStartEnd" />
+            <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: getTextColor() }} width={30} />
+            <Tooltip {...chartTooltipStyle} />
+            <Area type="monotone" dataKey="solved" stroke={CHART_BLUE} fill="url(#gradDaily)" strokeWidth={2.5} />
           </AreaChart>
         </ResponsiveContainer>
       ) : (
@@ -36,11 +36,17 @@ const ActivityCharts = ({ dailyData, weeklyData, cumulativeData }: ActivityChart
       {weeklyData.length > 0 ? (
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={weeklyData}>
+            <defs>
+              <linearGradient id="gradWeekly" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={CHART_VIOLET} stopOpacity={0.9} />
+                <stop offset="100%" stopColor={CHART_VIOLET} stopOpacity={0.5} />
+              </linearGradient>
+            </defs>
             <CartesianGrid strokeDasharray="3 3" stroke={getGridColor()} />
-            <XAxis dataKey="week" tick={{ fontSize: 9 }} interval="preserveStartEnd" />
-            <YAxis allowDecimals={false} tick={{ fontSize: 10 }} width={30} />
-            <Tooltip />
-            <Bar dataKey="solved" fill={PRIMARY_COLOR} radius={[4, 4, 0, 0]} />
+            <XAxis dataKey="week" tick={{ fontSize: 9, fill: getTextColor() }} interval="preserveStartEnd" />
+            <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: getTextColor() }} width={30} />
+            <Tooltip {...chartTooltipStyle} />
+            <Bar dataKey="solved" fill="url(#gradWeekly)" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       ) : (
@@ -53,16 +59,16 @@ const ActivityCharts = ({ dailyData, weeklyData, cumulativeData }: ActivityChart
         <ResponsiveContainer width="100%" height={200}>
           <AreaChart data={cumulativeData}>
             <defs>
-              <linearGradient id="colorCumulative" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={TEAL_COLOR} stopOpacity={0.15} />
-                <stop offset="95%" stopColor={TEAL_COLOR} stopOpacity={0} />
+              <linearGradient id="gradCumulative" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={CHART_TEAL} stopOpacity={0.3} />
+                <stop offset="100%" stopColor={CHART_TEAL} stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke={getGridColor()} />
-            <XAxis dataKey="date" tick={{ fontSize: 9 }} interval="preserveStartEnd" />
-            <YAxis allowDecimals={false} tick={{ fontSize: 10 }} width={30} />
-            <Tooltip />
-            <Area type="monotone" dataKey="total" stroke={TEAL_COLOR} fill="url(#colorCumulative)" strokeWidth={2} />
+            <XAxis dataKey="date" tick={{ fontSize: 9, fill: getTextColor() }} interval="preserveStartEnd" />
+            <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: getTextColor() }} width={30} />
+            <Tooltip {...chartTooltipStyle} />
+            <Area type="monotone" dataKey="total" stroke={CHART_TEAL} fill="url(#gradCumulative)" strokeWidth={2.5} />
           </AreaChart>
         </ResponsiveContainer>
       ) : (

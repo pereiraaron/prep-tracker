@@ -11,8 +11,8 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import { DIFF_COLORS, SOLVED_COLOR, PENDING_COLOR, PRIMARY_COLOR, getGridColor } from "./constants";
-import { ChartCard, NoData } from "./shared";
+import { DIFF_COLORS, SOLVED_COLOR, PENDING_COLOR, CHART_BLUE, CHART_VIOLET, getGridColor, getTextColor } from "./constants";
+import { ChartCard, NoData, chartTooltipStyle } from "./shared";
 
 interface BreakdownChartsProps {
   categoryData: { name: string; short: string; solved: number; pending: number }[];
@@ -37,9 +37,9 @@ const BreakdownCharts = ({
         {categoryData.length > 0 ? (
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={categoryData} layout="vertical">
-              <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10 }} />
-              <YAxis type="category" dataKey="short" tick={{ fontSize: 10 }} width={80} />
-              <Tooltip />
+              <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10, fill: getTextColor() }} />
+              <YAxis type="category" dataKey="short" tick={{ fontSize: 10, fill: getTextColor() }} width={80} />
+              <Tooltip {...chartTooltipStyle} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
               <Bar dataKey="solved" stackId="a" fill={SOLVED_COLOR} />
               <Bar dataKey="pending" stackId="a" fill={PENDING_COLOR} radius={[0, 4, 4, 0]} />
@@ -54,8 +54,8 @@ const BreakdownCharts = ({
         {diffData.some((d) => d.total > 0) ? (
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              <Tooltip formatter={(value, name) => `${name}: ${value}`} />
-              <Pie data={diffData} dataKey="total" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3}>
+              <Tooltip {...chartTooltipStyle} formatter={(value) => value} />
+              <Pie data={diffData} dataKey="total" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={4} strokeWidth={0}>
                 {diffData.map((_, i) => (
                   <Cell key={i} fill={DIFF_COLORS[i]} />
                 ))}
@@ -73,9 +73,9 @@ const BreakdownCharts = ({
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={diffByCatData}>
               <CartesianGrid strokeDasharray="3 3" stroke={getGridColor()} />
-              <XAxis dataKey="name" tick={{ fontSize: 9 }} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 10 }} width={30} />
-              <Tooltip />
+              <XAxis dataKey="name" tick={{ fontSize: 9, fill: getTextColor() }} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: getTextColor() }} width={30} />
+              <Tooltip {...chartTooltipStyle} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
               <Bar dataKey="Easy" stackId="a" fill={DIFF_COLORS[0]} />
               <Bar dataKey="Medium" stackId="a" fill={DIFF_COLORS[1]} />
@@ -93,9 +93,9 @@ const BreakdownCharts = ({
         {topicData.length > 0 ? (
           <ResponsiveContainer width="100%" height={Math.max(200, topicData.length * 28)}>
             <BarChart data={topicData} layout="vertical">
-              <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10 }} />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={85} />
-              <Tooltip />
+              <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10, fill: getTextColor() }} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: getTextColor() }} width={85} />
+              <Tooltip {...chartTooltipStyle} />
               <Bar dataKey="solved" stackId="a" fill={SOLVED_COLOR} />
               <Bar dataKey="pending" stackId="a" fill={PENDING_COLOR} radius={[0, 4, 4, 0]} />
             </BarChart>
@@ -109,10 +109,10 @@ const BreakdownCharts = ({
         {sourceData.length > 0 ? (
           <ResponsiveContainer width="100%" height={Math.max(200, sourceData.length * 35)}>
             <BarChart data={sourceData} layout="vertical">
-              <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10 }} />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={95} />
-              <Tooltip />
-              <Bar dataKey="solved" stackId="a" fill={SOLVED_COLOR} />
+              <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10, fill: getTextColor() }} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: getTextColor() }} width={95} />
+              <Tooltip {...chartTooltipStyle} />
+              <Bar dataKey="solved" stackId="a" fill={CHART_BLUE} />
               <Bar dataKey="pending" stackId="a" fill={PENDING_COLOR} radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -125,10 +125,10 @@ const BreakdownCharts = ({
         {companyData.length > 0 ? (
           <ResponsiveContainer width="100%" height={Math.max(200, companyData.length * 28)}>
             <BarChart data={companyData} layout="vertical">
-              <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10 }} />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={85} />
-              <Tooltip />
-              <Bar dataKey="solved" stackId="a" fill={PRIMARY_COLOR} />
+              <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10, fill: getTextColor() }} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: getTextColor() }} width={85} />
+              <Tooltip {...chartTooltipStyle} />
+              <Bar dataKey="solved" stackId="a" fill={CHART_VIOLET} />
               <Bar dataKey="pending" stackId="a" fill={PENDING_COLOR} radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>

@@ -32,5 +32,9 @@ export const queryKeys = {
   },
   backlog: {
     all: ["backlog"] as const,
+    list: (params: object) =>
+      [...queryKeys.backlog.all, "list", JSON.parse(JSON.stringify(params))] as const,
+    infinite: (params: object) =>
+      [...queryKeys.backlog.all, "infinite", JSON.parse(JSON.stringify(params))] as const,
   },
 };

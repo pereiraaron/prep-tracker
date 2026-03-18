@@ -1,101 +1,137 @@
 import type { Question } from "@api/questions";
-import { CATEGORY_LABEL } from "@api/types";
-import { DifficultyBadge, TopicBadge, SourceBadge } from "@components/Badge";
+import { SOURCE_LABEL } from "@api/types";
+import { CATEGORY_BORDER_COLORS } from "@lib/styles";
+import { DifficultyBadge, CategoryBadge } from "@components/Badge";
+import IconButton from "@components/IconButton";
 import { Star, Trash2, ExternalLink, CheckCircle } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface BacklogRowProps {
   item: Question;
   index: number;
-  solvingId: string | null;
   onStar: (id: string) => void;
-  onDelete: (id: string) => void;
-  onStartSolve: (id: string) => void;
-  onSolve: (id: string, category: string) => void;
-  onCancelSolve: () => void;
+  onDelete: (id: string, e: React.MouseEvent) => void;
+  onSolve: (id: string) => void;
 }
 
-const BacklogRow = ({
-  item: q,
-  index,
-  solvingId,
-  onStar,
-  onDelete,
-  onStartSolve,
-  onSolve,
-  onCancelSolve,
-}: BacklogRowProps) => (
-  <div
-    className="group flex items-center gap-3 px-4 py-3 md:py-2.5 transition-colors hover:bg-secondary/50 animate-slide-up"
-    style={{ animationDelay: `${index * 20}ms` }}
-  >
-    {/* Star */}
-    <button
-      aria-label={q.starred ? "Unstar" : "Star"}
-      onClick={() => onStar(q.id)}
-      className={`shrink-0 rounded p-0.5 transition-colors ${
-        q.starred ? "text-stat-orange" : "text-border hover:text-stat-orange"
-      }`}
+const formatDate = (dateStr: string) =>
+  new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+const BacklogRow = ({ item: q, index, onStar, onDelete, onSolve }: BacklogRowProps) => {
+  const borderColor = q.category ? CATEGORY_BORDER_COLORS[q.category] || "border-l-border" : "border-l-border";
+  const sourceLabel = q.source ? SOURCE_LABEL[q.source] || q.source : null;
+
+  return (
+    <Link
+      to={`/questions/${q.id}`}
+      className={`group flex items-center gap-3 border-l-[3px] ${borderColor} px-3 sm:px-4 py-3 md:py-2.5 transition-colors hover:bg-secondary/50 animate-slide-up`}
+      style={{ animationDelay: `${index * 20}ms` }}
     >
-      <Star className={`h-3.5 w-3.5 ${q.starred ? "fill-stat-orange" : ""}`} />
-    </button>
+      {/* Star */}
+      <IconButton
+        label={q.starred ? "Remove from favorites" : "Add to favorites"}
+        onClick={(e) => {
+          e.preventDefault();
+          onStar(q.id);
+        }}
+        className={`shrink-0 rounded p-0.5 transition-colors ${
+          q.starred ? "text-stat-orange" : "text-border hover:text-stat-orange"
+        }`}
+      >
+        <Star className={`h-3.5 w-3.5 ${q.starred ? "fill-stat-orange" : ""}`} />
+      </IconButton>
 
-    {/* Content */}
-    <div className="min-w-0 flex-1">
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="font-display text-[13px] font-semibold truncate">{q.title}</span>
-        {q.difficulty && <DifficultyBadge value={q.difficulty} />}
-        {q.topic && <span className="hidden sm:inline"><TopicBadge value={q.topic} /></span>}
-        {q.source && <span className="hidden sm:inline"><SourceBadge value={q.source} /></span>}
+      {/* Main content */}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="font-display text-[13px] font-semibold group-hover:text-primary transition-colors truncate">
+            {q.title}
+          </span>
+          {q.difficulty && <DifficultyBadge value={q.difficulty} />}
+          <span className="hidden sm:inline">{q.category && <CategoryBadge value={q.category} />}</span>
+          {q.topic && (
+            <span className="hidden lg:inline rounded bg-secondary/80 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+              {q.topic}
+            </span>
+          )}
+        </div>
+        {/* Mobile-only: source + date */}
+        <div className="flex items-center gap-2 mt-0.5 md:hidden">
+          {sourceLabel && (
+            <span className="text-[10px] font-mono text-muted-foreground/60">{sourceLabel}</span>
+          )}
+          <span className="text-[10px] text-muted-foreground/50">{formatDate(q.createdAt)}</span>
+        </div>
       </div>
-    </div>
 
-    {/* Actions — always visible on mobile, hover-reveal on desktop */}
-    <div className="flex shrink-0 items-center gap-0.5">
-      {q.url && (
-        <a
-          href={q.url}
-          target="_blank"
-          rel="noreferrer"
-          aria-label="Open problem link"
-          className="rounded-md p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors md:opacity-0 md:group-hover:opacity-100"
-        >
-          <ExternalLink className="h-3.5 w-3.5" />
-        </a>
-      )}
-
-      {solvingId === q.id ? (
-        <select
-          autoFocus
-          onChange={(e) => {
-            if (e.target.value) onSolve(q.id, e.target.value);
+      {/* Mobile actions */}
+      <div className="flex md:hidden shrink-0 items-center gap-0.5">
+        <IconButton
+          label="Solve this question"
+          onClick={(e) => {
+            e.preventDefault();
+            onSolve(q.id);
           }}
-          onBlur={onCancelSolve}
-          className="h-7 rounded-lg border border-border bg-card px-2 text-[11px] outline-none"
-        >
-          <option value="">Category...</option>
-          {Object.entries(CATEGORY_LABEL).map(([key, label]) => (
-            <option key={key} value={key}>{label}</option>
-          ))}
-        </select>
-      ) : (
-        <button
-          onClick={() => onStartSolve(q.id)}
-          className="rounded-md p-1.5 text-muted-foreground hover:text-stat-green hover:bg-stat-green/10 transition-colors md:opacity-0 md:group-hover:opacity-100"
-          title="Mark as solved"
+          className="rounded-md p-1.5 text-muted-foreground hover:text-stat-green"
         >
           <CheckCircle className="h-3.5 w-3.5" />
-        </button>
-      )}
+        </IconButton>
+        {q.url && (
+          <IconButton
+            label="Open problem"
+            onClick={(e) => {
+              e.preventDefault();
+              window.open(q.url, "_blank");
+            }}
+            className="rounded-md p-1.5 text-muted-foreground"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+          </IconButton>
+        )}
+      </div>
 
-      <button
-        aria-label="Remove from backlog"
-        onClick={() => onDelete(q.id)}
-        className="rounded-md p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors md:opacity-0 md:group-hover:opacity-100"
-      >
-        <Trash2 className="h-3.5 w-3.5" />
-      </button>
-    </div>
-  </div>
-);
+      {/* Desktop: source, date, actions */}
+      <div className="hidden md:flex items-center gap-4 shrink-0">
+        <span className="w-28 text-center text-[11px] font-mono text-muted-foreground/50">
+          {sourceLabel || "—"}
+        </span>
+        <span className="w-24 text-center text-[11px] text-muted-foreground/50 tabular-nums">
+          {formatDate(q.createdAt)}
+        </span>
+        <div className="flex items-center w-24 justify-end gap-0.5">
+          <IconButton
+            label="Solve this question"
+            onClick={(e) => {
+              e.preventDefault();
+              onSolve(q.id);
+            }}
+            className="rounded-md p-1.5 text-muted-foreground hover:text-stat-green hover:bg-stat-green/10 transition-colors"
+          >
+            <CheckCircle className="h-3.5 w-3.5" />
+          </IconButton>
+          {q.url && (
+            <IconButton
+              label="Open problem"
+              onClick={(e) => {
+                e.preventDefault();
+                window.open(q.url, "_blank");
+              }}
+              className="rounded-md p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+            </IconButton>
+          )}
+          <IconButton
+            label="Remove from backlog"
+            onClick={(e) => onDelete(q.id, e)}
+            className="rounded-md p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </IconButton>
+        </div>
+      </div>
+    </Link>
+  );
+};
 
 export default BacklogRow;
