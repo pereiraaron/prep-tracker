@@ -29,14 +29,21 @@ const QuestionsPage = () => {
   const [difficultyFilter, setDifficultyFilter] = useState<Difficulty | "">("");
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+  const [sort, setSort] = useState("-solvedAt");
 
   const debouncedSearch = useDebouncedValue(search, 300);
+
+  const handleSort = (field: string) => {
+    setSort((prev) => (prev === `-${field}` ? field : `-${field}`));
+    setCurrentPage(1);
+  };
 
   const filterParams = {
     search: debouncedSearch || undefined,
     status: "solved" as const,
     category: categoryFilter || undefined,
     difficulty: difficultyFilter || undefined,
+    sort,
   };
 
   // Only run the query for the current mode
@@ -156,7 +163,7 @@ const QuestionsPage = () => {
             <>
               {/* Desktop: column header with count */}
               {!isMobile && (
-                <ColumnHeader currentPage={currentPage} itemsPerPage={ITEMS_PER_PAGE} total={total} />
+                <ColumnHeader currentPage={currentPage} itemsPerPage={ITEMS_PER_PAGE} total={total} sort={sort} onSort={handleSort} />
               )}
 
               {/* Mobile: simple count */}

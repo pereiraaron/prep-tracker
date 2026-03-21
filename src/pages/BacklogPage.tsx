@@ -38,13 +38,20 @@ const BacklogPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const [solvingItem, setSolvingItem] = useState<Question | null>(null);
+  const [sort, setSort] = useState("-createdAt");
 
   const debouncedSearch = useDebouncedValue(search, 300);
+
+  const handleSort = (field: string) => {
+    setSort((prev) => (prev === `-${field}` ? field : `-${field}`));
+    setCurrentPage(1);
+  };
 
   const filterParams = {
     search: debouncedSearch || undefined,
     category: categoryFilter || undefined,
     difficulty: difficultyFilter || undefined,
+    sort,
   };
 
   const paginatedQuery = useBacklogList({
@@ -174,7 +181,7 @@ const BacklogPage = () => {
           ) : (
             <>
               {!isMobile && (
-                <ColumnHeader currentPage={currentPage} itemsPerPage={ITEMS_PER_PAGE} total={total} />
+                <ColumnHeader currentPage={currentPage} itemsPerPage={ITEMS_PER_PAGE} total={total} sort={sort} onSort={handleSort} dateField="createdAt" />
               )}
 
               {isMobile && (
