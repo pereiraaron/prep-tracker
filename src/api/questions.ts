@@ -204,4 +204,18 @@ export const questionsApi = {
       method: "POST",
       body: JSON.stringify(body),
     }),
+
+  // ---- Playground ----
+
+  getTemplates: async (id: string) =>
+    apiFetch<Record<string, string> | null>(`${API_BASE_URL}/questions/${id}/templates`),
+
+  getSubmission: async (id: string) =>
+    apiFetch<{ files: Record<string, string>; updatedAt: string } | null>(`${API_BASE_URL}/questions/${id}/submission`),
+
+  saveSubmission: async (id: string, files: Record<string, string>) =>
+    apiFetch<{ files: Record<string, string>; updatedAt: string }>(`${API_BASE_URL}/questions/${id}/submission`, {
+      method: "PUT",
+      body: JSON.stringify({ files }),
+    }),
 };

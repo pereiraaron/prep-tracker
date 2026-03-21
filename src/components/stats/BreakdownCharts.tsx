@@ -11,16 +11,16 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import { DIFF_COLORS, SOLVED_COLOR, PENDING_COLOR, CHART_BLUE, CHART_VIOLET, getGridColor, getTextColor } from "./constants";
+import { DIFF_COLORS, CHART_BLUE, CHART_VIOLET, getGridColor, getTextColor } from "./constants";
 import { ChartCard, NoData, chartTooltipStyle } from "./shared";
 
 interface BreakdownChartsProps {
-  categoryData: { name: string; short: string; solved: number; pending: number }[];
-  diffData: { name: string; total: number }[];
+  categoryData: { name: string; short: string; count: number }[];
+  diffData: { name: string; count: number }[];
   diffByCatData: { name: string; Easy: number; Medium: number; Hard: number }[];
-  topicData: { name: string; solved: number; pending: number }[];
-  sourceData: { name: string; solved: number; pending: number }[];
-  companyData: { name: string; solved: number; pending: number }[];
+  topicData: { name: string; count: number }[];
+  sourceData: { name: string; count: number }[];
+  companyData: { name: string; count: number }[];
 }
 
 const BreakdownCharts = ({
@@ -40,9 +40,7 @@ const BreakdownCharts = ({
               <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10, fill: getTextColor() }} />
               <YAxis type="category" dataKey="short" tick={{ fontSize: 10, fill: getTextColor() }} width={80} />
               <Tooltip {...chartTooltipStyle} />
-              <Legend wrapperStyle={{ fontSize: 11 }} />
-              <Bar dataKey="solved" stackId="a" fill={SOLVED_COLOR} />
-              <Bar dataKey="pending" stackId="a" fill={PENDING_COLOR} radius={[0, 4, 4, 0]} />
+              <Bar dataKey="count" fill={CHART_BLUE} radius={[0, 4, 4, 0]} name="Solved" />
             </BarChart>
           </ResponsiveContainer>
         ) : (
@@ -51,11 +49,11 @@ const BreakdownCharts = ({
       </ChartCard>
 
       <ChartCard title="By Difficulty">
-        {diffData.some((d) => d.total > 0) ? (
+        {diffData.some((d) => d.count > 0) ? (
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Tooltip {...chartTooltipStyle} formatter={(value) => value} />
-              <Pie data={diffData} dataKey="total" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={4} strokeWidth={0}>
+              <Pie data={diffData} dataKey="count" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={4} strokeWidth={0}>
                 {diffData.map((_, i) => (
                   <Cell key={i} fill={DIFF_COLORS[i]} />
                 ))}
@@ -96,8 +94,7 @@ const BreakdownCharts = ({
               <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10, fill: getTextColor() }} />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: getTextColor() }} width={85} />
               <Tooltip {...chartTooltipStyle} />
-              <Bar dataKey="solved" stackId="a" fill={SOLVED_COLOR} />
-              <Bar dataKey="pending" stackId="a" fill={PENDING_COLOR} radius={[0, 4, 4, 0]} />
+              <Bar dataKey="count" fill={CHART_BLUE} radius={[0, 4, 4, 0]} name="Solved" />
             </BarChart>
           </ResponsiveContainer>
         ) : (
@@ -112,8 +109,7 @@ const BreakdownCharts = ({
               <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10, fill: getTextColor() }} />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: getTextColor() }} width={95} />
               <Tooltip {...chartTooltipStyle} />
-              <Bar dataKey="solved" stackId="a" fill={CHART_BLUE} />
-              <Bar dataKey="pending" stackId="a" fill={PENDING_COLOR} radius={[0, 4, 4, 0]} />
+              <Bar dataKey="count" fill={CHART_BLUE} radius={[0, 4, 4, 0]} name="Solved" />
             </BarChart>
           </ResponsiveContainer>
         ) : (
@@ -128,8 +124,7 @@ const BreakdownCharts = ({
               <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10, fill: getTextColor() }} />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: getTextColor() }} width={85} />
               <Tooltip {...chartTooltipStyle} />
-              <Bar dataKey="solved" stackId="a" fill={CHART_VIOLET} />
-              <Bar dataKey="pending" stackId="a" fill={PENDING_COLOR} radius={[0, 4, 4, 0]} />
+              <Bar dataKey="count" fill={CHART_VIOLET} radius={[0, 4, 4, 0]} name="Solved" />
             </BarChart>
           </ResponsiveContainer>
         ) : (

@@ -22,6 +22,7 @@ import {
   Copy,
   Check,
   Loader2,
+  Play,
 } from "lucide-react";
 const CodeEditor = lazy(() => import("@components/CodeEditor"));
 
@@ -154,6 +155,15 @@ const QuestionDetailPage = () => {
               >
                 <Star className={`h-4 w-4 ${question.starred ? "fill-stat-orange text-stat-orange" : ""}`} />
               </button>
+              {isCodeQuestion && (
+                <button
+                  onClick={() => navigate(`/questions/${id}/practice`)}
+                  className="flex h-9 items-center gap-2 rounded-xl border border-stat-green/30 bg-stat-green/10 px-3 text-sm font-medium text-stat-green hover:bg-stat-green/20 active:scale-[0.98] transition-all"
+                >
+                  <Play className="h-3.5 w-3.5" />
+                  Practice
+                </button>
+              )}
               <button
                 onClick={() => {
                   if (!isEditing) {

@@ -4,59 +4,40 @@ import type { PrepCategory } from "./types";
 // ---- Response types ----
 
 export interface OverviewResponse {
-  total: number;
+  totalSolved: number;
   backlogCount: number;
-  byStatus: Record<string, number>;
   byCategory: Record<string, number>;
   byDifficulty: Record<string, number>;
 }
 
 export interface CategoryBreakdown {
   category: string;
-  total: number;
-  solved: number;
-  pending: number;
-  completionRate: number;
+  count: number;
 }
 
 export interface DifficultyBreakdown {
   difficulty: string;
-  total: number;
-  solved: number;
-  pending: number;
-  completionRate: number;
+  count: number;
 }
 
 export interface TopicBreakdown {
   topic: string;
-  total: number;
-  solved: number;
-  pending: number;
-  completionRate: number;
+  count: number;
 }
 
 export interface SourceBreakdown {
   source: string;
-  total: number;
-  solved: number;
-  pending: number;
-  completionRate: number;
+  count: number;
 }
 
 export interface CompanyTagBreakdown {
   companyTag: string;
-  total: number;
-  solved: number;
-  pending: number;
-  completionRate: number;
+  count: number;
 }
 
 export interface TagBreakdown {
   tag: string;
-  total: number;
-  solved: number;
-  pending: number;
-  completionRate: number;
+  count: number;
 }
 
 export interface ProgressDay {
@@ -93,9 +74,7 @@ export interface InsightsResponse {
   weakAreas: {
     type: string;
     name: string;
-    total: number;
-    solved: number;
-    completionRate: number;
+    count: number;
     lastSolvedDaysAgo: number | null;
   }[];
   tips: { text: string; priority: "high" | "medium" | "low" }[];

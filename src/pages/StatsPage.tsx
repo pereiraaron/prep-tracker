@@ -7,8 +7,8 @@ import StatCard from "@components/StatCard";
 import { DashboardStatsSkeleton } from "@components/Skeleton";
 import { useStatsBatch } from "@queries/useStats";
 import { CATEGORY_LABEL, SOURCE_LABEL } from "@api/types";
-import { BookOpen, CheckCircle, ListTodo, TrendingUp, BarChart3, Loader2 } from "lucide-react";
-import { categoryShort, CHART_BLUE, CHART_TEAL } from "@components/stats/constants";
+import { CheckCircle, ListTodo, TrendingUp, BarChart3, Loader2 } from "lucide-react";
+import { categoryShort } from "@components/stats/constants";
 import { SectionHeader } from "@components/stats/shared";
 import Heatmap, { buildHeatmapWeeks } from "@components/stats/Heatmap";
 import Streaks from "@components/stats/Streaks";
@@ -47,23 +47,20 @@ const StatsPage = () => {
   const streaks = batch?.streaks;
   const insights = batch?.insights;
 
-  const total = overview?.total ?? 0;
-  const solved = overview?.byStatus?.solved ?? 0;
+  const solved = overview?.totalSolved ?? 0;
   const backlog = overview?.backlogCount ?? 0;
-  const completionRate = total > 0 ? Math.round((solved / total) * 100) : 0;
 
   const categoryData = (categoryBreakdown ?? [])
-    .filter((c) => c.total > 0)
+    .filter((c) => c.count > 0)
     .map((c) => ({
       name: CATEGORY_LABEL[c.category as keyof typeof CATEGORY_LABEL] || c.category,
       short: categoryShort(c.category),
-      solved: c.solved,
-      pending: c.pending,
+      count: c.count,
     }));
 
   const diffData = (difficultyBreakdown ?? []).map((d) => ({
     name: d.difficulty.charAt(0).toUpperCase() + d.difficulty.slice(1),
-    total: d.total,
+    count: d.count,
   }));
 
   const dailyData = (progressData ?? []).map((d) => ({
@@ -82,21 +79,21 @@ const StatsPage = () => {
   }));
 
   const topicData = (topicBreakdown ?? [])
-    .filter((t) => t.total > 0)
-    .sort((a, b) => b.total - a.total)
+    .filter((t) => t.count > 0)
+    .sort((a, b) => b.count - a.count)
     .slice(0, 10)
-    .map((t) => ({ name: t.topic, solved: t.solved, pending: t.pending }));
+    .map((t) => ({ name: t.topic, count: t.count }));
 
   const sourceData = (sourceBreakdown ?? [])
-    .filter((s) => s.total > 0)
-    .sort((a, b) => b.total - a.total)
-    .map((s) => ({ name: SOURCE_LABEL[s.source] || s.source, solved: s.solved, pending: s.pending }));
+    .filter((s) => s.count > 0)
+    .sort((a, b) => b.count - a.count)
+    .map((s) => ({ name: SOURCE_LABEL[s.source] || s.source, count: s.count }));
 
   const companyData = (companyBreakdown ?? [])
-    .filter((c) => c.total > 0)
-    .sort((a, b) => b.total - a.total)
+    .filter((c) => c.count > 0)
+    .sort((a, b) => b.count - a.count)
     .slice(0, 10)
-    .map((c) => ({ name: c.companyTag, solved: c.solved, pending: c.pending }));
+    .map((c) => ({ name: c.companyTag, count: c.count }));
 
   const diffByCatData = (diffByCategory ?? [])
     .filter((d) => d.total > 0)
@@ -122,25 +119,15 @@ const StatsPage = () => {
       ) : (
         <>
           {/* Overview */}
-          <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-            <StatCard label="Total" value={total || "—"} icon={BookOpen} color="bg-stat-blue/10 text-stat-blue" />
+          <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-3">
             <StatCard label="Solved" value={solved || "—"} icon={CheckCircle} color="bg-stat-green/10 text-stat-green" />
-            <StatCard label="Remaining" value={backlog || "—"} icon={ListTodo} color="bg-stat-orange/10 text-stat-orange" />
-            <StatCard label="Rate" value={total > 0 ? `${completionRate}%` : "—"} icon={TrendingUp} color="bg-stat-purple/10 text-stat-purple" />
-          </div>
-
-          {/* Progress bar */}
-          <div className="glass-card mb-8 rounded-xl p-4">
-            <div className="mb-2 flex items-center justify-between text-sm">
-              <span className="font-display font-semibold">Overall Progress</span>
-              <span className="text-xs font-medium text-muted-foreground tabular-nums">{solved}/{total}</span>
-            </div>
-            <div className="h-2.5 overflow-hidden rounded-full bg-secondary">
-              <div
-                className="h-full rounded-full transition-all duration-700"
-                style={{ width: `${completionRate}%`, background: `linear-gradient(90deg, ${CHART_BLUE}, ${CHART_TEAL})` }}
-              />
-            </div>
+            <StatCard label="Backlog" value={backlog || "—"} icon={ListTodo} color="bg-stat-orange/10 text-stat-orange" />
+            <StatCard
+              label="Streak"
+              value={streaks ? `${streaks.currentStreak}d` : "—"}
+              icon={TrendingUp}
+              color="bg-stat-purple/10 text-stat-purple"
+            />
           </div>
 
           {streaks && <Streaks data={streaks} />}

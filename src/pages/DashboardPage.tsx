@@ -15,6 +15,7 @@ import {
   Plus,
   BarChart3,
   Flame,
+  CalendarCheck,
   Clock,
   Lightbulb,
   ArrowRight,
@@ -37,8 +38,7 @@ const Dashboard = () => {
   const tips = insights?.tips ?? [];
   const recentSolved = recentData?.data ?? [];
 
-  const total = overview?.total ?? 0;
-  const solved = overview?.byStatus?.solved ?? 0;
+  const solved = overview?.totalSolved ?? 0;
   const backlog = overview?.backlogCount ?? 0;
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -68,7 +68,6 @@ const Dashboard = () => {
         <DashboardStatsSkeleton />
       ) : (
         <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-          <StatCard label="Total" value={total || "—"} icon={BookOpen} color="bg-stat-blue/10 text-stat-blue" />
           <StatCard label="Solved" value={solved || "—"} icon={CheckCircle} color="bg-stat-green/10 text-stat-green" />
           <StatCard label="Backlog" value={backlog || "—"} icon={ListTodo} color="bg-stat-orange/10 text-stat-orange" />
           <StatCard
@@ -76,6 +75,12 @@ const Dashboard = () => {
             value={`${streaks?.currentStreak ?? 0}d`}
             icon={Flame}
             color="bg-stat-purple/10 text-stat-purple"
+          />
+          <StatCard
+            label="Active Days"
+            value={streaks?.totalActiveDays ?? "—"}
+            icon={CalendarCheck}
+            color="bg-stat-blue/10 text-stat-blue"
           />
         </div>
       )}

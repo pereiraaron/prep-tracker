@@ -63,6 +63,33 @@ export const useRecentQuestions = () =>
     queryFn: () => questionsApi.getAll({ sort: "-solvedAt", limit: 5, status: "solved" }),
   });
 
+// ---- Playground ----
+
+export const useTemplates = (id: string | undefined) =>
+  useQuery({
+    queryKey: queryKeys.questions.templates(id!),
+    queryFn: () => questionsApi.getTemplates(id!),
+    enabled: !!id,
+  });
+
+export const useSubmission = (id: string | undefined) =>
+  useQuery({
+    queryKey: queryKeys.questions.submission(id!),
+    queryFn: () => questionsApi.getSubmission(id!),
+    enabled: !!id,
+  });
+
+export const useSaveSubmission = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, files }: { id: string; files: Record<string, string> }) =>
+      questionsApi.saveSubmission(id, files),
+    onSuccess: (_data, { id }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.questions.submission(id) });
+    },
+  });
+};
+
 // ---- Mutations ----
 
 export const useCreateQuestion = () => {
