@@ -9,9 +9,11 @@ const ColumnHeader = ({ currentPage, itemsPerPage, total }: ColumnHeaderProps) =
     <span>
       Showing {(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, total)} of {total}
     </span>
-    <div className="hidden md:flex items-center gap-12">
-      <span className="w-20 text-right">Source</span>
-      <span className="w-16 text-right">Date</span>
+    <div className="hidden md:flex items-center gap-4">
+      <span className="w-16 text-center">Difficulty</span>
+      <span className="w-40 text-center">Category</span>
+      <span className="w-28 text-center">Source</span>
+      <span className="w-24 text-center">Date</span>
       <span className="w-24" />
     </div>
   </div>

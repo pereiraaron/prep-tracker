@@ -28,23 +28,23 @@ const StatsSidebar = () => {
 
   if (overviewLoading || streaksLoading) return <StatsSidebarSkeleton />;
 
-  const solved = overview?.byStatus?.solved ?? 0;
+  const solved = overview?.totalSolved ?? 0;
   const currentStreak = streaks?.currentStreak ?? 0;
   const longestStreak = streaks?.longestStreak ?? 0;
 
-  const diffTotal = difficulties?.reduce((s, d) => s + d.solved, 0) ?? 0;
-  const easyCount = difficulties?.find((d) => d.difficulty === "easy")?.solved ?? 0;
-  const mediumCount = difficulties?.find((d) => d.difficulty === "medium")?.solved ?? 0;
-  const hardCount = difficulties?.find((d) => d.difficulty === "hard")?.solved ?? 0;
+  const diffTotal = difficulties?.reduce((s, d) => s + d.count, 0) ?? 0;
+  const easyCount = difficulties?.find((d) => d.difficulty === "easy")?.count ?? 0;
+  const mediumCount = difficulties?.find((d) => d.difficulty === "medium")?.count ?? 0;
+  const hardCount = difficulties?.find((d) => d.difficulty === "hard")?.count ?? 0;
 
   const topCategories = (categories ?? [])
-    .filter((c) => c.solved > 0)
-    .sort((a, b) => b.solved - a.solved)
+    .filter((c) => c.count > 0)
+    .sort((a, b) => b.count - a.count)
     .slice(0, 5);
 
   const topSources = (sources ?? [])
-    .filter((s) => s.solved > 0)
-    .sort((a, b) => b.solved - a.solved);
+    .filter((s) => s.count > 0)
+    .sort((a, b) => b.count - a.count);
 
   return (
     <div className="space-y-4">
@@ -113,7 +113,7 @@ const StatsSidebar = () => {
                     <span className={`h-2 w-2 shrink-0 rounded-full ${colorCls.split(" ")[0]?.replace("/10", "") || "bg-muted-foreground"}`} />
                     <span className="text-xs font-medium truncate">{label}</span>
                   </div>
-                  <span className="text-xs font-semibold tabular-nums text-muted-foreground">{cat.solved}</span>
+                  <span className="text-xs font-semibold tabular-nums text-muted-foreground">{cat.count}</span>
                 </div>
               );
             })}
@@ -134,13 +134,13 @@ const StatsSidebar = () => {
           <div className="space-y-2">
             {topSources.map((src) => {
               const label = SOURCE_LABEL[src.source] || src.source;
-              const srcTotal = topSources.reduce((s, x) => s + x.solved, 0);
-              const pct = srcTotal > 0 ? (src.solved / srcTotal) * 100 : 0;
+              const srcTotal = topSources.reduce((s, x) => s + x.count, 0);
+              const pct = srcTotal > 0 ? (src.count / srcTotal) * 100 : 0;
               return (
                 <div key={src.source} className="space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-medium">{label}</span>
-                    <span className="text-[11px] font-semibold tabular-nums text-muted-foreground">{src.solved}</span>
+                    <span className="text-[11px] font-semibold tabular-nums text-muted-foreground">{src.count}</span>
                   </div>
                   <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
                     <div

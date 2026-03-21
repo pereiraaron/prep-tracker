@@ -33,6 +33,7 @@ const BacklogPage = lazy(() => import("@pages/BacklogPage"));
 const SettingsPage = lazy(() => import("@pages/SettingsPage"));
 const RegisterPage = lazy(() => import("@pages/RegisterPage"));
 const AuthCallbackPage = lazy(() => import("@pages/AuthCallbackPage"));
+const PracticePage = lazy(() => import("@pages/PracticePage"));
 const NotFound = lazy(() => import("@pages/NotFound"));
 
 const PageLoader = () => (
@@ -67,6 +68,7 @@ const App = () => (
               <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
               <Route path="/questions" element={<ProtectedRoute><QuestionsPage /></ProtectedRoute>} />
               <Route path="/questions/:id" element={<ProtectedRoute><QuestionDetailPage /></ProtectedRoute>} />
+              <Route path="/questions/:id/practice" element={<ProtectedRoute><PracticePage /></ProtectedRoute>} />
               <Route path="/question/new" element={<ProtectedRoute><NewQuestionPage /></ProtectedRoute>} />
               <Route path="/backlog" element={<ProtectedRoute><BacklogPage /></ProtectedRoute>} />
               <Route path="/stats" element={<ProtectedRoute><StatsPage /></ProtectedRoute>} />

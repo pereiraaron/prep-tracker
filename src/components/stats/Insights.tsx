@@ -5,9 +5,7 @@ import { SectionHeader } from "./shared";
 interface WeakArea {
   type: string;
   name: string;
-  total: number;
-  solved: number;
-  completionRate: number;
+  count: number;
   lastSolvedDaysAgo: number | null;
 }
 
@@ -38,26 +36,17 @@ const InsightsSection = ({ insights }: { insights: InsightsData }) => {
           </div>
           <div className="space-y-3">
             {insights.weakAreas.map((area, i) => (
-              <div key={i}>
-                <div className="flex items-center justify-between text-sm mb-1">
-                  <span className="font-medium">{area.name}</span>
-                  <span className="text-muted-foreground text-xs">
-                    {area.solved}/{area.total} ({area.completionRate}%)
+              <div key={i} className="flex items-center justify-between">
+                <span className="text-sm font-medium">{area.name}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold tabular-nums text-muted-foreground">
+                    {area.count} solved
                   </span>
-                </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
-                  <div
-                    className="h-full rounded-full transition-all"
-                    style={{
-                      width: `${area.completionRate}%`,
-                      background:
-                        area.completionRate < 40
-                          ? "hsl(0, 72%, 55%)"
-                          : area.completionRate < 70
-                            ? "hsl(42, 95%, 52%)"
-                            : "hsl(155, 65%, 42%)",
-                    }}
-                  />
+                  {area.lastSolvedDaysAgo !== null && (
+                    <span className="text-[10px] text-muted-foreground/60">
+                      {area.lastSolvedDaysAgo}d ago
+                    </span>
+                  )}
                 </div>
               </div>
             ))}

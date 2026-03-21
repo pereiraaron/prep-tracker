@@ -29,6 +29,8 @@ export const queryKeys = {
       [...queryKeys.questions.all, "infinite", JSON.parse(JSON.stringify(params))] as const,
     detail: (id: string) => [...queryKeys.questions.all, "detail", id] as const,
     recent: () => [...queryKeys.questions.all, "recent"] as const,
+    templates: (id: string) => [...queryKeys.questions.all, "templates", id] as const,
+    submission: (id: string) => [...queryKeys.questions.all, "submission", id] as const,
   },
   backlog: {
     all: ["backlog"] as const,
