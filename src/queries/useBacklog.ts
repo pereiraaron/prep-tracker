@@ -1,6 +1,7 @@
-import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { questionsApi, type QuestionsFilter, type CreateBacklogQuestionBody } from "@api/questions";
 import { queryKeys } from "@lib/queryKeys";
+import { useQuestionsFilterStore } from "@store/useQuestionsFilterStore";
 
 // ---- Queries ----
 
@@ -23,6 +24,7 @@ export const useBacklogList = (params: BacklogListParams = {}, enabled = true) =
           })
         : questionsApi.getBacklog(filter),
     enabled,
+    placeholderData: keepPreviousData,
   });
 };
 
@@ -123,6 +125,7 @@ export const useSolveBacklogItem = () => {
     mutationFn: ({ id, solution }: { id: string; solution: string }) =>
       questionsApi.solve(id, { solution }),
     onSuccess: () => {
+      useQuestionsFilterStore.getState().setCurrentPage(1);
       queryClient.invalidateQueries({ queryKey: queryKeys.backlog.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.stats.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.all });

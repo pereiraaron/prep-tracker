@@ -1,7 +1,7 @@
 const MOBILE_WEEKS = 16;
 
-const HEATMAP_LIGHT = ["hsl(220, 15%, 90%)", "hsl(155, 50%, 75%)", "hsl(155, 55%, 58%)", "hsl(155, 60%, 42%)", "hsl(155, 65%, 30%)"];
-const HEATMAP_DARK = ["hsl(224, 20%, 18%)", "hsl(155, 40%, 25%)", "hsl(155, 50%, 35%)", "hsl(155, 55%, 45%)", "hsl(155, 60%, 55%)"];
+const HEATMAP_LIGHT = ["hsl(220, 15%, 92%)", "hsl(155, 45%, 78%)", "hsl(155, 52%, 60%)", "hsl(155, 58%, 44%)", "hsl(155, 62%, 32%)"];
+const HEATMAP_DARK = ["hsl(224, 20%, 16%)", "hsl(155, 35%, 24%)", "hsl(155, 45%, 34%)", "hsl(155, 52%, 44%)", "hsl(155, 58%, 54%)"];
 
 const isDark = () => document.documentElement.classList.contains("dark");
 
@@ -45,6 +45,33 @@ export const buildHeatmapWeeks = (data: Record<string, number>): HeatmapDay[][] 
   return weeks;
 };
 
+const HeatmapTooltip = ({ date, count }: { date: string; count: number }) => {
+  if (!date) return null;
+  const d = new Date(date + "T00:00:00");
+  const label = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return (
+    <div className="pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-popover px-2.5 py-1 text-[10px] font-medium text-popover-foreground shadow-lg border border-border z-10">
+      {count} solved &middot; {label}
+    </div>
+  );
+};
+
+const HeatmapCell = ({ day }: { day: HeatmapDay }) => {
+  if (!day.date) return <div className="aspect-square w-full" />;
+
+  return (
+    <div className="group relative aspect-square w-full">
+      <div
+        className="h-full w-full rounded-[3px] transition-transform group-hover:scale-125"
+        style={{ backgroundColor: heatmapColor(day.count) }}
+      />
+      <div className="hidden group-hover:block">
+        <HeatmapTooltip date={day.date} count={day.count} />
+      </div>
+    </div>
+  );
+};
+
 const HeatmapGridInner = ({ data }: { data: HeatmapDay[][] }) => (
   <>
     <div
@@ -54,22 +81,17 @@ const HeatmapGridInner = ({ data }: { data: HeatmapDay[][] }) => (
       {data.map((week, wi) => (
         <div key={wi} className="grid gap-[3px]" style={{ gridTemplateRows: "repeat(7, minmax(0, 1fr))" }}>
           {week.map((day, di) => (
-            <div
-              key={di}
-              title={day.date ? `${day.date}: ${day.count} solved` : ""}
-              className="aspect-square w-full rounded-full"
-              style={{ backgroundColor: day.date ? heatmapColor(day.count) : "transparent" }}
-            />
+            <HeatmapCell key={di} day={day} />
           ))}
         </div>
       ))}
     </div>
-    <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+    <div className="mt-3 flex items-center justify-end gap-1.5 text-[10px] text-muted-foreground/70">
       <span>Less</span>
       {[0, 1, 2, 3, 4].map((level) => (
         <div
           key={level}
-          className="h-3 w-3 rounded-full"
+          className="h-2.5 w-2.5 rounded-[2px]"
           style={{ backgroundColor: heatmapColor(level === 0 ? 0 : level) }}
         />
       ))}

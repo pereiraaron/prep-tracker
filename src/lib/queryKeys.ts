@@ -4,6 +4,15 @@ interface QuestionListParams extends QuestionsFilter {
   search?: string;
 }
 
+// Stable key from params: strips undefined values, sorts keys for consistency.
+// Cheaper than JSON.parse(JSON.stringify(params)).
+const stableKey = (params: object): string => {
+  const entries = Object.entries(params as Record<string, unknown>)
+    .filter(([, v]) => v !== undefined)
+    .sort(([a], [b]) => a.localeCompare(b));
+  return JSON.stringify(entries);
+};
+
 export const queryKeys = {
   stats: {
     all: ["stats"] as const,
@@ -24,9 +33,9 @@ export const queryKeys = {
   questions: {
     all: ["questions"] as const,
     list: (params: QuestionListParams) =>
-      [...queryKeys.questions.all, "list", JSON.parse(JSON.stringify(params))] as const,
+      [...queryKeys.questions.all, "list", stableKey(params)] as const,
     infinite: (params: QuestionListParams) =>
-      [...queryKeys.questions.all, "infinite", JSON.parse(JSON.stringify(params))] as const,
+      [...queryKeys.questions.all, "infinite", stableKey(params)] as const,
     detail: (id: string) => [...queryKeys.questions.all, "detail", id] as const,
     recent: () => [...queryKeys.questions.all, "recent"] as const,
     templates: (id: string) => [...queryKeys.questions.all, "templates", id] as const,
@@ -35,8 +44,8 @@ export const queryKeys = {
   backlog: {
     all: ["backlog"] as const,
     list: (params: object) =>
-      [...queryKeys.backlog.all, "list", JSON.parse(JSON.stringify(params))] as const,
+      [...queryKeys.backlog.all, "list", stableKey(params)] as const,
     infinite: (params: object) =>
-      [...queryKeys.backlog.all, "infinite", JSON.parse(JSON.stringify(params))] as const,
+      [...queryKeys.backlog.all, "infinite", stableKey(params)] as const,
   },
 };

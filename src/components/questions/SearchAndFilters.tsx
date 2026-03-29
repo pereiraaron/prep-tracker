@@ -40,7 +40,7 @@ const SearchAndFilters = ({
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search by title, topic, or tag..."
-            className="glass-card h-10 w-full rounded-xl pl-10 pr-9 text-sm outline-none transition-all placeholder:text-muted-foreground/50 focus:ring-2 focus:ring-primary/20 focus:border-primary/30"
+            className="glass-card h-10 w-full rounded-xl pl-10 pr-9 text-sm outline-none transition-all placeholder:text-muted-foreground/40 focus:ring-2 focus:ring-primary/20 focus:border-primary/30"
           />
           {search && (
             <button

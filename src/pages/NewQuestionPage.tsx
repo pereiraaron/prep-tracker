@@ -368,7 +368,22 @@ const NewQuestionPage = () => {
         </section>
 
         {/* ---- Actions ---- */}
-        <div className="flex items-center gap-3 pt-2">
+        <div className="flex items-center gap-3 pt-2 justify-end">
+          {!canSubmit && title.trim() && (
+            <p className="text-xs text-muted-foreground mr-auto">
+              {!category
+                ? "Pick a category"
+                : isBacklogMode
+                  ? !url.trim() ? "Add problem URL" : !urlValid ? "Fix the URL" : ""
+                  : !difficulty ? "Pick difficulty" : !solution.trim() ? "Add a solution" : !urlValid ? "Fix the URL" : ""}
+            </p>
+          )}
+          <button
+            onClick={() => navigate(isBacklogMode ? "/backlog" : "/questions")}
+            className="rounded-xl border border-border px-5 py-2.5 text-sm font-medium transition-all hover:bg-secondary active:scale-[0.98]"
+          >
+            Cancel
+          </button>
           <button
             onClick={handleSubmit}
             disabled={!canSubmit || mutating}
@@ -377,21 +392,6 @@ const NewQuestionPage = () => {
             {mutating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             {isBacklogMode ? "Add to Backlog" : "Save Question"}
           </button>
-          <button
-            onClick={() => navigate(isBacklogMode ? "/backlog" : "/questions")}
-            className="rounded-xl border border-border px-5 py-2.5 text-sm font-medium transition-all hover:bg-secondary active:scale-[0.98]"
-          >
-            Cancel
-          </button>
-          {!canSubmit && title.trim() && (
-            <p className="text-xs text-muted-foreground ml-auto">
-              {!category
-                ? "Pick a category"
-                : isBacklogMode
-                  ? !url.trim() ? "Add problem URL" : !urlValid ? "Fix the URL" : ""
-                  : !difficulty ? "Pick difficulty" : !solution.trim() ? "Add a solution" : !urlValid ? "Fix the URL" : ""}
-            </p>
-          )}
         </div>
       </div>
     </Layout>

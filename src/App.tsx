@@ -14,6 +14,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000, // keep unused cache 30 min (default 5 min)
       retry: 1,
       refetchOnWindowFocus: false,
     },
@@ -34,6 +35,7 @@ const SettingsPage = lazy(() => import("@pages/SettingsPage"));
 const RegisterPage = lazy(() => import("@pages/RegisterPage"));
 const AuthCallbackPage = lazy(() => import("@pages/AuthCallbackPage"));
 const PracticePage = lazy(() => import("@pages/PracticePage"));
+const RevisionPage = lazy(() => import("@pages/RevisionPage"));
 const NotFound = lazy(() => import("@pages/NotFound"));
 
 const PageLoader = () => (
@@ -72,6 +74,7 @@ const App = () => (
               <Route path="/question/new" element={<ProtectedRoute><NewQuestionPage /></ProtectedRoute>} />
               <Route path="/backlog" element={<ProtectedRoute><BacklogPage /></ProtectedRoute>} />
               <Route path="/stats" element={<ProtectedRoute><StatsPage /></ProtectedRoute>} />
+              <Route path="/revision" element={<ProtectedRoute><RevisionPage /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
