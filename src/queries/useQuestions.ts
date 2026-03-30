@@ -1,4 +1,4 @@
-import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { questionsApi, type QuestionsFilter, type CreateQuestionBody, type UpdateQuestionBody } from "@api/questions";
 import { queryKeys } from "@lib/queryKeys";
 
@@ -23,6 +23,7 @@ export const useQuestionsList = (params: ListParams = {}, enabled = true) => {
           })
         : questionsApi.getAll(filter),
     enabled,
+    placeholderData: keepPreviousData,
   });
 };
 

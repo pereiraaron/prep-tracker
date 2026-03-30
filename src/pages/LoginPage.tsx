@@ -28,19 +28,20 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      {/* Subtle gradient orb */}
+      {/* Subtle gradient orbs */}
       <div className="pointer-events-none fixed left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 h-125 w-125 rounded-full bg-primary/5 blur-3xl" />
+      <div className="pointer-events-none fixed right-1/4 bottom-1/4 h-80 w-80 rounded-full bg-stat-purple/5 blur-3xl" />
 
       <div className="relative w-full max-w-md space-y-6 animate-fade-in">
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-2">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 mb-2">
             <Zap className="w-7 h-7 text-primary" />
           </div>
           <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">Welcome back</h1>
-          <p className="text-muted-foreground text-sm">Sign in to your interview prep tracker</p>
+          <p className="text-muted-foreground/70 text-sm">Sign in to your interview prep tracker</p>
         </div>
 
-        <Card className="glass-card border-border/50">
+        <Card className="glass-card border-border/50 shadow-lg shadow-black/[0.03]">
           <CardHeader className="pb-4">
             <h2 className="text-base font-display font-semibold text-center">Login</h2>
           </CardHeader>
@@ -48,7 +49,7 @@ const LoginPage = () => {
           <CardContent className="space-y-4">
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2 text-sm text-destructive animate-slide-up">
+                <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2.5 text-sm text-destructive animate-slide-up">
                   {error}
                 </div>
               )}
@@ -56,7 +57,7 @@ const LoginPage = () => {
               <div className="space-y-1.5">
                 <Label htmlFor="login-email" className="text-xs font-medium">Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
                   <Input
                     id="login-email"
                     name="email"
@@ -73,7 +74,7 @@ const LoginPage = () => {
               <div className="space-y-1.5">
                 <Label htmlFor="login-password" className="text-xs font-medium">Password</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
                   <Input
                     id="login-password"
                     name="password"
@@ -87,7 +88,7 @@ const LoginPage = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full gap-2 shadow-lg shadow-primary/25 hover:shadow-xl transition-all active:scale-[0.98]" disabled={isLoading}>
+              <Button type="submit" className="w-full gap-2 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25 transition-all active:scale-[0.98]" disabled={isLoading}>
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
@@ -104,7 +105,7 @@ const LoginPage = () => {
                 <span className="w-full border-t border-border" />
               </div>
               <div className="relative flex justify-center text-[10px] uppercase tracking-wider">
-                <span className="bg-card px-3 text-muted-foreground/60">or continue with</span>
+                <span className="bg-card px-3 text-muted-foreground/50">or continue with</span>
               </div>
             </div>
 
@@ -118,7 +119,7 @@ const LoginPage = () => {
           </CardContent>
         </Card>
 
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="text-center text-sm text-muted-foreground/70">
           Don't have an account?{" "}
           <Link to="/auth/register" className="text-primary underline-offset-4 hover:underline font-medium">
             Sign up

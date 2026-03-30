@@ -46,6 +46,8 @@ const StatsSidebar = () => {
     .filter((s) => s.count > 0)
     .sort((a, b) => b.count - a.count);
 
+  const srcTotal = topSources.reduce((s, x) => s + x.count, 0);
+
   return (
     <div className="space-y-4">
       {/* Quick stats */}
@@ -134,7 +136,6 @@ const StatsSidebar = () => {
           <div className="space-y-2">
             {topSources.map((src) => {
               const label = SOURCE_LABEL[src.source] || src.source;
-              const srcTotal = topSources.reduce((s, x) => s + x.count, 0);
               const pct = srcTotal > 0 ? (src.count / srcTotal) * 100 : 0;
               return (
                 <div key={src.source} className="space-y-1">

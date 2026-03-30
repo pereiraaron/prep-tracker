@@ -1,8 +1,12 @@
 import type { Question } from "@api/questions";
+import { questionsApi } from "@api/questions";
 import { SOURCE_LABEL } from "@api/types";
 import { CATEGORY_BORDER_COLORS } from "@lib/styles";
 import { DifficultyBadge, CategoryBadge } from "@components/Badge";
 import IconButton from "@components/IconButton";
+import { queryKeys } from "@lib/queryKeys";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRef } from "react";
 import { Star, Trash2, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -17,13 +21,37 @@ const formatDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
 const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps) => {
+  const queryClient = useQueryClient();
   const borderColor = q.category ? CATEGORY_BORDER_COLORS[q.category] || "border-l-border" : "border-l-border";
   const sourceLabel = q.source ? SOURCE_LABEL[q.source] || q.source : null;
+
+  const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const startPrefetch = () => {
+    hoverTimer.current = setTimeout(() => {
+      queryClient.prefetchQuery({
+        queryKey: queryKeys.questions.detail(q.id),
+        queryFn: () => questionsApi.getById(q.id),
+        staleTime: 30_000,
+      });
+    }, 500);
+  };
+
+  const cancelPrefetch = () => {
+    if (hoverTimer.current) {
+      clearTimeout(hoverTimer.current);
+      hoverTimer.current = null;
+    }
+  };
 
   return (
     <Link
       to={`/questions/${q.id}`}
-      className={`group flex items-center gap-3 border-l-[3px] ${borderColor} px-3 sm:px-4 py-3 md:py-2.5 transition-colors hover:bg-secondary/50 animate-slide-up`}
+      onMouseEnter={startPrefetch}
+      onMouseLeave={cancelPrefetch}
+      onFocus={startPrefetch}
+      onBlur={cancelPrefetch}
+      className={`group flex items-center gap-3 border-l-[3px] ${borderColor} px-3 sm:px-4 py-3 md:py-2.5 transition-all hover:bg-secondary/40 animate-slide-up`}
       style={{ animationDelay: `${index * 20}ms` }}
     >
       {/* Star */}

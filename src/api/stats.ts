@@ -13,11 +13,19 @@ export interface OverviewResponse {
 export interface CategoryBreakdown {
   category: string;
   count: number;
+  total: number;
+  solved: number;
+  pending: number;
+  completionRate: number;
 }
 
 export interface DifficultyBreakdown {
   difficulty: string;
   count: number;
+  total: number;
+  solved: number;
+  pending: number;
+  completionRate: number;
 }
 
 export interface TopicBreakdown {
@@ -28,6 +36,10 @@ export interface TopicBreakdown {
 export interface SourceBreakdown {
   source: string;
   count: number;
+  total: number;
+  solved: number;
+  pending: number;
+  completionRate: number;
 }
 
 export interface CompanyTagBreakdown {

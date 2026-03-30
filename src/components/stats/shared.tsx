@@ -2,25 +2,28 @@ export const chartTooltipStyle = {
   contentStyle: {
     background: "hsl(var(--card))",
     border: "1px solid hsl(var(--border))",
-    borderRadius: "0.5rem",
+    borderRadius: "0.625rem",
     fontSize: "12px",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+    boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+    padding: "8px 12px",
   },
   labelStyle: {
     color: "hsl(var(--foreground))",
     fontWeight: 600,
-    marginBottom: "2px",
+    marginBottom: "4px",
+    fontSize: "12px",
   },
   itemStyle: {
-    color: "hsl(var(--foreground))",
+    color: "hsl(var(--muted-foreground))",
     fontSize: "11px",
+    padding: "1px 0",
   },
-  cursor: { stroke: "hsl(var(--border))" },
+  cursor: { fill: "hsl(var(--foreground) / 0.04)", stroke: "none" },
 };
 
 export const NoData = () => (
-  <div className="py-8 text-center">
-    <p className="text-sm text-muted-foreground">Solve some questions and your stats will appear here</p>
+  <div className="flex items-center justify-center py-12">
+    <p className="text-sm text-muted-foreground/60">No data yet</p>
   </div>
 );
 
@@ -40,8 +43,8 @@ export const ChartCard = ({
   children: React.ReactNode;
   className?: string;
 }) => (
-  <div className={`glass-card rounded-xl p-5 transition-all hover:shadow-sm ${className}`}>
-    <h3 className="font-display text-sm font-semibold mb-4">{title}</h3>
+  <div className={`glass-card rounded-xl p-5 ${className}`}>
+    <h3 className="font-display text-[13px] font-semibold text-muted-foreground mb-4">{title}</h3>
     {children}
   </div>
 );

@@ -2,7 +2,7 @@ import usePageTitle from "@hooks/usePageTitle";
 import Layout from "@components/Layout";
 import PageHeader from "@components/PageHeader";
 import PasskeySection from "@components/settings/PasskeySection";
-import { User, Moon, Sun, Settings as SettingsIcon, Palette } from "lucide-react";
+import { User, Moon, Sun, Settings as SettingsIcon, Palette, CalendarClock, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@store/useAuthStore";
 
@@ -86,10 +86,86 @@ const SettingsPage = () => {
           </div>
         </div>
 
+        {/* Interview Countdown */}
+        <InterviewCountdownSetting />
+
         {/* Security – Passkeys */}
         <PasskeySection />
       </div>
     </Layout>
+  );
+};
+
+const InterviewCountdownSetting = () => {
+  const [date, setDate] = useState(() => localStorage.getItem("interviewDate") || "");
+  const [label, setLabel] = useState(() => localStorage.getItem("interviewLabel") || "");
+
+  const handleSave = () => {
+    if (date) {
+      localStorage.setItem("interviewDate", date);
+      localStorage.setItem("interviewLabel", label.trim());
+    }
+  };
+
+  const handleClear = () => {
+    setDate("");
+    setLabel("");
+    localStorage.removeItem("interviewDate");
+    localStorage.removeItem("interviewLabel");
+  };
+
+  const saved = localStorage.getItem("interviewDate");
+
+  return (
+    <div className="glass-card rounded-xl p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <CalendarClock className="h-4 w-4 text-muted-foreground" />
+        <h2 className="font-display text-sm font-semibold">Interview Countdown</h2>
+      </div>
+      <p className="text-xs text-muted-foreground mb-4">
+        Set an upcoming interview date to see a countdown on your dashboard.
+      </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div className="flex-1">
+          <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Label (optional)</label>
+          <input
+            type="text"
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder="e.g. Google Round 1"
+            className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30"
+          />
+        </div>
+        <div className="flex-1">
+          <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Date</label>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            min={new Date().toISOString().split("T")[0]}
+            className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30"
+          />
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={handleSave}
+            disabled={!date}
+            className="h-10 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-40"
+          >
+            Save
+          </button>
+          {saved && (
+            <button
+              onClick={handleClear}
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+              aria-label="Clear interview date"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 

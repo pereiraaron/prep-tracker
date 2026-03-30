@@ -1,7 +1,7 @@
 import usePageTitle from "@hooks/usePageTitle";
 import useIsMobile from "@hooks/useIsMobile";
 import useDebouncedValue from "@hooks/useDebouncedValue";
-import { useState } from "react";
+import useQuestionsFilter from "@hooks/useQuestionsFilter";
 import Layout from "@components/Layout";
 import PageHeader from "@components/PageHeader";
 import EmptyState from "@components/EmptyState";
@@ -14,6 +14,9 @@ import SearchAndFilters from "@components/questions/SearchAndFilters";
 import QuestionRow from "@components/questions/QuestionRow";
 import ColumnHeader from "@components/questions/ColumnHeader";
 import { useQuestionsList, useQuestionsInfinite, useDeleteQuestion, useStarQuestion } from "@queries/useQuestions";
+import { useQueryClient } from "@tanstack/react-query";
+import { questionsApi } from "@api/questions";
+import { queryKeys } from "@lib/queryKeys";
 import type { PrepCategory, Difficulty } from "@api/types";
 import { BookOpen, Plus, Search, X } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -24,19 +27,29 @@ const ITEMS_PER_PAGE = 15;
 const QuestionsPage = () => {
   usePageTitle("Questions");
   const isMobile = useIsMobile();
-  const [search, setSearch] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<PrepCategory | "">("");
-  const [difficultyFilter, setDifficultyFilter] = useState<Difficulty | "">("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [showFilters, setShowFilters] = useState(false);
+  const queryClient = useQueryClient();
+  const {
+    search, setSearch,
+    categoryFilter, setCategoryFilter,
+    difficultyFilter, setDifficultyFilter,
+    currentPage, setCurrentPage,
+    showFilters, setShowFilters,
+    sort, setSort,
+    clearAll,
+  } = useQuestionsFilter();
 
   const debouncedSearch = useDebouncedValue(search, 300);
+
+  const handleSort = (field: string) => {
+    setSort(sort === `-${field}` ? field : `-${field}`);
+  };
 
   const filterParams = {
     search: debouncedSearch || undefined,
     status: "solved" as const,
     category: categoryFilter || undefined,
     difficulty: difficultyFilter || undefined,
+    sort,
   };
 
   // Only run the query for the current mode
@@ -66,14 +79,31 @@ const QuestionsPage = () => {
     ? infiniteQuery.data?.pages[0]?.pagination.total ?? 0
     : pagination?.total ?? 0;
 
+  // Prefetch next page for instant pagination
+  if (!isMobile && currentPage < totalPages) {
+    const nextParams = { ...filterParams, page: currentPage + 1, limit: ITEMS_PER_PAGE };
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.questions.list(nextParams),
+      queryFn: () =>
+        debouncedSearch
+          ? questionsApi.search(debouncedSearch, {
+              status: "solved",
+              difficulty: filterParams.difficulty,
+              category: filterParams.category,
+              page: currentPage + 1,
+              limit: ITEMS_PER_PAGE,
+            })
+          : questionsApi.getAll({ ...filterParams, page: currentPage + 1, limit: ITEMS_PER_PAGE }),
+      staleTime: 30_000,
+    });
+  }
+
   const deleteMutation = useDeleteQuestion();
   const starMutation = useStarQuestion();
 
-  const resetPage = () => setCurrentPage(1);
-  const handleSearch = (val: string) => { setSearch(val); resetPage(); };
-  const handleCategoryFilter = (val: PrepCategory | "") => { setCategoryFilter(val); resetPage(); };
-  const handleDifficultyFilter = (val: Difficulty | "") => { setDifficultyFilter(val); resetPage(); };
-  const clearAll = () => { setSearch(""); setCategoryFilter(""); setDifficultyFilter(""); resetPage(); };
+  const handleSearch = (val: string) => setSearch(val);
+  const handleCategoryFilter = (val: PrepCategory | "") => setCategoryFilter(val);
+  const handleDifficultyFilter = (val: Difficulty | "") => setDifficultyFilter(val);
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -156,7 +186,7 @@ const QuestionsPage = () => {
             <>
               {/* Desktop: column header with count */}
               {!isMobile && (
-                <ColumnHeader currentPage={currentPage} itemsPerPage={ITEMS_PER_PAGE} total={total} />
+                <ColumnHeader currentPage={currentPage} itemsPerPage={ITEMS_PER_PAGE} total={total} sort={sort} onSort={handleSort} />
               )}
 
               {/* Mobile: simple count */}

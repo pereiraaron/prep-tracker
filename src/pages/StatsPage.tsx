@@ -56,6 +56,7 @@ const StatsPage = () => {
       name: CATEGORY_LABEL[c.category as keyof typeof CATEGORY_LABEL] || c.category,
       short: categoryShort(c.category),
       count: c.count,
+      key: c.category,
     }));
 
   const diffData = (difficultyBreakdown ?? []).map((d) => ({
@@ -87,7 +88,7 @@ const StatsPage = () => {
   const sourceData = (sourceBreakdown ?? [])
     .filter((s) => s.count > 0)
     .sort((a, b) => b.count - a.count)
-    .map((s) => ({ name: SOURCE_LABEL[s.source] || s.source, count: s.count }));
+    .map((s) => ({ name: SOURCE_LABEL[s.source] || s.source, count: s.count, key: s.source }));
 
   const companyData = (companyBreakdown ?? [])
     .filter((c) => c.count > 0)
