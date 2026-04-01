@@ -78,6 +78,8 @@ const BacklogPage = () => {
     : paginatedQuery.data?.data ?? [];
 
   const isLoading = isMobile ? infiniteQuery.isLoading : paginatedQuery.isLoading;
+  const isFetching = isMobile ? infiniteQuery.isFetching : paginatedQuery.isFetching;
+  const isTransitioning = isFetching && !isLoading;
   const pagination = paginatedQuery.data?.pagination ?? null;
   const totalPages = pagination?.totalPages ?? 1;
 
@@ -214,7 +216,7 @@ const BacklogPage = () => {
                 </div>
               )}
 
-              <div className="glass-card rounded-xl overflow-hidden divide-y divide-border">
+              <div className={`glass-card rounded-xl overflow-hidden divide-y divide-border transition-opacity duration-200 ${isTransitioning ? "opacity-40 pointer-events-none" : ""}`}>
                 {backlog.map((q, i) => (
                   <BacklogRow
                     key={q.id}

@@ -71,6 +71,8 @@ const QuestionsPage = () => {
     : paginatedQuery.data?.data ?? [];
 
   const isLoading = isMobile ? infiniteQuery.isLoading : paginatedQuery.isLoading;
+  const isFetching = isMobile ? infiniteQuery.isFetching : paginatedQuery.isFetching;
+  const isTransitioning = isFetching && !isLoading;
   const pagination = paginatedQuery.data?.pagination ?? null;
   const totalPages = pagination?.totalPages ?? 1;
 
@@ -196,7 +198,7 @@ const QuestionsPage = () => {
                 </div>
               )}
 
-              <div className="glass-card rounded-xl overflow-hidden divide-y divide-border">
+              <div className={`glass-card rounded-xl overflow-hidden divide-y divide-border transition-opacity duration-200 ${isTransitioning ? "opacity-40 pointer-events-none" : ""}`}>
                 {questions.map((q, i) => (
                   <QuestionRow
                     key={q.id}
