@@ -44,6 +44,8 @@
   --color-stat-green: hsl(var(--stat-green));
   --color-stat-orange: hsl(var(--stat-orange));
   --color-stat-purple: hsl(var(--stat-purple));
+  --color-stat-yellow: hsl(var(--stat-yellow));
+  --color-stat-pink: hsl(var(--stat-pink));
 
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
@@ -107,6 +109,8 @@
   --stat-green: 155 65% 42%;
   --stat-orange: 28 90% 55%;
   --stat-purple: 265 60% 55%;
+  --stat-yellow: 45 90% 50%;
+  --stat-pink: 340 75% 55%;
 
   --code-bg: 220 13% 95%;
   --code-fg: 220 13% 30%;
@@ -154,6 +158,8 @@
   --stat-green: 155 65% 50%;
   --stat-orange: 28 90% 60%;
   --stat-purple: 265 60% 62%;
+  --stat-yellow: 45 90% 55%;
+  --stat-pink: 340 75% 62%;
 
   --code-bg: 220 13% 18%;
   --code-fg: 220 10% 75%;

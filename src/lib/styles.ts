@@ -1,3 +1,6 @@
+// Capitalize first letter of each word (for displaying lowercase-stored values)
+export const capitalize = (s: string) => s.replace(/\b\w/g, (c) => c.toUpperCase());
+
 // Shared color maps for badges and chips across pages
 
 export const DIFFICULTY_COLORS: Record<string, string> = {

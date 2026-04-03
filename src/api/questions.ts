@@ -17,7 +17,7 @@ export interface Question {
   solution?: string;
   status: QuestionStatus;
   difficulty?: Difficulty;
-  topic?: string;
+  topics: string[];
   source?: QuestionSource;
   url?: string;
   tags: string[];
@@ -34,7 +34,7 @@ export interface CreateQuestionBody {
   category: PrepCategory;
   notes?: string;
   difficulty?: Difficulty;
-  topic?: string;
+  topics?: string[];
   source?: QuestionSource;
   url?: string;
   tags?: string[];
@@ -47,7 +47,7 @@ export interface CreateBacklogQuestionBody {
   url: string;
   notes?: string;
   difficulty?: Difficulty;
-  topic?: string;
+  topics?: string[];
   source?: QuestionSource;
   tags?: string[];
   companyTags?: string[];
@@ -58,7 +58,7 @@ export interface UpdateQuestionBody {
   notes?: string;
   solution?: string;
   difficulty?: Difficulty | null;
-  topic?: string | null;
+  topics?: string[] | null;
   source?: QuestionSource | null;
   url?: string;
   tags?: string[];

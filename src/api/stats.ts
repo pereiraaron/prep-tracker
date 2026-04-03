@@ -52,6 +52,16 @@ export interface TagBreakdown {
   count: number;
 }
 
+export interface DailyByCategoryResponse {
+  categories: string[];
+  days: Record<string, any>[];
+}
+
+export interface BacklogAgeItem {
+  label: string;
+  count: number;
+}
+
 export interface ProgressDay {
   date: string;
   solved: number;
@@ -135,8 +145,11 @@ export const statsApi = {
     return apiFetch<InsightsResponse>(`${API_BASE_URL}/stats/insights${query}`);
   },
 
-  getBatch: async (keys?: string[]) => {
-    const query = keys ? `?keys=${keys.join(",")}` : "";
+  getBatch: async (keys?: string[], category?: string) => {
+    const params = new URLSearchParams();
+    if (keys) params.set("keys", keys.join(","));
+    if (category) params.set("category", category);
+    const query = params.toString() ? `?${params}` : "";
     return apiFetch<BatchStatsResponse>(`${API_BASE_URL}/stats/batch${query}`);
   },
 };
@@ -153,6 +166,8 @@ export interface BatchStatsResponse {
   companyTags?: CompanyTagBreakdown[];
   heatmap?: Record<string, number>;
   difficultyByCategory?: DifficultyByCategory[];
+  dailyByCategory?: DailyByCategoryResponse;
+  backlogAge?: BacklogAgeItem[];
   streaks?: StreaksResponse;
   insights?: InsightsResponse;
 }

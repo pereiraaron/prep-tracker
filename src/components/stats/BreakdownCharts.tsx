@@ -17,8 +17,10 @@ import {
   SOURCE_CHART_COLORS,
   CHART_BLUE,
   CHART_VIOLET,
+  CHART_ORANGE,
   getGridColor,
   getTextColor,
+  categoryShort,
 } from "./constants";
 import { ChartCard, NoData, chartTooltipStyle } from "./shared";
 
@@ -29,6 +31,12 @@ interface BreakdownChartsProps {
   topicData: { name: string; count: number }[];
   sourceData: { name: string; count: number; key?: string }[];
   companyData: { name: string; count: number }[];
+}
+
+export interface DetailChartsProps {
+  dailyByCategoryData?: { categories: string[]; days: Record<string, any>[] };
+  diffData: { name: string; count: number }[];
+  backlogAgeData?: { label: string; count: number }[];
 }
 
 const ROW2_HEIGHT = 240;
@@ -148,7 +156,7 @@ const BreakdownCharts = ({
         </ChartCard>
       </div>
 
-      {/* Row 2 — consistent height */}
+      {/* Row 2 */}
       <div className="grid gap-6 md:grid-cols-3">
         {/* Topics */}
         <ChartCard title="Top Topics">
@@ -203,6 +211,107 @@ const BreakdownCharts = ({
         </ChartCard>
       </div>
     </>
+  );
+};
+
+export const DetailCharts = ({ dailyByCategoryData, diffData, backlogAgeData }: DetailChartsProps) => {
+  const diffTotal = diffData.reduce((s, d) => s + d.count, 0);
+
+  return (
+    <div className="grid gap-6 md:grid-cols-3">
+      {/* Daily by Category — stacked bar */}
+      <ChartCard title="Daily by Category">
+        {dailyByCategoryData && dailyByCategoryData.categories.length > 0 ? (
+          <ResponsiveContainer width="100%" height={ROW2_HEIGHT}>
+            <BarChart
+              data={dailyByCategoryData.days.map((d) => ({
+                ...d,
+                date: new Date(d.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+              }))}
+              margin={{ top: 0, right: 4, bottom: 0, left: -12 }}
+              barCategoryGap="20%"
+            >
+              <CartesianGrid vertical={false} stroke={getGridColor()} strokeDasharray="3 3" />
+              <XAxis
+                dataKey="date"
+                tick={{ fontSize: 10, fill: getTextColor() }}
+                tickLine={false}
+                axisLine={false}
+                interval={Math.max(0, Math.floor(dailyByCategoryData.days.length / 5) - 1)}
+              />
+              <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: getTextColor() }} tickLine={false} axisLine={false} width={28} />
+              <Tooltip {...chartTooltipStyle} formatter={(value: any, name: any) => [value, categoryShort(name)]} />
+              <Legend content={<CompactLegend />} formatter={(value: string) => categoryShort(value)} />
+              {dailyByCategoryData.categories.map((cat, i) => (
+                <Bar
+                  key={cat}
+                  dataKey={cat}
+                  name={cat}
+                  stackId="categories"
+                  fill={CATEGORY_CHART_COLORS[cat] || CHART_BLUE}
+                  animationDuration={600}
+                  radius={i === dailyByCategoryData.categories.length - 1 ? [4, 4, 0, 0] : undefined}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <NoData />
+        )}
+      </ChartCard>
+
+      {/* By Difficulty — donut */}
+      <ChartCard title="By Difficulty">
+        {diffData.some((d) => d.count > 0) ? (
+          <ResponsiveContainer width="100%" height={ROW2_HEIGHT}>
+            <PieChart>
+              <Tooltip {...chartTooltipStyle} formatter={(value) => value} />
+              <Pie
+                data={diffData}
+                dataKey="count"
+                nameKey="name"
+                cx="50%"
+                cy="46%"
+                innerRadius={52}
+                outerRadius={78}
+                paddingAngle={3}
+                strokeWidth={0}
+                animationDuration={600}
+              >
+                {diffData.map((_, i) => (
+                  <Cell key={i} fill={DIFF_COLORS[i]} />
+                ))}
+              </Pie>
+              <text x="50%" y="42%" textAnchor="middle" dominantBaseline="central" style={{ fill: "hsl(var(--foreground))", fontSize: 24, fontWeight: 700, fontFamily: "var(--font-display)" }}>
+                {diffTotal}
+              </text>
+              <text x="50%" y="54%" textAnchor="middle" dominantBaseline="central" style={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}>
+                total
+              </text>
+              <Legend content={<CompactLegend />} />
+            </PieChart>
+          </ResponsiveContainer>
+        ) : (
+          <NoData />
+        )}
+      </ChartCard>
+
+      {/* Backlog Age */}
+      <ChartCard title="Backlog Age">
+        {backlogAgeData && backlogAgeData.some((d) => d.count > 0) ? (
+          <ResponsiveContainer width="100%" height={ROW2_HEIGHT}>
+            <BarChart data={backlogAgeData} layout="vertical" margin={{ top: 0, right: 8, bottom: 0, left: 0 }} barCategoryGap="20%">
+              <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10, fill: getTextColor() }} tickLine={false} axisLine={false} />
+              <YAxis type="category" dataKey="label" tick={{ fontSize: 11, fill: getTextColor() }} tickLine={false} axisLine={false} width={80} />
+              <Tooltip {...chartTooltipStyle} />
+              <Bar dataKey="count" fill={CHART_ORANGE} shape={<RoundedBar />} name="Pending" animationDuration={600} />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <NoData />
+        )}
+      </ChartCard>
+    </div>
   );
 };
 

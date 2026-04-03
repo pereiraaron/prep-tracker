@@ -113,8 +113,8 @@ const NewQuestionPage = () => {
   const handleCategoryChange = (val: PrepCategory) => {
     setCategory(val);
     // Clear topics that don't belong to the new category
-    const newPresets = TOPICS_BY_CATEGORY[val] ?? [];
-    setTopics((prev) => prev.filter((t) => newPresets.includes(t)));
+    const newPresetsLower = (TOPICS_BY_CATEGORY[val] ?? []).map((t) => t.toLowerCase());
+    setTopics((prev) => prev.filter((t) => newPresetsLower.includes(t)));
   };
 
   const handleSubmit = async () => {
@@ -127,7 +127,7 @@ const NewQuestionPage = () => {
           url: url.trim(),
           notes: notes.trim() || undefined,
           difficulty: difficulty || undefined,
-          topic: topics.length ? topics.join(", ") : undefined,
+          topics: topics.length ? topics : undefined,
           source: (source as QuestionSource) || undefined,
           tags: tags.length ? tags : undefined,
           companyTags: companyTags.length ? companyTags : undefined,
@@ -141,7 +141,7 @@ const NewQuestionPage = () => {
           category,
           notes: notes.trim() || undefined,
           difficulty,
-          topic: topics.length ? topics.join(", ") : undefined,
+          topics: topics.length ? topics : undefined,
           source: (source as QuestionSource) || undefined,
           url: url.trim() || undefined,
           tags: tags.length ? tags : undefined,
@@ -277,6 +277,7 @@ const NewQuestionPage = () => {
               onAdd={(v) => setTopics([...topics, v])}
               onRemove={(v) => setTopics(topics.filter((t) => t !== v))}
               placeholder="Custom topic + Enter..."
+              lowercase
             />
           </div>
         </section>

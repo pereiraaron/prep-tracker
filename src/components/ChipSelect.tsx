@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { X } from "lucide-react";
-import { CHIP_BASE, CHIP_ACTIVE, CHIP_INACTIVE } from "@lib/styles";
+import { capitalize, CHIP_BASE, CHIP_ACTIVE, CHIP_INACTIVE } from "@lib/styles";
 
 interface ChipSelectProps {
   presets: string[];
@@ -9,21 +9,29 @@ interface ChipSelectProps {
   onAdd: (value: string) => void;
   onRemove: (value: string) => void;
   placeholder: string;
+  lowercase?: boolean;
 }
 
-const ChipSelect = ({ presets, selected, onToggle, onAdd, onRemove, placeholder }: ChipSelectProps) => {
+const ChipSelect = ({ presets, selected, onToggle, onAdd, onRemove, placeholder, lowercase }: ChipSelectProps) => {
   const [input, setInput] = useState("");
+
+  const eq = lowercase
+    ? (a: string, b: string) => a.toLowerCase() === b.toLowerCase()
+    : (a: string, b: string) => a === b;
+  const isSelected = (p: string) => selected.some((s) => eq(s, p));
+  const normalize = (v: string) => lowercase ? v.toLowerCase() : v;
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if ((e.key === "Enter" || e.key === ",") && input.trim()) {
       e.preventDefault();
-      const val = input.trim();
-      if (!selected.includes(val)) onAdd(val);
+      const val = normalize(input.trim());
+      if (!selected.some((s) => eq(s, val))) onAdd(val);
       setInput("");
     }
   };
 
-  const custom = selected.filter((s) => !presets.includes(s));
+  const custom = selected.filter((s) => !presets.some((p) => eq(s, p)));
+  const display = lowercase ? capitalize : (s: string) => s;
 
   return (
     <div className="space-y-3">
@@ -32,8 +40,8 @@ const ChipSelect = ({ presets, selected, onToggle, onAdd, onRemove, placeholder 
           <button
             key={p}
             type="button"
-            onClick={() => onToggle(p)}
-            className={`${CHIP_BASE} ${selected.includes(p) ? CHIP_ACTIVE : CHIP_INACTIVE}`}
+            onClick={() => onToggle(normalize(p))}
+            className={`${CHIP_BASE} ${isSelected(p) ? CHIP_ACTIVE : CHIP_INACTIVE}`}
           >
             {p}
           </button>
@@ -46,7 +54,7 @@ const ChipSelect = ({ presets, selected, onToggle, onAdd, onRemove, placeholder 
               key={c}
               className={`inline-flex items-center gap-1 ${CHIP_BASE} ${CHIP_ACTIVE}`}
             >
-              {c}
+              {display(c)}
               <button type="button" onClick={() => onRemove(c)} className="hover:text-destructive transition-colors">
                 <X className="h-3 w-3" />
               </button>

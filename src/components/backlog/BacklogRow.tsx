@@ -1,6 +1,6 @@
 import type { Question } from "@api/questions";
 import { SOURCE_LABEL } from "@api/types";
-import { CATEGORY_BORDER_COLORS } from "@lib/styles";
+import { capitalize, CATEGORY_BORDER_COLORS } from "@lib/styles";
 import { DifficultyBadge, CategoryBadge } from "@components/Badge";
 import IconButton from "@components/IconButton";
 import { Star, Trash2, ExternalLink, CheckCircle } from "lucide-react";
@@ -49,11 +49,11 @@ const BacklogRow = ({ item: q, index, onStar, onDelete, onSolve }: BacklogRowPro
           </span>
           {q.difficulty && <span className="md:hidden"><DifficultyBadge value={q.difficulty} /></span>}
           {q.category && <span className="hidden sm:inline md:hidden"><CategoryBadge value={q.category} /></span>}
-          {q.topic && (
-            <span className="hidden lg:inline rounded bg-secondary/80 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-              {q.topic}
+          {q.topics?.length > 0 && q.topics.map((t) => (
+            <span key={t} className="hidden lg:inline rounded bg-secondary/80 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+              {capitalize(t)}
             </span>
-          )}
+          ))}
         </div>
         {/* Mobile-only: source + date */}
         <div className="flex items-center gap-2 mt-0.5 md:hidden">

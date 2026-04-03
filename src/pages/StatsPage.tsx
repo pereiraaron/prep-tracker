@@ -1,13 +1,14 @@
 import usePageTitle from "@hooks/usePageTitle";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
 import Layout from "@components/Layout";
 import PageHeader from "@components/PageHeader";
 import Skeleton from "@components/Skeleton";
 import StatCard from "@components/StatCard";
 import { DashboardStatsSkeleton } from "@components/Skeleton";
-import { useStatsBatch } from "@queries/useStats";
-import { CATEGORY_LABEL, SOURCE_LABEL } from "@api/types";
-import { CheckCircle, ListTodo, TrendingUp, BarChart3, Loader2 } from "lucide-react";
+import { useStatsBatch, useFilteredDeepDive } from "@queries/useStats";
+import { PREP_CATEGORIES, CATEGORY_LABEL, SOURCE_LABEL } from "@api/types";
+import type { PrepCategory } from "@api/types";
+import { CheckCircle, ListTodo, BarChart3, Loader2, Percent } from "lucide-react";
 import { categoryShort } from "@components/stats/constants";
 import { SectionHeader } from "@components/stats/shared";
 import Heatmap, { buildHeatmapWeeks } from "@components/stats/Heatmap";
@@ -16,6 +17,7 @@ import Streaks from "@components/stats/Streaks";
 // Lazy-load chart-heavy components (recharts is 386KB)
 const ActivityCharts = lazy(() => import("@components/stats/ActivityCharts"));
 const BreakdownCharts = lazy(() => import("@components/stats/BreakdownCharts"));
+const DetailCharts = lazy(() => import("@components/stats/BreakdownCharts").then((m) => ({ default: m.DetailCharts })));
 const InsightsSection = lazy(() => import("@components/stats/Insights"));
 
 const ChartSkeleton = () => (
@@ -31,7 +33,9 @@ const ChartSkeleton = () => (
 
 const StatsPage = () => {
   usePageTitle("Stats & Insights");
+  const [activityCategory, setActivityCategory] = useState<PrepCategory | undefined>();
   const { data: batch, isLoading } = useStatsBatch();
+  const { data: filtered } = useFilteredDeepDive(activityCategory);
 
   const overview = batch?.overview;
   const categoryBreakdown = batch?.categories;
@@ -41,6 +45,8 @@ const StatsPage = () => {
   const cumulativeData = batch?.cumulativeProgress;
   const topicBreakdown = batch?.topics;
   const sourceBreakdown = batch?.sources;
+  const dailyByCategory = activityCategory ? filtered?.dailyByCategory : batch?.dailyByCategory;
+  const backlogAge = activityCategory ? filtered?.backlogAge : batch?.backlogAge;
   const companyBreakdown = batch?.companyTags;
   const heatmapData = batch?.heatmap;
   const diffByCategory = batch?.difficultyByCategory;
@@ -49,6 +55,8 @@ const StatsPage = () => {
 
   const solved = overview?.totalSolved ?? 0;
   const backlog = overview?.backlogCount ?? 0;
+  const total = solved + backlog;
+  const solveRate = total > 0 ? Math.round((solved / total) * 100) : 0;
 
   const categoryData = (categoryBreakdown ?? [])
     .filter((c) => c.count > 0)
@@ -100,6 +108,18 @@ const StatsPage = () => {
     .filter((d) => d.total > 0)
     .map((d) => ({ name: categoryShort(d.category), Easy: d.easy, Medium: d.medium, Hard: d.hard }));
 
+  // Filtered difficulty for Deep Dive
+  const deepDiveDiffData = (() => {
+    if (!activityCategory) return diffData;
+    const catEntry = (diffByCategory ?? []).find((d) => d.category === activityCategory);
+    if (!catEntry) return [{ name: "Easy", count: 0 }, { name: "Medium", count: 0 }, { name: "Hard", count: 0 }];
+    return [
+      { name: "Easy", count: catEntry.easy },
+      { name: "Medium", count: catEntry.medium },
+      { name: "Hard", count: catEntry.hard },
+    ];
+  })();
+
   const heatmapWeeks = buildHeatmapWeeks(heatmapData ?? {});
 
   return (
@@ -120,15 +140,10 @@ const StatsPage = () => {
       ) : (
         <>
           {/* Overview */}
-          <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-3">
+          <div className="mb-3 grid grid-cols-3 gap-3">
             <StatCard label="Solved" value={solved || "—"} icon={CheckCircle} color="bg-stat-green/10 text-stat-green" />
-            <StatCard label="Backlog" value={backlog || "—"} icon={ListTodo} color="bg-stat-orange/10 text-stat-orange" />
-            <StatCard
-              label="Streak"
-              value={streaks ? `${streaks.currentStreak}d` : "—"}
-              icon={TrendingUp}
-              color="bg-stat-purple/10 text-stat-purple"
-            />
+            <StatCard label="Backlog" value={backlog || "—"} icon={ListTodo} color="bg-stat-yellow/10 text-stat-yellow" />
+            <StatCard label="Solve Rate" value={total > 0 ? `${solveRate}%` : "—"} icon={Percent} color="bg-stat-blue/10 text-stat-blue" />
           </div>
 
           {streaks && <Streaks data={streaks} />}
@@ -146,7 +161,7 @@ const StatsPage = () => {
             )}
           </div>
 
-          {/* Charts load lazily — recharts is 386KB */}
+          <SectionHeader title="Progress" />
           <Suspense fallback={<ChartSkeleton />}>
             <ActivityCharts dailyData={dailyData} weeklyData={weeklyChartData} cumulativeData={cumulativeChartData} />
           </Suspense>
@@ -160,6 +175,40 @@ const StatsPage = () => {
               topicData={topicData}
               sourceData={sourceData}
               companyData={companyData}
+            />
+          </Suspense>
+
+          <SectionHeader title="Deep Dive" />
+          <div className="mb-4 flex flex-wrap gap-2">
+            <button
+              onClick={() => setActivityCategory(undefined)}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                !activityCategory
+                  ? "bg-foreground text-background"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              All
+            </button>
+            {PREP_CATEGORIES.map((c) => (
+              <button
+                key={c.value}
+                onClick={() => setActivityCategory(activityCategory === c.value ? undefined : c.value)}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                  activityCategory === c.value
+                    ? "bg-foreground text-background"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                }`}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+          <Suspense fallback={<ChartSkeleton />}>
+            <DetailCharts
+              dailyByCategoryData={dailyByCategory}
+              diffData={deepDiveDiffData}
+              backlogAgeData={backlogAge}
             />
           </Suspense>
 

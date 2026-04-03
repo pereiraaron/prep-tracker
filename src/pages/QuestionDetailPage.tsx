@@ -11,7 +11,7 @@ import { toast } from "@components/ui/sonner";
 import type { QuestionSource } from "@api/questions";
 import type { PrepCategory, Difficulty } from "@api/types";
 import { PREP_CATEGORIES, DIFFICULTIES, QUESTION_SOURCES } from "@api/types";
-import { DIFFICULTY_COLORS, CHIP_BASE, CHIP_ACTIVE, CHIP_INACTIVE } from "@lib/styles";
+import { capitalize, DIFFICULTY_COLORS, CHIP_BASE, CHIP_ACTIVE, CHIP_INACTIVE } from "@lib/styles";
 import {
   ArrowLeft,
   Star,
@@ -204,7 +204,7 @@ const QuestionDetailPage = () => {
     setNotes(question?.notes || "");
     setCategory((question?.category as PrepCategory) || "dsa");
     setDifficulty((question?.difficulty as Difficulty) || "easy");
-    setTopics(question?.topic ? question.topic.split(",").map((t) => t.trim()).filter(Boolean) : []);
+    setTopics(question?.topics?.length ? [...question.topics] : []);
     setSource((question?.source as QuestionSource) || "");
     setUrl(question?.url || "");
     setTags(question?.tags || []);
@@ -213,8 +213,8 @@ const QuestionDetailPage = () => {
 
   const handleCategoryChange = (val: PrepCategory) => {
     setCategory(val);
-    const newPresets = TOPICS_BY_CATEGORY[val] ?? [];
-    setTopics((prev) => prev.filter((t) => newPresets.includes(t)));
+    const newPresetsLower = (TOPICS_BY_CATEGORY[val] ?? []).map((t) => t.toLowerCase());
+    setTopics((prev) => prev.filter((t) => newPresetsLower.includes(t)));
   };
 
   const toggleItem = (list: string[], setList: React.Dispatch<React.SetStateAction<string[]>>, value: string) => {
@@ -234,7 +234,7 @@ const QuestionDetailPage = () => {
           notes: notes.trim() || undefined,
           category,
           difficulty,
-          topic: topics.length ? topics.join(", ") : null,
+          topics: topics.length ? topics : null,
           source: (source as QuestionSource) || null,
           url: url.trim() || undefined,
           tags: tags.length ? tags : [],
@@ -323,7 +323,8 @@ const QuestionDetailPage = () => {
 
   const hasTags = question.tags.length > 0;
   const hasCompanyTags = question.companyTags.length > 0;
-  const hasMetadata = question.topic || question.source || hasTags || hasCompanyTags;
+  const hasTopics = question.topics?.length > 0;
+  const hasMetadata = hasTopics || question.source || hasTags || hasCompanyTags;
 
   return (
     <Layout>
@@ -425,22 +426,22 @@ const QuestionDetailPage = () => {
           {/* Metadata: Topic, Source, Tags, Company Tags (view mode) */}
           {!isEditing && hasMetadata && (
             <div className="border-t border-border pt-4 space-y-3">
-              {(question.topic || question.source) && (
+              {(hasTopics || question.source) && (
                 <div className="flex flex-wrap items-center gap-2">
-                  {question.topic && (
+                  {hasTopics && (
                     <>
                       <FileText className="h-3 w-3 text-muted-foreground shrink-0" />
-                      {question.topic.split(",").map((t) => t.trim()).filter(Boolean).map((t) => (
+                      {question.topics.map((t) => (
                         <span
                           key={t}
                           className="rounded-md bg-secondary border border-border px-2 py-0.5 text-[11px] font-medium text-foreground"
                         >
-                          {t}
+                          {capitalize(t)}
                         </span>
                       ))}
                     </>
                   )}
-                  {question.topic && question.source && <span className="mx-1 h-4 w-px bg-border" />}
+                  {hasTopics && question.source && <span className="mx-1 h-4 w-px bg-border" />}
                   {question.source && (
                     <>
                       <Globe className="h-3 w-3 text-muted-foreground shrink-0" />
@@ -623,6 +624,7 @@ const QuestionDetailPage = () => {
                   onAdd={(v) => setTopics([...topics, v])}
                   onRemove={(v) => setTopics(topics.filter((t) => t !== v))}
                   placeholder="Custom topic + Enter..."
+                  lowercase
                 />
               </div>
             </section>

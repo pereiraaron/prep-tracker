@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { statsApi, type BatchStatsResponse } from "@api/stats";
 import { queryKeys } from "@lib/queryKeys";
 
@@ -43,6 +43,18 @@ export const useInsights = () =>
  * Fetches all stats in a single request and seeds individual query caches.
  * Use this on StatsPage instead of 13 separate hooks.
  */
+/**
+ * Fetches deep dive stats (dailyByCategory) filtered by category.
+ * Returns undefined when no category is selected (use batch data instead).
+ */
+export const useFilteredDeepDive = (category?: string) =>
+  useQuery({
+    queryKey: [...queryKeys.stats.all, "deepDive", category] as const,
+    queryFn: () => statsApi.getBatch(["dailyByCategory", "backlogAge"], category),
+    enabled: !!category,
+    placeholderData: keepPreviousData,
+  });
+
 export const useStatsBatch = () => {
   const queryClient = useQueryClient();
 
@@ -61,6 +73,7 @@ export const useStatsBatch = () => {
         [queryKeys.stats.cumulative(), "cumulativeProgress"],
         [queryKeys.stats.topics(), "topics"],
         [queryKeys.stats.sources(), "sources"],
+        [[...queryKeys.stats.all, "dailyByCategory"], "dailyByCategory"],
         [queryKeys.stats.companyTags(), "companyTags"],
         [queryKeys.stats.heatmap(), "heatmap"],
         [queryKeys.stats.difficultyByCategory(), "difficultyByCategory"],
