@@ -7,6 +7,7 @@ import { useQuestionDetail, useUpdateQuestion, useStarQuestion, useSuggestions }
 import { DifficultyBadge, CategoryBadge } from "@components/Badge";
 import ChipSelect from "@components/ChipSelect";
 import FormSectionHeader from "@components/FormSectionHeader";
+const MarkdownContent = lazy(() => import("@components/MarkdownContent"));
 import { toast } from "@components/ui/sonner";
 import type { QuestionSource } from "@api/questions";
 import type { PrepCategory, Difficulty } from "@api/types";
@@ -477,9 +478,20 @@ const QuestionDetailPage = () => {
           </div>
         ) : (
           <div className="glass-card rounded-xl p-4 md:p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <FileText className="h-4 w-4 text-stat-blue" />
-              <h2 className="font-display text-sm font-semibold">Solution</h2>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-stat-blue" />
+                <h2 className="font-display text-sm font-semibold">Solution</h2>
+              </div>
+              {!isEditing && question.solution && (
+                <button
+                  onClick={handleCopy}
+                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
+                >
+                  {copied ? <Check className="h-3.5 w-3.5 text-stat-green" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copied ? "Copied!" : "Copy"}
+                </button>
+              )}
             </div>
             {isEditing ? (
               <textarea
@@ -487,13 +499,15 @@ const QuestionDetailPage = () => {
                 onChange={(e) => setSolution(e.target.value)}
                 rows={10}
                 disabled={mutating}
-                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 resize-none disabled:opacity-50"
-                placeholder="Write your solution..."
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 resize-none disabled:opacity-50 font-mono"
+                placeholder="Write your solution (supports markdown)..."
               />
             ) : (
               <div>
                 {question.solution ? (
-                  <p className="text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap">{question.solution}</p>
+                  <Suspense fallback={<p className="text-sm text-muted-foreground/50 animate-pulse">Rendering...</p>}>
+                    <MarkdownContent content={question.solution} />
+                  </Suspense>
                 ) : (
                   <p className="text-sm text-muted-foreground italic">No solution yet. Click Edit to add one.</p>
                 )}
