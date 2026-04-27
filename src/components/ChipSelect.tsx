@@ -37,9 +37,10 @@ const ChipSelect = ({ presets, selected, onToggle, onAdd, onRemove, placeholder,
   const custom = selected.filter((s) => !presets.some((p) => eq(s, p)));
   const display = lowercase ? capitalize : (s: string) => s;
 
-  const selectedPresets = presets.filter((p) => isSelected(p));
-  const unselectedPresets = presets.filter((p) => !isSelected(p));
-  const canCollapse = presets.length > VISIBLE_LIMIT;
+  const dedupedPresets = presets.filter((p, i) => presets.findIndex((q) => eq(p, q)) === i);
+  const selectedPresets = dedupedPresets.filter((p) => isSelected(p));
+  const unselectedPresets = dedupedPresets.filter((p) => !isSelected(p));
+  const canCollapse = dedupedPresets.length > VISIBLE_LIMIT;
   const visibleUnselected = expanded ? unselectedPresets : unselectedPresets.slice(0, Math.max(0, VISIBLE_LIMIT - selectedPresets.length));
   const hiddenCount = unselectedPresets.length - visibleUnselected.length;
 

@@ -22,7 +22,7 @@ export interface CategoryInfo {
 export const PREP_CATEGORIES: CategoryInfo[] = [
   {
     value: "dsa",
-    label: "Data Structures & Algorithms",
+    label: "DSA",
     description: "Coding problems, algorithmic thinking, and data structure usage",
   },
   {
