@@ -2,75 +2,17 @@ import usePageTitle from "@hooks/usePageTitle";
 import { useState } from "react";
 import Layout from "@components/Layout";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useCreateQuestion } from "@queries/useQuestions";
+import { useCreateQuestion, useSuggestions } from "@queries/useQuestions";
 import { useCreateBacklogItem } from "@queries/useBacklog";
 import type { QuestionSource } from "@api/questions";
 import type { PrepCategory, Difficulty } from "@api/types";
-import { PREP_CATEGORIES, DIFFICULTIES, QUESTION_SOURCES } from "@api/types";
+import { PREP_CATEGORIES, DIFFICULTIES, QUESTION_SOURCES, SOLUTION_OPTIONAL_CATEGORIES } from "@api/types";
 import { toast } from "@components/ui/sonner";
 import { ArrowLeft, Save, Loader2, FileText, Layers, Tag, Building2, StickyNote, Link2, ChevronDown } from "lucide-react";
 import ChipSelect from "@components/ChipSelect";
 import FormSectionHeader from "@components/FormSectionHeader";
 import { DIFFICULTY_COLORS, CHIP_BASE, CHIP_ACTIVE, CHIP_INACTIVE } from "@lib/styles";
 
-// ---- Topic presets per category ----
-
-const TOPICS_BY_CATEGORY: Record<PrepCategory, string[]> = {
-  dsa: [
-    "Arrays", "Strings", "Hash Map", "Two Pointers", "Sliding Window",
-    "Binary Search", "Linked List", "Stack", "Queue", "Trees",
-    "Binary Trees", "BST", "Graphs", "BFS", "DFS",
-    "Dynamic Programming", "Recursion", "Backtracking", "Greedy",
-    "Heap", "Trie", "Sorting", "Math", "Bit Manipulation",
-  ],
-  system_design: [
-    "Scalability", "Load Balancing", "Caching", "Database Design",
-    "Message Queues", "Microservices", "API Design", "CDN",
-    "Consistency", "Availability", "Rate Limiting", "Sharding",
-    "Event-Driven", "CAP Theorem", "SQL vs NoSQL",
-  ],
-  machine_coding: [
-    "React", "Vanilla JS", "DOM Manipulation", "State Management",
-    "Event Handling", "Component Design", "Async Patterns",
-    "Debounce/Throttle", "Drag & Drop", "Virtual Scrolling",
-    "Form Validation", "Accessibility", "CSS Layout", "Canvas/SVG",
-  ],
-  language_framework: [
-    "Closures", "Promises", "Async/Await", "Prototypes",
-    "Event Loop", "Hoisting", "Scope", "Generics",
-    "Type System", "Hooks", "Context API", "Middleware",
-    "Decorators", "Iterators", "Modules",
-  ],
-  behavioral: [
-    "Leadership", "Conflict Resolution", "Teamwork",
-    "Problem Solving", "Communication", "Prioritization",
-    "Failure & Learning", "Decision Making", "Mentoring",
-    "Cross-Team Collaboration",
-  ],
-  theory: [
-    "OS Concepts", "Networking", "DBMS", "OOP",
-    "Design Patterns", "SOLID Principles", "Complexity Analysis",
-    "Concurrency", "Memory Management", "Compilers",
-    "Distributed Systems",
-  ],
-  quiz: [
-    "JavaScript", "TypeScript", "React", "CSS",
-    "HTML", "Node.js", "SQL", "General CS",
-    "Web APIs", "Security",
-  ],
-};
-
-const PRESET_TAGS = [
-  "revisit", "tricky", "important", "weak-area", "interview-ready",
-  "needs-review", "blind-75", "neetcode-150", "top-interview",
-  "asked-in-interview", "one-liner", "follow-up",
-];
-
-const PRESET_COMPANIES = [
-  "Google", "Meta", "Amazon", "Apple", "Microsoft", "Netflix",
-  "Uber", "Stripe", "Adobe", "Oracle", "Flipkart", "Atlassian",
-  "Intuit", "Goldman Sachs", "Morgan Stanley",
-];
 
 const inputCls =
   "h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30 disabled:opacity-50";
@@ -88,6 +30,7 @@ const NewQuestionPage = () => {
   const createBacklogMutation = useCreateBacklogItem();
   const createMutation = isBacklogMode ? createBacklogMutation : createQuestionMutation;
   const mutating = createMutation.isPending;
+  const { data: suggestions, isLoading: suggestionsLoading } = useSuggestions();
 
   const [title, setTitle] = useState("");
   const [solution, setSolution] = useState("");
@@ -106,15 +49,18 @@ const NewQuestionPage = () => {
   };
 
   const urlValid = isValidUrl(url.trim());
+  const solutionRequired = !SOLUTION_OPTIONAL_CATEGORIES.includes(category);
   const canSubmit = isBacklogMode
     ? !!(title.trim() && category && url.trim() && urlValid)
-    : !!(title.trim() && solution.trim() && category && difficulty && urlValid);
+    : !!(title.trim() && (!solutionRequired || solution.trim()) && category && difficulty && urlValid);
 
   const handleCategoryChange = (val: PrepCategory) => {
     setCategory(val);
-    // Clear topics that don't belong to the new category
-    const newPresetsLower = (TOPICS_BY_CATEGORY[val] ?? []).map((t) => t.toLowerCase());
-    setTopics((prev) => prev.filter((t) => newPresetsLower.includes(t)));
+    const newPresets = suggestions?.topicsByCategory?.[val];
+    if (newPresets) {
+      const newPresetsLower = new Set(newPresets.map((t: string) => t.toLowerCase()));
+      setTopics((prev) => prev.filter((t) => newPresetsLower.has(t)));
+    }
   };
 
   const handleSubmit = async () => {
@@ -137,7 +83,7 @@ const NewQuestionPage = () => {
       } else {
         await createQuestionMutation.mutateAsync({
           title: title.trim(),
-          solution: solution.trim(),
+          solution: solution.trim() || undefined,
           category,
           notes: notes.trim() || undefined,
           difficulty,
@@ -160,7 +106,9 @@ const NewQuestionPage = () => {
   };
 
   const labelCls = "mb-1.5 block text-xs font-semibold text-muted-foreground";
-  const topicPresets = TOPICS_BY_CATEGORY[category] ?? [];
+  const topicPresets = suggestions?.topicsByCategory?.[category] ?? [];
+  const tagPresets = suggestions?.tags ?? [];
+  const companyPresets = suggestions?.companyTags ?? [];
 
   return (
     <Layout>
@@ -210,7 +158,7 @@ const NewQuestionPage = () => {
             {!isBacklogMode && (
               <div>
                 <label htmlFor="q-solution" className={labelCls}>
-                  Solution <span className="text-destructive">*</span>
+                  Solution {solutionRequired && <span className="text-destructive">*</span>}
                 </label>
                 <textarea
                   id="q-solution"
@@ -218,7 +166,7 @@ const NewQuestionPage = () => {
                   onChange={(e) => setSolution(e.target.value)}
                   rows={6}
                   className={textareaCls}
-                  placeholder="Describe your approach, include code snippets..."
+                  placeholder={solutionRequired ? "Describe your approach, include code snippets..." : "Optional — add notes, key points, or a brief explanation..."}
                   disabled={mutating}
                 />
               </div>
@@ -278,6 +226,7 @@ const NewQuestionPage = () => {
               onRemove={(v) => setTopics(topics.filter((t) => t !== v))}
               placeholder="Custom topic + Enter..."
               lowercase
+              loading={suggestionsLoading}
             />
           </div>
         </section>
@@ -330,12 +279,14 @@ const NewQuestionPage = () => {
             <div>
               <label className={labelCls}>Tags</label>
               <ChipSelect
-                presets={PRESET_TAGS}
+                presets={tagPresets}
                 selected={tags}
                 onToggle={(v) => toggleItem(tags, setTags, v)}
                 onAdd={(v) => setTags([...tags, v])}
                 onRemove={(v) => setTags(tags.filter((t) => t !== v))}
                 placeholder="Custom tag + Enter..."
+                lowercase
+                loading={suggestionsLoading}
               />
             </div>
             <div>
@@ -344,12 +295,13 @@ const NewQuestionPage = () => {
                 Company Tags
               </label>
               <ChipSelect
-                presets={PRESET_COMPANIES}
+                presets={companyPresets}
                 selected={companyTags}
                 onToggle={(v) => toggleItem(companyTags, setCompanyTags, v)}
                 onAdd={(v) => setCompanyTags([...companyTags, v])}
                 onRemove={(v) => setCompanyTags(companyTags.filter((t) => t !== v))}
                 placeholder="Company name + Enter..."
+                loading={suggestionsLoading}
               />
             </div>
           </div>
@@ -376,7 +328,7 @@ const NewQuestionPage = () => {
                 ? "Pick a category"
                 : isBacklogMode
                   ? !url.trim() ? "Add problem URL" : !urlValid ? "Fix the URL" : ""
-                  : !difficulty ? "Pick difficulty" : !solution.trim() ? "Add a solution" : !urlValid ? "Fix the URL" : ""}
+                  : !difficulty ? "Pick difficulty" : (solutionRequired && !solution.trim()) ? "Add a solution" : !urlValid ? "Fix the URL" : ""}
             </p>
           )}
           <button

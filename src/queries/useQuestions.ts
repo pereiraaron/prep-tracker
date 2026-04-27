@@ -64,6 +64,15 @@ export const useRecentQuestions = () =>
     queryFn: () => questionsApi.getAll({ sort: "-solvedAt", limit: 5, status: "solved" }),
   });
 
+// ---- Suggestions ----
+
+export const useSuggestions = () =>
+  useQuery({
+    queryKey: queryKeys.questions.suggestions(),
+    queryFn: () => questionsApi.getSuggestions(),
+    staleTime: Infinity,
+  });
+
 // ---- Playground ----
 
 export const useTemplates = (id: string | undefined) =>

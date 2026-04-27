@@ -28,9 +28,15 @@ export interface Question {
   updatedAt: string;
 }
 
+export interface SuggestionsResponse {
+  topicsByCategory: Record<string, string[]>;
+  tags: string[];
+  companyTags: string[];
+}
+
 export interface CreateQuestionBody {
   title: string;
-  solution: string;
+  solution?: string;
   category: PrepCategory;
   notes?: string;
   difficulty?: Difficulty;
@@ -139,10 +145,10 @@ export const questionsApi = {
       method: "DELETE",
     }),
 
-  solve: async (id: string, body?: { solution: string }) =>
+  solve: async (id: string, body?: { solution?: string }) =>
     apiFetch<Question>(`${API_BASE_URL}/questions/${id}/solve`, {
       method: "PATCH",
-      ...(body ? { body: JSON.stringify(body) } : {}),
+      ...(body?.solution ? { body: JSON.stringify(body) } : {}),
     }),
 
   reset: async (id: string) =>
@@ -204,6 +210,11 @@ export const questionsApi = {
       method: "POST",
       body: JSON.stringify(body),
     }),
+
+  // ---- Suggestions ----
+
+  getSuggestions: async () =>
+    apiFetch<SuggestionsResponse>(`${API_BASE_URL}/questions/suggestions`),
 
   // ---- Playground ----
 

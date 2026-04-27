@@ -5,19 +5,21 @@ import {
   PieChart,
   Pie,
   Cell,
+  AreaChart,
+  Area,
   CartesianGrid,
   XAxis,
   YAxis,
   Tooltip,
   Legend,
 } from "recharts";
+import type { WeeklyProgress } from "@api/stats";
 import {
   DIFF_COLORS,
   CATEGORY_CHART_COLORS,
   SOURCE_CHART_COLORS,
   CHART_BLUE,
   CHART_VIOLET,
-  CHART_ORANGE,
   getGridColor,
   getTextColor,
   categoryShort,
@@ -36,7 +38,7 @@ interface BreakdownChartsProps {
 export interface DetailChartsProps {
   dailyByCategoryData?: { categories: string[]; days: Record<string, any>[] };
   diffData: { name: string; count: number }[];
-  backlogAgeData?: { label: string; count: number }[];
+  weeklyProgressData?: WeeklyProgress[];
 }
 
 const ROW2_HEIGHT = 240;
@@ -214,7 +216,7 @@ const BreakdownCharts = ({
   );
 };
 
-export const DetailCharts = ({ dailyByCategoryData, diffData, backlogAgeData }: DetailChartsProps) => {
+export const DetailCharts = ({ dailyByCategoryData, diffData, weeklyProgressData }: DetailChartsProps) => {
   const diffTotal = diffData.reduce((s, d) => s + d.count, 0);
 
   return (
@@ -296,16 +298,29 @@ export const DetailCharts = ({ dailyByCategoryData, diffData, backlogAgeData }: 
         )}
       </ChartCard>
 
-      {/* Backlog Age */}
-      <ChartCard title="Backlog Age">
-        {backlogAgeData && backlogAgeData.some((d) => d.count > 0) ? (
+      {/* Weekly Trend — area */}
+      <ChartCard title="Weekly Trend">
+        {weeklyProgressData && weeklyProgressData.some((d) => d.solved > 0) ? (
           <ResponsiveContainer width="100%" height={ROW2_HEIGHT}>
-            <BarChart data={backlogAgeData} layout="vertical" margin={{ top: 0, right: 8, bottom: 0, left: 0 }} barCategoryGap="20%">
-              <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10, fill: getTextColor() }} tickLine={false} axisLine={false} />
-              <YAxis type="category" dataKey="label" tick={{ fontSize: 11, fill: getTextColor() }} tickLine={false} axisLine={false} width={80} />
+            <AreaChart
+              data={weeklyProgressData.map((d) => ({
+                ...d,
+                label: new Date(d.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+              }))}
+              margin={{ top: 4, right: 4, bottom: 0, left: -12 }}
+            >
+              <defs>
+                <linearGradient id="weeklyFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={CHART_BLUE} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={CHART_BLUE} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid vertical={false} stroke={getGridColor()} strokeDasharray="3 3" />
+              <XAxis dataKey="label" tick={{ fontSize: 10, fill: getTextColor() }} tickLine={false} axisLine={false} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: getTextColor() }} tickLine={false} axisLine={false} width={28} />
               <Tooltip {...chartTooltipStyle} />
-              <Bar dataKey="count" fill={CHART_ORANGE} shape={<RoundedBar />} name="Pending" animationDuration={600} />
-            </BarChart>
+              <Area type="monotone" dataKey="solved" stroke={CHART_BLUE} fill="url(#weeklyFill)" name="Solved" animationDuration={600} />
+            </AreaChart>
           </ResponsiveContainer>
         ) : (
           <NoData />

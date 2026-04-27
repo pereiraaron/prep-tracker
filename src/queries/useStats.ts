@@ -50,7 +50,7 @@ export const useInsights = () =>
 export const useFilteredDeepDive = (category?: string) =>
   useQuery({
     queryKey: [...queryKeys.stats.all, "deepDive", category] as const,
-    queryFn: () => statsApi.getBatch(["dailyByCategory", "backlogAge"], category),
+    queryFn: () => statsApi.getBatch(["dailyByCategory", "weeklyProgress"], category),
     enabled: !!category,
     placeholderData: keepPreviousData,
   });

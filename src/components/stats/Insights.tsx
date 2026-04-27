@@ -1,13 +1,6 @@
-import { AlertTriangle, Trophy } from "lucide-react";
+import { Trophy } from "lucide-react";
 import { CHART_BLUE, MILESTONE_ICONS } from "./constants";
 import { SectionHeader } from "./shared";
-
-interface WeakArea {
-  type: string;
-  name: string;
-  count: number;
-  lastSolvedDaysAgo: number | null;
-}
 
 interface Milestone {
   name: string;
@@ -16,43 +9,16 @@ interface Milestone {
 }
 
 interface InsightsData {
-  weakAreas: WeakArea[];
   milestones: Milestone[];
   tips: { text: string; priority: string }[];
 }
 
 const InsightsSection = ({ insights }: { insights: InsightsData }) => {
-  if (!insights.weakAreas.length && !insights.milestones.length) return null;
+  if (!insights.milestones.length) return null;
 
   return (
     <>
       <SectionHeader title="Insights" />
-
-      {insights.weakAreas.length > 0 && (
-        <div className="glass-card rounded-xl p-5 mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <AlertTriangle className="h-4 w-4 text-stat-orange" />
-            <h3 className="font-display text-sm font-semibold">Weak Areas</h3>
-          </div>
-          <div className="space-y-3">
-            {insights.weakAreas.map((area, i) => (
-              <div key={i} className="flex items-center justify-between">
-                <span className="text-sm font-medium">{area.name}</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold tabular-nums text-muted-foreground">
-                    {area.count} solved
-                  </span>
-                  {area.lastSolvedDaysAgo !== null && (
-                    <span className="text-[10px] text-muted-foreground/60">
-                      {area.lastSolvedDaysAgo}d ago
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {insights.milestones.length > 0 && (
         <div className="glass-card rounded-xl p-5">

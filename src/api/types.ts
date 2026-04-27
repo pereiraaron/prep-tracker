@@ -1,11 +1,15 @@
 export type PrepCategory =
   | "dsa"
   | "system_design"
-  | "behavioral"
   | "machine_coding"
   | "language_framework"
-  | "theory"
-  | "quiz";
+  | "theory";
+
+export const SOLUTION_OPTIONAL_CATEGORIES: PrepCategory[] = [
+  "system_design",
+  "theory",
+  "language_framework",
+];
 
 export type Difficulty = "easy" | "medium" | "hard";
 
@@ -27,11 +31,6 @@ export const PREP_CATEGORIES: CategoryInfo[] = [
     description: "Designing scalable systems, architecture, and trade-off analysis",
   },
   {
-    value: "behavioral",
-    label: "Behavioral",
-    description: "Behavioral and situational interview questions",
-  },
-  {
     value: "machine_coding",
     label: "Machine Coding",
     description: "Live coding rounds building small applications or features",
@@ -46,7 +45,6 @@ export const PREP_CATEGORIES: CategoryInfo[] = [
     label: "Theory",
     description: "CS fundamentals and theoretical concepts",
   },
-  { value: "quiz", label: "Quiz", description: "Quick quiz-style questions" },
 ];
 
 export const CATEGORY_LABEL: Record<PrepCategory, string> = Object.fromEntries(
@@ -77,11 +75,9 @@ export const QUESTION_SOURCES = [
 export const CATEGORY_COLOR: Record<string, string> = {
   dsa: "purple",
   system_design: "blue",
-  behavioral: "green",
   machine_coding: "orange",
   language_framework: "teal",
   theory: "cyan",
-  quiz: "pink",
 };
 
 export const DIFFICULTY_COLOR: Record<string, string> = {

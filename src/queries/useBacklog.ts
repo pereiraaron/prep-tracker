@@ -122,7 +122,7 @@ export const useStarBacklogItem = () => {
 export const useSolveBacklogItem = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, solution }: { id: string; solution: string }) =>
+    mutationFn: ({ id, solution }: { id: string; solution?: string }) =>
       questionsApi.solve(id, { solution }),
     onSuccess: () => {
       useQuestionsFilterStore.getState().setCurrentPage(1);

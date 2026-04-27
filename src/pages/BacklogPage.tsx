@@ -125,7 +125,7 @@ const BacklogPage = () => {
     }
   };
 
-  const handleSolve = async (solution: string) => {
+  const handleSolve = async (solution?: string) => {
     if (!solvingItem) return;
     try {
       await solveMutation.mutateAsync({ id: solvingItem.id, solution });
@@ -258,6 +258,7 @@ const BacklogPage = () => {
         onSolve={handleSolve}
         isPending={solveMutation.isPending}
         questionTitle={solvingItem?.title ?? ""}
+        category={solvingItem?.category}
       />
     </Layout>
   );

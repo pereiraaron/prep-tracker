@@ -57,11 +57,6 @@ export interface DailyByCategoryResponse {
   days: Record<string, any>[];
 }
 
-export interface BacklogAgeItem {
-  label: string;
-  count: number;
-}
-
 export interface ProgressDay {
   date: string;
   solved: number;
@@ -93,12 +88,6 @@ export interface StreaksResponse {
 }
 
 export interface InsightsResponse {
-  weakAreas: {
-    type: string;
-    name: string;
-    count: number;
-    lastSolvedDaysAgo: number | null;
-  }[];
   tips: { text: string; priority: "high" | "medium" | "low" }[];
   milestones: { name: string; achieved: boolean; progress: string }[];
 }
@@ -167,7 +156,6 @@ export interface BatchStatsResponse {
   heatmap?: Record<string, number>;
   difficultyByCategory?: DifficultyByCategory[];
   dailyByCategory?: DailyByCategoryResponse;
-  backlogAge?: BacklogAgeItem[];
   streaks?: StreaksResponse;
   insights?: InsightsResponse;
 }

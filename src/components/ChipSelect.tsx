@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, ChevronDown, ChevronUp } from "lucide-react";
 import { capitalize, CHIP_BASE, CHIP_ACTIVE, CHIP_INACTIVE } from "@lib/styles";
+
+const VISIBLE_LIMIT = 12;
 
 interface ChipSelectProps {
   presets: string[];
@@ -10,10 +12,12 @@ interface ChipSelectProps {
   onRemove: (value: string) => void;
   placeholder: string;
   lowercase?: boolean;
+  loading?: boolean;
 }
 
-const ChipSelect = ({ presets, selected, onToggle, onAdd, onRemove, placeholder, lowercase }: ChipSelectProps) => {
+const ChipSelect = ({ presets, selected, onToggle, onAdd, onRemove, placeholder, lowercase, loading }: ChipSelectProps) => {
   const [input, setInput] = useState("");
+  const [expanded, setExpanded] = useState(false);
 
   const eq = lowercase
     ? (a: string, b: string) => a.toLowerCase() === b.toLowerCase()
@@ -33,19 +37,66 @@ const ChipSelect = ({ presets, selected, onToggle, onAdd, onRemove, placeholder,
   const custom = selected.filter((s) => !presets.some((p) => eq(s, p)));
   const display = lowercase ? capitalize : (s: string) => s;
 
+  const selectedPresets = presets.filter((p) => isSelected(p));
+  const unselectedPresets = presets.filter((p) => !isSelected(p));
+  const canCollapse = presets.length > VISIBLE_LIMIT;
+  const visibleUnselected = expanded ? unselectedPresets : unselectedPresets.slice(0, Math.max(0, VISIBLE_LIMIT - selectedPresets.length));
+  const hiddenCount = unselectedPresets.length - visibleUnselected.length;
+
+  if (loading && presets.length === 0) {
+    return (
+      <div className="space-y-3">
+        <div className="flex flex-wrap gap-1.5">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="h-7 rounded-lg bg-secondary/70 animate-pulse" style={{ width: `${60 + (i % 3) * 20}px` }} />
+          ))}
+        </div>
+        <input disabled className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm opacity-50" placeholder={placeholder} />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-1.5">
-        {presets.map((p) => (
+        {selectedPresets.map((p) => (
           <button
             key={p}
             type="button"
             onClick={() => onToggle(normalize(p))}
-            className={`${CHIP_BASE} ${isSelected(p) ? CHIP_ACTIVE : CHIP_INACTIVE}`}
+            className={`${CHIP_BASE} ${CHIP_ACTIVE}`}
           >
-            {p}
+            {display(p)}
           </button>
         ))}
+        {visibleUnselected.map((p) => (
+          <button
+            key={p}
+            type="button"
+            onClick={() => onToggle(normalize(p))}
+            className={`${CHIP_BASE} ${CHIP_INACTIVE}`}
+          >
+            {display(p)}
+          </button>
+        ))}
+        {canCollapse && hiddenCount > 0 && (
+          <button
+            type="button"
+            onClick={() => setExpanded(!expanded)}
+            className={`${CHIP_BASE} border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/20 inline-flex items-center gap-1`}
+          >
+            +{hiddenCount} more <ChevronDown className="h-3 w-3" />
+          </button>
+        )}
+        {canCollapse && expanded && (
+          <button
+            type="button"
+            onClick={() => setExpanded(false)}
+            className={`${CHIP_BASE} border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/20 inline-flex items-center gap-1`}
+          >
+            Show less <ChevronUp className="h-3 w-3" />
+          </button>
+        )}
       </div>
       {custom.length > 0 && (
         <div className="flex flex-wrap gap-1.5">

@@ -3,7 +3,7 @@ import { lazy, Suspense, useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import Layout from "@components/Layout";
-import { useQuestionDetail, useUpdateQuestion, useStarQuestion } from "@queries/useQuestions";
+import { useQuestionDetail, useUpdateQuestion, useStarQuestion, useSuggestions } from "@queries/useQuestions";
 import { DifficultyBadge, CategoryBadge } from "@components/Badge";
 import ChipSelect from "@components/ChipSelect";
 import FormSectionHeader from "@components/FormSectionHeader";
@@ -39,62 +39,6 @@ import {
 } from "lucide-react";
 const CodeEditor = lazy(() => import("@components/CodeEditor"));
 
-const TOPICS_BY_CATEGORY: Record<PrepCategory, string[]> = {
-  dsa: [
-    "Arrays", "Strings", "Hash Map", "Two Pointers", "Sliding Window",
-    "Binary Search", "Linked List", "Stack", "Queue", "Trees",
-    "Binary Trees", "BST", "Graphs", "BFS", "DFS",
-    "Dynamic Programming", "Recursion", "Backtracking", "Greedy",
-    "Heap", "Trie", "Sorting", "Math", "Bit Manipulation",
-  ],
-  system_design: [
-    "Scalability", "Load Balancing", "Caching", "Database Design",
-    "Message Queues", "Microservices", "API Design", "CDN",
-    "Consistency", "Availability", "Rate Limiting", "Sharding",
-    "Event-Driven", "CAP Theorem", "SQL vs NoSQL",
-  ],
-  machine_coding: [
-    "React", "Vanilla JS", "DOM Manipulation", "State Management",
-    "Event Handling", "Component Design", "Async Patterns",
-    "Debounce/Throttle", "Drag & Drop", "Virtual Scrolling",
-    "Form Validation", "Accessibility", "CSS Layout", "Canvas/SVG",
-  ],
-  language_framework: [
-    "Closures", "Promises", "Async/Await", "Prototypes",
-    "Event Loop", "Hoisting", "Scope", "Generics",
-    "Type System", "Hooks", "Context API", "Middleware",
-    "Decorators", "Iterators", "Modules",
-  ],
-  behavioral: [
-    "Leadership", "Conflict Resolution", "Teamwork",
-    "Problem Solving", "Communication", "Prioritization",
-    "Failure & Learning", "Decision Making", "Mentoring",
-    "Cross-Team Collaboration",
-  ],
-  theory: [
-    "OS Concepts", "Networking", "DBMS", "OOP",
-    "Design Patterns", "SOLID Principles", "Complexity Analysis",
-    "Concurrency", "Memory Management", "Compilers",
-    "Distributed Systems",
-  ],
-  quiz: [
-    "JavaScript", "TypeScript", "React", "CSS",
-    "HTML", "Node.js", "SQL", "General CS",
-    "Web APIs", "Security",
-  ],
-};
-
-const PRESET_TAGS = [
-  "revisit", "tricky", "important", "weak-area", "interview-ready",
-  "needs-review", "blind-75", "neetcode-150", "top-interview",
-  "asked-in-interview", "one-liner", "follow-up",
-];
-
-const PRESET_COMPANIES = [
-  "Google", "Meta", "Amazon", "Apple", "Microsoft", "Netflix",
-  "Uber", "Stripe", "Adobe", "Oracle", "Flipkart", "Atlassian",
-  "Intuit", "Goldman Sachs", "Morgan Stanley",
-];
 
 const inputCls =
   "h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30 disabled:opacity-50";
@@ -162,6 +106,7 @@ const QuestionDetailPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: question, isLoading } = useQuestionDetail(id);
+  const { data: suggestions, isLoading: suggestionsLoading } = useSuggestions();
   const updateMutation = useUpdateQuestion();
   const starMutation = useStarQuestion();
   const mutating = updateMutation.isPending;
@@ -213,15 +158,21 @@ const QuestionDetailPage = () => {
 
   const handleCategoryChange = (val: PrepCategory) => {
     setCategory(val);
-    const newPresetsLower = (TOPICS_BY_CATEGORY[val] ?? []).map((t) => t.toLowerCase());
-    setTopics((prev) => prev.filter((t) => newPresetsLower.includes(t)));
+    const newPresets = suggestions?.topicsByCategory?.[val];
+    if (newPresets) {
+      const newPresetsLower = new Set(newPresets.map((t: string) => t.toLowerCase()));
+      setTopics((prev) => prev.filter((t) => newPresetsLower.has(t)));
+    }
   };
 
   const toggleItem = (list: string[], setList: React.Dispatch<React.SetStateAction<string[]>>, value: string) => {
     setList(list.includes(value) ? list.filter((i) => i !== value) : [...list, value]);
   };
 
-  const topicPresets = TOPICS_BY_CATEGORY[isEditing ? category : (cat as PrepCategory)] ?? [];
+  const activeCat = isEditing ? category : (cat as PrepCategory);
+  const topicPresets = suggestions?.topicsByCategory?.[activeCat] ?? [];
+  const tagPresets = suggestions?.tags ?? [];
+  const companyPresets = suggestions?.companyTags ?? [];
 
   const handleSave = async () => {
     if (!canSave) return;
@@ -625,6 +576,7 @@ const QuestionDetailPage = () => {
                   onRemove={(v) => setTopics(topics.filter((t) => t !== v))}
                   placeholder="Custom topic + Enter..."
                   lowercase
+                  loading={suggestionsLoading}
                 />
               </div>
             </section>
@@ -675,12 +627,14 @@ const QuestionDetailPage = () => {
                 <div>
                   <label className={labelCls}>Tags</label>
                   <ChipSelect
-                    presets={PRESET_TAGS}
+                    presets={tagPresets}
                     selected={tags}
                     onToggle={(v) => toggleItem(tags, setTags, v)}
                     onAdd={(v) => setTags([...tags, v])}
                     onRemove={(v) => setTags(tags.filter((t) => t !== v))}
                     placeholder="Custom tag + Enter..."
+                    lowercase
+                    loading={suggestionsLoading}
                   />
                 </div>
                 <div>
@@ -689,12 +643,13 @@ const QuestionDetailPage = () => {
                     Company Tags
                   </label>
                   <ChipSelect
-                    presets={PRESET_COMPANIES}
+                    presets={companyPresets}
                     selected={companyTags}
                     onToggle={(v) => toggleItem(companyTags, setCompanyTags, v)}
                     onAdd={(v) => setCompanyTags([...companyTags, v])}
                     onRemove={(v) => setCompanyTags(companyTags.filter((t) => t !== v))}
                     placeholder="Company name + Enter..."
+                    loading={suggestionsLoading}
                   />
                 </div>
               </div>

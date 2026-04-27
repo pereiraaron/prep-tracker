@@ -1,5 +1,26 @@
-// Capitalize first letter of each word (for displaying lowercase-stored values)
-export const capitalize = (s: string) => s.replace(/\b\w/g, (c) => c.toUpperCase());
+// Capitalize with acronym awareness (for displaying lowercase-stored values)
+const ACRONYMS: Record<string, string> = {
+  bfs: "BFS", dfs: "DFS", bst: "BST", api: "API", cdn: "CDN",
+  sql: "SQL", nosql: "NoSQL", css: "CSS", html: "HTML", dom: "DOM",
+  oop: "OOP", dbms: "DBMS", os: "OS", svg: "SVG", cap: "CAP", solid: "SOLID",
+};
+const SMALL_WORDS = new Set(["vs", "and", "or", "of", "the", "in", "on", "to", "a", "an"]);
+
+const capitalizeWord = (word: string): string => {
+  const lower = word.toLowerCase();
+  if (lower in ACRONYMS) return ACRONYMS[lower];
+  if (lower.includes("/")) {
+    return lower.split("/").map((part) => part in ACRONYMS ? ACRONYMS[part] : part.charAt(0).toUpperCase() + part.slice(1)).join("/");
+  }
+  return word.charAt(0).toUpperCase() + word.slice(1);
+};
+
+export const capitalize = (s: string) =>
+  s.split(" ").map((word, i) => {
+    const lower = word.toLowerCase();
+    if (i > 0 && SMALL_WORDS.has(lower) && !(lower in ACRONYMS)) return lower;
+    return capitalizeWord(word);
+  }).join(" ");
 
 // Shared color maps for badges and chips across pages
 

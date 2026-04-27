@@ -46,7 +46,7 @@ const StatsPage = () => {
   const topicBreakdown = batch?.topics;
   const sourceBreakdown = batch?.sources;
   const dailyByCategory = activityCategory ? filtered?.dailyByCategory : batch?.dailyByCategory;
-  const backlogAge = activityCategory ? filtered?.backlogAge : batch?.backlogAge;
+  const weeklyProgress = activityCategory ? filtered?.weeklyProgress : batch?.weeklyProgress;
   const companyBreakdown = batch?.companyTags;
   const heatmapData = batch?.heatmap;
   const diffByCategory = batch?.difficultyByCategory;
@@ -208,7 +208,7 @@ const StatsPage = () => {
             <DetailCharts
               dailyByCategoryData={dailyByCategory}
               diffData={deepDiveDiffData}
-              backlogAgeData={backlogAge}
+              weeklyProgressData={weeklyProgress}
             />
           </Suspense>
 
