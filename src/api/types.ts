@@ -103,8 +103,8 @@ export const SOURCE_COLOR: Record<string, string> = {
   geeksforgeeks: "green",
   linkedin: "blue",
   medium: "gray",
-  namastedsa: "purple",
-  fmc: "blue",
+  namastedsa: "yellow",
+  fmc: "pink",
   other: "gray",
 };
 

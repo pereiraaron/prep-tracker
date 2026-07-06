@@ -1,7 +1,6 @@
 import type { QuestionListItem } from "@api/questions";
-import { SOURCE_LABEL } from "@api/types";
 import { capitalize, CATEGORY_BORDER_COLORS } from "@lib/styles";
-import { DifficultyBadge, CategoryBadge } from "@components/Badge";
+import { DifficultyBadge, CategoryBadge, SourceBadge } from "@components/Badge";
 import IconButton from "@components/IconButton";
 import { Star, Trash2, ExternalLink, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -19,12 +18,11 @@ const formatDate = (dateStr: string) =>
 
 const BacklogRow = ({ item: q, index, onStar, onDelete, onSolve }: BacklogRowProps) => {
   const borderColor = q.category ? CATEGORY_BORDER_COLORS[q.category] || "border-l-border" : "border-l-border";
-  const sourceLabel = q.source ? SOURCE_LABEL[q.source] || q.source : null;
 
   return (
     <Link
       to={`/questions/${q.id}`}
-      className={`group flex items-center gap-3 border-l-[3px] ${borderColor} px-3 sm:px-4 py-3 md:py-2.5 transition-colors hover:bg-secondary/50 animate-slide-up`}
+      className={`group flex items-center gap-3 border-l-[3px] ${borderColor} px-3 sm:px-4 py-3 md:py-2.5 transition-all hover:bg-secondary/50 hover:shadow-[inset_3px_0_0_0_hsl(var(--primary)/0.45)] animate-slide-up`}
       style={{ animationDelay: `${index * 20}ms` }}
     >
       {/* Star */}
@@ -57,10 +55,8 @@ const BacklogRow = ({ item: q, index, onStar, onDelete, onSolve }: BacklogRowPro
         </div>
         {/* Mobile-only: source + date */}
         <div className="flex items-center gap-2 mt-0.5 md:hidden">
-          {sourceLabel && (
-            <span className="text-[10px] font-mono text-muted-foreground/60">{sourceLabel}</span>
-          )}
-          <span className="text-[10px] text-muted-foreground/50">{formatDate(q.createdAt)}</span>
+          {q.source && <SourceBadge value={q.source} />}
+          <span className="text-[10px] text-muted-foreground/50 tabular-nums">{formatDate(q.createdAt)}</span>
         </div>
       </div>
 
@@ -98,8 +94,12 @@ const BacklogRow = ({ item: q, index, onStar, onDelete, onSolve }: BacklogRowPro
         <span className="w-40 flex justify-center">
           {q.category ? <CategoryBadge value={q.category} /> : <span className="text-[11px] text-muted-foreground/50">—</span>}
         </span>
-        <span className="w-28 text-center text-[11px] font-mono text-muted-foreground/50">
-          {sourceLabel || "—"}
+        <span className="w-28 flex justify-center">
+          {q.source ? (
+            <SourceBadge value={q.source} />
+          ) : (
+            <span className="text-[11px] text-muted-foreground/50">—</span>
+          )}
         </span>
         <span className="w-24 text-center text-[11px] text-muted-foreground/50 tabular-nums">
           {formatDate(q.createdAt)}

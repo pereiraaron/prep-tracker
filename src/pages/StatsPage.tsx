@@ -2,6 +2,7 @@ import usePageTitle from "@hooks/usePageTitle";
 import { lazy, Suspense, useState } from "react";
 import Layout from "@components/Layout";
 import PageHeader from "@components/PageHeader";
+import StaggerSection from "@components/StaggerSection";
 import Skeleton from "@components/Skeleton";
 import StatCard from "@components/StatCard";
 import { DashboardStatsSkeleton } from "@components/Skeleton";
@@ -11,7 +12,7 @@ import type { PrepCategory } from "@api/types";
 import { CheckCircle, ListTodo, BarChart3, Loader2, Percent } from "lucide-react";
 import { categoryShort } from "@components/stats/constants";
 import { SectionHeader } from "@components/stats/shared";
-import Heatmap from "@components/stats/Heatmap";
+import Heatmap, { buildHeatmapWeeks, buildHeatmapSummary, HeatmapSummaryLine } from "@components/stats/Heatmap";
 import Streaks from "@components/stats/Streaks";
 
 // Lazy-load chart-heavy components (recharts is 386KB)
@@ -120,14 +121,25 @@ const StatsPage = () => {
     ];
   })();
 
+  const heatmapWeeks = buildHeatmapWeeks(heatmapData ?? {});
+  const heatmapSummary = buildHeatmapSummary(heatmapWeeks);
+
+  const progressDays = progressData ?? [];
+  const last7 = progressDays.slice(-7);
+  const prev7 = progressDays.slice(-14, -7);
+  const solvedTrend = last7.reduce((a, d) => a + d.solved, 0) - prev7.reduce((a, d) => a + d.solved, 0);
+  const solvedSparkline = last7.map((d) => d.solved);
+
   return (
     <Layout>
-      <PageHeader
-        icon={BarChart3}
-        iconColor="bg-stat-purple/10 text-stat-purple"
-        title="Stats & Insights"
-        subtitle="Track your interview prep progress"
-      />
+      <StaggerSection index={0}>
+        <PageHeader
+          icon={BarChart3}
+          iconColor="bg-stat-purple/10 text-stat-purple"
+          title="Stats & Insights"
+          subtitle="Track your interview prep progress"
+        />
+      </StaggerSection>
 
       {isLoading ? (
         <>
@@ -137,23 +149,42 @@ const StatsPage = () => {
         </>
       ) : (
         <>
-          {/* Overview */}
-          <div className="mb-3 grid grid-cols-3 gap-3">
-            <StatCard label="Solved" value={solved || "—"} icon={CheckCircle} color="bg-stat-green/10 text-stat-green" />
-            <StatCard label="Backlog" value={backlog || "—"} icon={ListTodo} color="bg-stat-yellow/10 text-stat-yellow" />
-            <StatCard label="Solve Rate" value={total > 0 ? `${solveRate}%` : "—"} icon={Percent} color="bg-stat-blue/10 text-stat-blue" />
-          </div>
+          <StaggerSection index={1}>
+            <div className="mb-3 grid grid-cols-3 gap-3">
+              <StatCard
+                label="Solved"
+                value={solved || "—"}
+                icon={CheckCircle}
+                color="bg-stat-green/10 text-stat-green"
+                trend={solvedTrend !== 0 ? solvedTrend : undefined}
+                sparkline={solvedSparkline}
+                sparkColor="hsl(var(--stat-green))"
+              />
+              <StatCard label="Backlog" value={backlog || "—"} icon={ListTodo} color="bg-stat-yellow/10 text-stat-yellow" />
+              <StatCard label="Solve Rate" value={total > 0 ? `${solveRate}%` : "—"} icon={Percent} color="bg-stat-blue/10 text-stat-blue" />
+            </div>
+          </StaggerSection>
 
-          {streaks && <Streaks data={streaks} />}
+          {streaks && (
+            <StaggerSection index={2}>
+              <Streaks data={streaks} />
+            </StaggerSection>
+          )}
 
-          <SectionHeader title="Activity" />
+          <StaggerSection index={3}>
+            <SectionHeader title="Activity" />
+          </StaggerSection>
 
-          <div className="glass-card mb-6 min-w-0 rounded-xl p-4 md:p-5">
-            <h3 className="font-display text-sm font-semibold mb-4">Activity Heatmap</h3>
+          <StaggerSection index={4}>
+            <div className="glass-card mb-6 rounded-xl p-4 md:p-5">
+            <div className="mb-4 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+              <h3 className="font-display text-sm font-semibold shrink-0">Activity Heatmap</h3>
+              {Object.keys(heatmapData ?? {}).length > 0 && (
+                <HeatmapSummaryLine summary={heatmapSummary} className="sm:text-right" />
+              )}
+            </div>
             {Object.keys(heatmapData ?? {}).length > 0 ? (
-              <div className="-mx-4 min-w-0 touch-pan-x overflow-x-auto px-4 pb-1 md:-mx-5 md:px-5 [scrollbar-gutter:stable]">
-                <Heatmap data={heatmapData ?? {}} />
-              </div>
+              <Heatmap weeks={heatmapWeeks} />
             ) : (
               <div className="py-8 text-center">
                 <p className="text-sm text-muted-foreground">Solve some questions and your heatmap will appear here</p>
@@ -161,13 +192,21 @@ const StatsPage = () => {
             )}
 
           </div>
+          </StaggerSection>
 
-          <SectionHeader title="Progress" />
+          <StaggerSection index={5}>
+            <SectionHeader title="Progress" />
+          </StaggerSection>
+          <StaggerSection index={6}>
           <Suspense fallback={<ChartSkeleton />}>
             <ActivityCharts dailyData={dailyData} weeklyData={weeklyChartData} cumulativeData={cumulativeChartData} />
           </Suspense>
+          </StaggerSection>
 
-          <SectionHeader title="Breakdowns" />
+          <StaggerSection index={7}>
+            <SectionHeader title="Breakdowns" />
+          </StaggerSection>
+          <StaggerSection index={8}>
           <Suspense fallback={<ChartSkeleton />}>
             <BreakdownCharts
               categoryData={categoryData}
@@ -178,8 +217,12 @@ const StatsPage = () => {
               companyData={companyData}
             />
           </Suspense>
+          </StaggerSection>
 
-          <SectionHeader title="Deep Dive" />
+          <StaggerSection index={9}>
+            <SectionHeader title="Deep Dive" />
+          </StaggerSection>
+          <StaggerSection index={10}>
           <div className="mb-4 flex flex-wrap gap-2">
             <button
               onClick={() => setActivityCategory(undefined)}
@@ -205,6 +248,8 @@ const StatsPage = () => {
               </button>
             ))}
           </div>
+          </StaggerSection>
+          <StaggerSection index={11}>
           <Suspense fallback={<ChartSkeleton />}>
             <DetailCharts
               dailyByCategoryData={dailyByCategory}
@@ -212,7 +257,9 @@ const StatsPage = () => {
               weeklyProgressData={weeklyProgress}
             />
           </Suspense>
+          </StaggerSection>
 
+          <StaggerSection index={12}>
           <Suspense fallback={
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -220,6 +267,7 @@ const StatsPage = () => {
           }>
             {insights && <InsightsSection insights={insights} />}
           </Suspense>
+          </StaggerSection>
         </>
       )}
     </Layout>

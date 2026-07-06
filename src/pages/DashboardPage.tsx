@@ -3,10 +3,15 @@ import Layout from "@components/Layout";
 import PageHeader from "@components/PageHeader";
 import StatCard from "@components/StatCard";
 import ActivityItem from "@components/ActivityItem";
+import StaggerSection from "@components/StaggerSection";
+import PrimaryButton from "@components/PrimaryButton";
 import { DashboardStatsSkeleton, DashboardActivitySkeleton } from "@components/Skeleton";
 import QuickAction from "@components/QuickAction";
-import { useOverview, useInsights, useStreaks } from "@queries/useStats";
+import { useOverview, useInsights, useStreaks, useProgress } from "@queries/useStats";
 import { useRecentQuestions } from "@queries/useQuestions";
+import { Button } from "@components/ui/button";
+import { Input } from "@components/ui/input";
+import { Label } from "@components/ui/label";
 import {
   BookOpen,
   CheckCircle,
@@ -25,7 +30,7 @@ import {
   X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const getGreeting = () => {
   const hour = new Date().getHours();
@@ -33,6 +38,9 @@ const getGreeting = () => {
   if (hour < 18) return "Good afternoon";
   return "Good evening";
 };
+
+const sumDays = (days: { solved: number }[] | undefined) =>
+  (days ?? []).reduce((acc, d) => acc + d.solved, 0);
 
 const InterviewCountdown = () => {
   const [, setTick] = useState(0);
@@ -43,13 +51,12 @@ const InterviewCountdown = () => {
   const dateStr = localStorage.getItem("interviewDate");
   const label = localStorage.getItem("interviewLabel");
 
-  // Re-render at midnight to update days count
-  useState(() => {
+  useEffect(() => {
     const now = new Date();
     const msToMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() - now.getTime();
     const timer = setTimeout(() => setTick((t) => t + 1), msToMidnight);
     return () => clearTimeout(timer);
-  });
+  }, []);
 
   const handleSave = () => {
     if (dateInput) {
@@ -69,7 +76,6 @@ const InterviewCountdown = () => {
     setTick((t) => t + 1);
   };
 
-  // No date set and not editing → show add button
   if (!dateStr && !editing) {
     return (
       <button
@@ -87,7 +93,6 @@ const InterviewCountdown = () => {
     );
   }
 
-  // Inline form
   if (editing) {
     return (
       <div className="glass-card mb-8 rounded-xl p-4">
@@ -97,50 +102,46 @@ const InterviewCountdown = () => {
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="flex-1">
-            <label className="mb-1.5 block text-[11px] font-semibold text-muted-foreground">Label (optional)</label>
-            <input
+            <Label className="mb-1.5 block text-[11px] font-semibold text-muted-foreground">Label (optional)</Label>
+            <Input
               type="text"
               value={labelInput}
               onChange={(e) => setLabelInput(e.target.value)}
               placeholder="e.g. Google Round 1"
-              className="h-9 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30"
+              className="h-9 rounded-lg"
             />
           </div>
           <div className="flex-1">
-            <label className="mb-1.5 block text-[11px] font-semibold text-muted-foreground">Date</label>
-            <input
+            <Label className="mb-1.5 block text-[11px] font-semibold text-muted-foreground">Date</Label>
+            <Input
               type="date"
               value={dateInput}
               onChange={(e) => setDateInput(e.target.value)}
               min={new Date().toISOString().split("T")[0]}
-              className="h-9 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30"
+              className="h-9 rounded-lg"
             />
           </div>
           <div className="flex gap-2">
-            <button
-              onClick={handleSave}
-              disabled={!dateInput}
-              className="h-9 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-40"
-            >
+            <Button variant="brand" size="sm" onClick={handleSave} disabled={!dateInput}>
               Save
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => {
                 setEditing(false);
                 setDateInput(localStorage.getItem("interviewDate") || "");
                 setLabelInput(localStorage.getItem("interviewLabel") || "");
               }}
-              className="h-9 rounded-lg border border-border px-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       </div>
     );
   }
 
-  // Active countdown
   const target = new Date(`${dateStr}T00:00:00`);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -173,28 +174,25 @@ const InterviewCountdown = () => {
           )}
         </p>
       </div>
-      <p className="text-xs text-muted-foreground hidden sm:block">
+      <p className="text-xs text-muted-foreground hidden sm:block tabular-nums">
         {target.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
       </p>
       <div className="flex items-center gap-1 shrink-0">
-        <button
+        <Button
+          variant="ghost"
+          size="iconSm"
           onClick={() => {
             setDateInput(dateStr || "");
             setLabelInput(label || "");
             setEditing(true);
           }}
-          className="rounded-lg p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
           aria-label="Edit countdown"
         >
           <Pencil className="h-3.5 w-3.5" />
-        </button>
-        <button
-          onClick={handleClear}
-          className="rounded-lg p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-          aria-label="Remove countdown"
-        >
+        </Button>
+        <Button variant="ghost" size="iconSm" onClick={handleClear} aria-label="Remove countdown" className="hover:text-destructive hover:bg-destructive/10">
           <X className="h-3.5 w-3.5" />
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -203,6 +201,7 @@ const InterviewCountdown = () => {
 const Dashboard = () => {
   usePageTitle("Dashboard");
   const { data: overview, isLoading: statsLoading } = useOverview();
+  const { data: progress } = useProgress(14);
   const { data: recentData, isLoading: recentLoading } = useRecentQuestions();
   const { data: insights } = useInsights();
   const { data: streaks } = useStreaks();
@@ -217,83 +216,100 @@ const Dashboard = () => {
     day: "numeric",
   });
 
+  const progressDays = progress ?? [];
+  const last7 = progressDays.slice(-7);
+  const prev7 = progressDays.slice(-14, -7);
+  const solvedTrend = sumDays(last7) - sumDays(prev7);
+  const solvedSparkline = last7.map((d) => d.solved);
+
   return (
     <Layout>
-      <PageHeader
-        icon={Clock}
-        title={getGreeting()}
-        subtitle={today}
-        actions={
-          <Link
-            to="/question/new"
-            className="flex shrink-0 items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:brightness-110 active:scale-[0.98]"
-          >
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">New Question</span>
-          </Link>
-        }
-      />
+      <StaggerSection index={0}>
+        <PageHeader
+          icon={Clock}
+          iconColor="bg-stat-blue/10 text-stat-blue"
+          title={getGreeting()}
+          subtitle={today}
+          actions={
+            <PrimaryButton to="/question/new" size="sm" className="shrink-0">
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">New Question</span>
+            </PrimaryButton>
+          }
+        />
+      </StaggerSection>
 
-      {/* Stat cards */}
-      {statsLoading ? (
-        <DashboardStatsSkeleton />
-      ) : (
-        <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-          <StatCard label="Solved" value={solved || "—"} icon={CheckCircle} color="bg-stat-green/10 text-stat-green" />
-          <StatCard label="Backlog" value={backlog || "—"} icon={ListTodo} color="bg-stat-orange/10 text-stat-orange" />
-          <StatCard
-            label="Streak"
-            value={`${streaks?.currentStreak ?? 0}d`}
-            icon={Flame}
-            color="bg-stat-purple/10 text-stat-purple"
-          />
-          <StatCard
-            label="Active Days"
-            value={streaks?.totalActiveDays ?? "—"}
-            icon={CalendarCheck}
-            color="bg-stat-blue/10 text-stat-blue"
-          />
-        </div>
-      )}
+      <StaggerSection index={1}>
+        {statsLoading ? (
+          <DashboardStatsSkeleton />
+        ) : (
+          <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+            <StatCard
+              label="Solved"
+              value={solved || "—"}
+              icon={CheckCircle}
+              color="bg-stat-green/10 text-stat-green"
+              trend={solvedTrend !== 0 ? solvedTrend : undefined}
+              sparkline={solvedSparkline}
+              sparkColor="hsl(var(--stat-green))"
+            />
+            <StatCard label="Backlog" value={backlog || "—"} icon={ListTodo} color="bg-stat-orange/10 text-stat-orange" />
+            <StatCard
+              label="Streak"
+              value={`${streaks?.currentStreak ?? 0}d`}
+              icon={Flame}
+              color="bg-stat-purple/10 text-stat-purple"
+              sublabel={streaks?.longestStreak ? `Best: ${streaks.longestStreak}d` : undefined}
+            />
+            <StatCard
+              label="Active Days"
+              value={streaks?.totalActiveDays ?? "—"}
+              icon={CalendarCheck}
+              color="bg-stat-blue/10 text-stat-blue"
+            />
+          </div>
+        )}
+      </StaggerSection>
 
-      {/* Interview countdown */}
-      <InterviewCountdown />
+      <StaggerSection index={2}>
+        <InterviewCountdown />
+      </StaggerSection>
 
-      {/* Tips */}
       {tips.length > 0 && (
-        <div className="glass-card mb-8 rounded-xl p-4 md:p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Lightbulb className="h-4 w-4 text-stat-blue" />
-            <h2 className="font-display text-sm font-semibold">Tips</h2>
+        <StaggerSection index={3}>
+          <div className="glass-card mb-8 rounded-xl p-4 md:p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Lightbulb className="h-4 w-4 text-stat-blue" />
+              <h2 className="font-display text-sm font-semibold">Tips</h2>
+            </div>
+            <div className="space-y-2">
+              {tips.map((tip, i) => {
+                const color = `hsl(var(${
+                  tip.priority === "high" ? "--destructive" : tip.priority === "medium" ? "--stat-orange" : "--stat-green"
+                }))`;
+                return (
+                  <div
+                    key={i}
+                    className={`rounded-lg bg-secondary/30 pl-4 pr-3.5 py-2.5 ${
+                      tip.priority === "high" ? "tip-glow-fast" : tip.priority === "medium" ? "tip-glow" : ""
+                    }`}
+                    style={{
+                      border: `1px solid color-mix(in srgb, ${color} 20%, transparent)`,
+                      boxShadow: `inset 3px 0 0 ${color}`,
+                      ["--tip-color" as string]: color,
+                    }}
+                  >
+                    <p className="text-[13px] leading-relaxed text-foreground/85">{tip.text}</p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <div className="space-y-2">
-            {tips.map((tip, i) => {
-              const color = `hsl(var(${
-                tip.priority === "high" ? "--destructive" : tip.priority === "medium" ? "--stat-orange" : "--stat-green"
-              }))`;
-              return (
-                <div
-                  key={i}
-                  className={`rounded-lg bg-secondary/30 pl-4 pr-3.5 py-2.5 ${
-                    tip.priority === "high" ? "tip-glow-fast" : tip.priority === "medium" ? "tip-glow" : ""
-                  }`}
-                  style={{
-                    border: `1px solid color-mix(in srgb, ${color} 20%, transparent)`,
-                    boxShadow: `inset 3px 0 0 ${color}`,
-                    ["--tip-color" as string]: color,
-                  }}
-                >
-                  <p className="text-[13px] leading-relaxed text-foreground/85">{tip.text}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        </StaggerSection>
       )}
 
       <div className="grid gap-6 lg:grid-cols-5 min-w-0">
-        {/* Recent activity */}
-        <div className="lg:col-span-3 min-w-0">
+        <StaggerSection index={4} className="lg:col-span-3 min-w-0">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-display text-base font-bold">Recent Activity</h2>
             {recentSolved.length > 0 && (
@@ -325,10 +341,9 @@ const Dashboard = () => {
               </div>
             )}
           </div>
-        </div>
+        </StaggerSection>
 
-        {/* Quick actions */}
-        <div className="lg:col-span-2">
+        <StaggerSection index={5} className="lg:col-span-2">
           <h2 className="font-display text-base font-bold mb-3">Quick Actions</h2>
           <div className="space-y-2">
             <QuickAction to="/question/new" icon={Plus} label="New Question" description="Log a solved question" />
@@ -337,7 +352,7 @@ const Dashboard = () => {
             <QuickAction to="/revision" icon={Shuffle} label="Revision Mode" description="Review old questions" />
             <QuickAction to="/stats" icon={BarChart3} label="View Stats" description="Charts & insights" />
           </div>
-        </div>
+        </StaggerSection>
       </div>
     </Layout>
   );

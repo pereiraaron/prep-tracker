@@ -55,3 +55,21 @@ export const CHIP_BASE = "rounded-lg border px-2.5 py-1.5 text-xs font-medium tr
 export const CHIP_ACTIVE = "border-primary/40 bg-primary/15 text-primary shadow-sm shadow-primary/5";
 export const CHIP_INACTIVE =
   "border-border bg-secondary/50 text-muted-foreground hover:border-primary/20 hover:text-foreground";
+
+export const FORM_INPUT =
+  "flex h-10 w-full rounded-lg border border-input bg-background px-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+
+export const FORM_TEXTAREA =
+  "flex w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none";
+
+export const SOURCE_COLORS: Record<string, string> = {
+  leetcode: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20",
+  greatfrontend: "bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20",
+  minichallenges: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
+  geeksforgeeks: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
+  linkedin: "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20",
+  medium: "bg-muted text-muted-foreground border-border",
+  namastedsa: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+  fmc: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+  other: "bg-muted text-muted-foreground border-border",
+};

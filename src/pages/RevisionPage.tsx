@@ -2,6 +2,7 @@ import usePageTitle from "@hooks/usePageTitle";
 import { useState } from "react";
 import Layout from "@components/Layout";
 import PageHeader from "@components/PageHeader";
+import PrimaryButton from "@components/PrimaryButton";
 import { DifficultyBadge, CategoryBadge } from "@components/Badge";
 import { useQuestionsList } from "@queries/useQuestions";
 import type { PrepCategory, Difficulty } from "@api/types";
@@ -51,13 +52,10 @@ const RevisionPage = () => {
         title="Revision Mode"
         subtitle="Review solved questions to keep them fresh"
         actions={
-          <button
-            onClick={handleShuffle}
-            className="flex shrink-0 items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:brightness-110 active:scale-[0.98]"
-          >
+          <PrimaryButton onClick={handleShuffle} size="sm" className="shrink-0">
             <Shuffle className="h-4 w-4" />
             <span className="hidden sm:inline">Shuffle</span>
-          </button>
+          </PrimaryButton>
         }
       />
 

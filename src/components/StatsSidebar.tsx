@@ -3,6 +3,7 @@ import { StatsSidebarSkeleton } from "@components/Skeleton";
 import { CATEGORY_COLORS } from "@lib/styles";
 import { CATEGORY_LABEL, SOURCE_LABEL } from "@api/types";
 import type { PrepCategory } from "@api/types";
+import { CHART_BLUE, SOURCE_CHART_COLORS } from "@components/stats/constants";
 import { Flame, Trophy, Target, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -145,8 +146,8 @@ const StatsSidebar = () => {
                   </div>
                   <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-stat-blue/60 transition-all duration-500"
-                      style={{ width: `${pct}%` }}
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{ width: `${pct}%`, backgroundColor: SOURCE_CHART_COLORS[src.source] ?? CHART_BLUE }}
                     />
                   </div>
                 </div>

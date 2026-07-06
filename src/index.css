@@ -130,7 +130,7 @@
   --background: 224 30% 7%;
   --foreground: 220 15% 93%;
 
-  --card: 224 24% 11%;
+  --card: 224 22% 13%;
   --card-foreground: 220 15% 93%;
 
   --popover: 224 24% 11%;
@@ -217,6 +217,26 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
 }
 
+.dark .glass-card {
+  box-shadow:
+    0 1px 2px 0 rgb(0 0 0 / 0.25),
+    inset 0 1px 0 0 hsl(220 15% 100% / 0.04);
+}
+
+@utility app-background {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+@utility app-background-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+}
+
 @utility font-display {
   font-family: var(--font-family-display);
 }
@@ -236,6 +256,43 @@ h1, h2, h3, h4, h5, h6 {
 
 @utility animate-slide-up {
   animation: slide-up 0.3s ease-out both;
+}
+
+@keyframes heatmap-cell-in {
+  from { opacity: 0; transform: scale(0.35); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@utility animate-heatmap-cell {
+  animation: heatmap-cell-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes heatmap-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@utility animate-heatmap-fade-in {
+  animation: heatmap-fade-in 0.45s ease-out both;
+}
+
+@keyframes heatmap-milestone-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(25 95% 53% / 0.35); }
+  50% { box-shadow: 0 0 0 3px hsl(25 95% 53% / 0.12); }
+}
+
+@utility animate-heatmap-milestone {
+  animation: heatmap-milestone-pulse 2.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-heatmap-cell,
+  .animate-heatmap-fade-in,
+  .animate-heatmap-milestone,
+  .animate-slide-up,
+  .animate-fade-in {
+    animation: none;
+  }
 }
 
 @keyframes tip-pulse {

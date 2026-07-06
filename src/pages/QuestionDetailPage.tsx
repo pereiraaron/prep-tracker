@@ -13,7 +13,8 @@ import { toast } from "@components/ui/sonner";
 import type { QuestionSource, Solution } from "@api/questions";
 import type { PrepCategory, Difficulty } from "@api/types";
 import { PREP_CATEGORIES, DIFFICULTIES, QUESTION_SOURCES } from "@api/types";
-import { capitalize, DIFFICULTY_COLORS, CHIP_BASE, CHIP_ACTIVE, CHIP_INACTIVE } from "@lib/styles";
+import { capitalize, DIFFICULTY_COLORS, CHIP_BASE, CHIP_ACTIVE, CHIP_INACTIVE, FORM_INPUT } from "@lib/styles";
+import { Button } from "@components/ui/button";
 import {
   allowsMultipleSolutions,
   isSolutionRequired,
@@ -48,8 +49,7 @@ import {
 } from "lucide-react";
 const CodeEditor = lazy(() => import("@components/CodeEditor"));
 
-const inputCls =
-  "h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30 disabled:opacity-50";
+const inputCls = FORM_INPUT;
 const labelCls = "mb-2.5 block text-xs font-semibold text-muted-foreground";
 
 const SectionHeader = FormSectionHeader;
@@ -737,24 +737,21 @@ const QuestionDetailPage = () => {
 
             {/* Cancel / Save */}
             <div className="flex gap-2 justify-end">
-              <button
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => {
                   initEditState();
                   setIsEditing(false);
                 }}
-                className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-medium hover:bg-secondary active:scale-[0.98] transition-all"
               >
                 <X className="h-3.5 w-3.5" />
                 Cancel
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={mutating || !canSave || !urlValid}
-                className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 transition-all"
-              >
+              </Button>
+              <Button variant="brand" size="sm" onClick={handleSave} disabled={mutating || !canSave || !urlValid}>
                 {mutating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
                 Save Changes
-              </button>
+              </Button>
             </div>
           </div>
         )}

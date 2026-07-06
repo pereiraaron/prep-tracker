@@ -10,6 +10,8 @@ export const CHART_TEAL = "hsl(172, 66%, 44%)";
 export const CHART_ORANGE = "hsl(28, 90%, 55%)";
 export const CHART_ROSE = "hsl(350, 70%, 55%)";
 export const CHART_SKY = "hsl(200, 80%, 52%)";
+export const CHART_AMBER = "hsl(42, 95%, 52%)";
+export const CHART_EMERALD = "hsl(145, 58%, 42%)";
 
 // Solved / pending
 export const SOLVED_COLOR = "hsl(155, 70%, 45%)";
@@ -34,6 +36,8 @@ export const SOURCE_CHART_COLORS: Record<string, string> = {
   geeksforgeeks: CHART_BLUE,
   linkedin: CHART_SKY,
   medium: "hsl(0, 0%, 55%)",
+  namastedsa: CHART_AMBER,
+  fmc: CHART_EMERALD,
   other: PENDING_COLOR,
 };
 

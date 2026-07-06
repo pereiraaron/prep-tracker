@@ -1,5 +1,6 @@
 import usePageTitle from "@hooks/usePageTitle";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Layout from "@components/Layout";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCreateQuestion, useSuggestions } from "@queries/useQuestions";
@@ -7,6 +8,9 @@ import { useCreateBacklogItem } from "@queries/useBacklog";
 import type { QuestionSource, Solution } from "@api/questions";
 import type { PrepCategory, Difficulty } from "@api/types";
 import { PREP_CATEGORIES, DIFFICULTIES, QUESTION_SOURCES } from "@api/types";
+import { statsApi, type OverviewResponse, type StreaksResponse } from "@api/stats";
+import { queryKeys } from "@lib/queryKeys";
+import { celebrateSolve } from "@lib/celebrate";
 import SolutionFields from "@components/SolutionFields";
 import {
   allowsMultipleSolutions,
@@ -19,13 +23,11 @@ import { toast } from "@components/ui/sonner";
 import { ArrowLeft, Save, Loader2, FileText, Layers, Tag, Building2, StickyNote, Link2, ChevronDown } from "lucide-react";
 import ChipSelect from "@components/ChipSelect";
 import FormSectionHeader from "@components/FormSectionHeader";
-import { DIFFICULTY_COLORS, CHIP_BASE, CHIP_ACTIVE, CHIP_INACTIVE } from "@lib/styles";
+import { DIFFICULTY_COLORS, CHIP_BASE, CHIP_ACTIVE, CHIP_INACTIVE, FORM_INPUT, FORM_TEXTAREA } from "@lib/styles";
 
 
-const inputCls =
-  "h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30 disabled:opacity-50";
-const textareaCls =
-  "w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30 resize-none disabled:opacity-50";
+const inputCls = FORM_INPUT;
+const textareaCls = FORM_TEXTAREA;
 
 const SectionHeader = FormSectionHeader;
 
@@ -34,6 +36,7 @@ const NewQuestionPage = () => {
   const isBacklogMode = searchParams.get("mode") === "backlog";
   usePageTitle(isBacklogMode ? "Add to Backlog" : "New Question");
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const createQuestionMutation = useCreateQuestion();
   const createBacklogMutation = useCreateBacklogItem();
   const createMutation = isBacklogMode ? createBacklogMutation : createQuestionMutation;
@@ -100,6 +103,8 @@ const NewQuestionPage = () => {
         toast.success("Added to backlog");
         navigate("/backlog");
       } else {
+        const overviewBefore = queryClient.getQueryData<OverviewResponse>(queryKeys.stats.overview());
+        const streaksBefore = queryClient.getQueryData<StreaksResponse>(queryKeys.stats.streaks());
         await createQuestionMutation.mutateAsync({
           title: title.trim(),
           solutions: normalizeSolutionsForSubmit(solutions, category),
@@ -112,7 +117,15 @@ const NewQuestionPage = () => {
           tags: tags.length ? tags : undefined,
           companyTags: companyTags.length ? companyTags : undefined,
         });
-        toast.success("Question saved");
+        const streaksAfter = await queryClient.fetchQuery({
+          queryKey: queryKeys.stats.streaks(),
+          queryFn: statsApi.getStreaks,
+        });
+        celebrateSolve({
+          wasFirstQuestion: (overviewBefore?.totalSolved ?? 0) === 0,
+          previousStreak: streaksBefore?.currentStreak ?? 0,
+          currentStreak: streaksAfter.currentStreak,
+        });
         navigate("/questions");
       }
     } catch (err) {

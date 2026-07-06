@@ -29,6 +29,7 @@ const SettingsPage = () => {
     <Layout>
       <PageHeader
         icon={SettingsIcon}
+        iconColor="bg-muted text-muted-foreground"
         title="Settings"
         subtitle="Manage your account and preferences"
       />

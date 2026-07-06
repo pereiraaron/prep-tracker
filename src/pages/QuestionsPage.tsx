@@ -13,13 +13,13 @@ import StatsSidebar from "@components/StatsSidebar";
 import SearchAndFilters from "@components/questions/SearchAndFilters";
 import QuestionRow from "@components/questions/QuestionRow";
 import ColumnHeader from "@components/questions/ColumnHeader";
+import { Button } from "@components/ui/button";
 import { useQuestionsList, useQuestionsInfinite, useDeleteQuestion, useStarQuestion } from "@queries/useQuestions";
 import { useQueryClient } from "@tanstack/react-query";
 import { questionsApi } from "@api/questions";
 import { queryKeys } from "@lib/queryKeys";
 import type { PrepCategory, Difficulty } from "@api/types";
 import { BookOpen, Plus, Search, X } from "lucide-react";
-import { Link } from "react-router-dom";
 import { toast } from "@components/ui/sonner";
 
 const ITEMS_PER_PAGE = 15;
@@ -124,17 +124,16 @@ const QuestionsPage = () => {
     <Layout>
       <PageHeader
         icon={BookOpen}
+        iconColor="bg-stat-green/10 text-stat-green"
+        countColor="bg-stat-green/10 text-stat-green"
         title="Questions"
         subtitle={total > 0 ? "Your solved questions library" : "Your solved questions will appear here"}
         count={total}
         actions={
-          <Link
-            to="/question/new"
-            className="flex shrink-0 items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:brightness-110 active:scale-[0.98]"
-          >
+          <PrimaryButton to="/question/new" size="sm" className="shrink-0">
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">New Question</span>
-          </Link>
+          </PrimaryButton>
         }
       />
 
@@ -161,21 +160,19 @@ const QuestionsPage = () => {
                 title="No matching questions"
                 description="Try adjusting your search or filters"
                 action={
-                  <button
-                    onClick={clearAll}
-                    className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-secondary transition-colors"
-                  >
+                  <Button variant="outline" size="sm" onClick={clearAll}>
                     <X className="h-3 w-3" />
                     Clear all filters
-                  </button>
+                  </Button>
                 }
               />
             ) : (
               <EmptyState
                 icon={BookOpen}
-                iconBg="bg-primary/5"
+                iconBg="from-stat-green/15 via-stat-green/8 to-transparent"
                 title="No questions yet"
                 description="Log your first solved question to start building your library"
+                tip="Start with an Easy DSA problem you've done recently — it only takes a minute."
                 action={
                   <PrimaryButton to="/question/new">
                     <Plus className="h-4 w-4" />
@@ -186,28 +183,35 @@ const QuestionsPage = () => {
             )
           ) : (
             <>
-              {/* Desktop: column header with count */}
-              {!isMobile && (
-                <ColumnHeader currentPage={currentPage} itemsPerPage={ITEMS_PER_PAGE} total={total} sort={sort} onSort={handleSort} />
-              )}
-
-              {/* Mobile: simple count */}
-              {isMobile && (
-                <div className="mb-1 px-3 text-[11px] font-medium text-muted-foreground/60">
-                  {total} question{total === 1 ? "" : "s"}
-                </div>
-              )}
-
-              <div className={`glass-card rounded-xl overflow-hidden divide-y divide-border transition-opacity duration-200 ${isTransitioning ? "opacity-40 pointer-events-none" : ""}`}>
-                {questions.map((q, i) => (
-                  <QuestionRow
-                    key={q.id}
-                    question={q}
-                    index={i}
-                    onStar={(id) => starMutation.mutate(id)}
-                    onDelete={handleDelete}
+              <div className={`glass-card rounded-xl overflow-hidden transition-opacity duration-200 ${isTransitioning ? "opacity-40 pointer-events-none" : ""}`}>
+                {!isMobile && (
+                  <ColumnHeader
+                    sticky
+                    currentPage={currentPage}
+                    itemsPerPage={ITEMS_PER_PAGE}
+                    total={total}
+                    sort={sort}
+                    onSort={handleSort}
                   />
-                ))}
+                )}
+
+                {isMobile && (
+                  <div className="px-3 py-2 text-[11px] font-medium text-muted-foreground/60 border-b border-border">
+                    {total} question{total === 1 ? "" : "s"}
+                  </div>
+                )}
+
+                <div className="divide-y divide-border">
+                  {questions.map((q, i) => (
+                    <QuestionRow
+                      key={q.id}
+                      question={q}
+                      index={i}
+                      onStar={(id) => starMutation.mutate(id)}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </div>
               </div>
 
               {/* Mobile: infinite scroll trigger */}

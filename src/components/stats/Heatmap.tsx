@@ -1,8 +1,96 @@
-const MOBILE_MONTHS = 5;
-const RANGE_DAYS = 364;
+import { Fragment } from "react";
+
+const MOBILE_WEEKS = 16;
 
 const HEATMAP_LIGHT = ["hsl(220, 15%, 92%)", "hsl(155, 45%, 78%)", "hsl(155, 52%, 60%)", "hsl(155, 58%, 44%)", "hsl(155, 62%, 32%)"];
 const HEATMAP_DARK = ["hsl(224, 20%, 16%)", "hsl(155, 35%, 24%)", "hsl(155, 45%, 34%)", "hsl(155, 52%, 44%)", "hsl(155, 58%, 54%)"];
+
+/** Streak lengths worth highlighting on the heatmap */
+const STREAK_MILESTONES = [7, 14, 30, 50, 100] as const;
+
+type MilestoneKind = "best" | "first" | "streak";
+
+interface DayMilestone {
+  kind: MilestoneKind;
+  label: string;
+}
+
+const dayDiff = (a: string, b: string) =>
+  Math.round((new Date(b + "T00:00:00").getTime() - new Date(a + "T00:00:00").getTime()) / 86_400_000);
+
+const addMilestone = (map: Map<string, DayMilestone[]>, date: string, milestone: DayMilestone) => {
+  const list = map.get(date) ?? [];
+  if (!list.some((m) => m.kind === milestone.kind && m.label === milestone.label)) {
+    list.push(milestone);
+    map.set(date, list);
+  }
+};
+
+const buildDayMilestones = (weeks: HeatmapDay[][], bestDay: number): Map<string, DayMilestone[]> => {
+  const map = new Map<string, DayMilestone[]>();
+  const days: HeatmapDay[] = [];
+
+  for (const week of weeks) {
+    for (const day of week) {
+      if (day.date) days.push(day);
+    }
+  }
+
+  const firstActive = days.find((d) => d.count > 0);
+  if (firstActive) {
+    addMilestone(map, firstActive.date, { kind: "first", label: "First solve in this period" });
+  }
+
+  if (bestDay >= 2) {
+    for (const d of days) {
+      if (d.count === bestDay) {
+        addMilestone(map, d.date, { kind: "best", label: `Personal best — ${bestDay} solved` });
+      }
+    }
+  }
+
+  let streak = 0;
+  for (let i = 0; i < days.length; i++) {
+    const d = days[i];
+    if (d.count > 0) {
+      const prev = i > 0 ? days[i - 1] : null;
+      if (prev && prev.count > 0 && dayDiff(prev.date, d.date) === 1) streak += 1;
+      else streak = 1;
+
+      if ((STREAK_MILESTONES as readonly number[]).includes(streak)) {
+        addMilestone(map, d.date, { kind: "streak", label: `${streak}-day streak` });
+      }
+    } else {
+      streak = 0;
+    }
+  }
+
+  return map;
+};
+
+const primaryMilestone = (milestones: DayMilestone[] | undefined): DayMilestone | undefined => {
+  if (!milestones?.length) return undefined;
+  const order: MilestoneKind[] = ["streak", "best", "first"];
+  for (const kind of order) {
+    const found = milestones.find((m) => m.kind === kind);
+    if (found) return found;
+  }
+  return milestones[0];
+};
+
+const milestoneRingClass = (kind: MilestoneKind) => {
+  switch (kind) {
+    case "streak":
+      return "ring-2 ring-stat-orange/80 ring-offset-1 ring-offset-background animate-heatmap-milestone";
+    case "best":
+      return "ring-2 ring-stat-yellow/90 ring-offset-1 ring-offset-background";
+    case "first":
+      return "ring-2 ring-stat-purple/70 ring-offset-1 ring-offset-background";
+  }
+};
+
+/** Row labels — weeks start on Sunday; show Mon / Wed / Fri like GitHub */
+const WEEKDAY_LABELS = ["", "Mon", "", "Wed", "", "Fri", ""] as const;
 
 const isDark = () => document.documentElement.classList.contains("dark");
 
@@ -18,13 +106,12 @@ const heatmapColor = (count: number): string => {
 interface HeatmapDay {
   date: string;
   count: number;
-  padding?: boolean;
 }
 
-interface MonthCalendar {
-  key: string;
-  label: string;
-  weeks: HeatmapDay[][];
+interface HeatmapSummary {
+  totalQuestions: number;
+  activeDays: number;
+  bestDay: number;
 }
 
 const formatDateLocal = (date: Date) => {
@@ -34,135 +121,253 @@ const formatDateLocal = (date: Date) => {
   return `${y}-${m}-${d}`;
 };
 
-const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+const monthShort = (dateStr: string) =>
+  new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", { month: "short" });
 
-export const getHeatmapRange = () => {
-  const end = startOfDay(new Date());
-  const start = startOfDay(new Date(end));
-  start.setDate(start.getDate() - RANGE_DAYS);
-  return { start, end };
+export const buildHeatmapSummary = (weeks: HeatmapDay[][]): HeatmapSummary => {
+  let totalQuestions = 0;
+  let activeDays = 0;
+  let bestDay = 0;
+
+  for (const week of weeks) {
+    for (const day of week) {
+      if (!day.date) continue;
+      totalQuestions += day.count;
+      if (day.count > 0) activeDays++;
+      if (day.count > bestDay) bestDay = day.count;
+    }
+  }
+
+  return { totalQuestions, activeDays, bestDay };
 };
 
-export const buildMonthCalendars = (data: Record<string, number>): MonthCalendar[] => {
-  const { start, end } = getHeatmapRange();
-  const months: MonthCalendar[] = [];
-  const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
-  const endMonth = new Date(end.getFullYear(), end.getMonth(), 1);
+/** GitHub-style: label the week column where each month starts (or the first week). */
+const buildMonthLabels = (weeks: HeatmapDay[][]): (string | null)[] => {
+  const labels: (string | null)[] = weeks.map(() => null);
+  const labeled = new Set<string>();
 
-  while (cursor <= endMonth) {
-    const year = cursor.getFullYear();
-    const month = cursor.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const firstDow = new Date(year, month, 1).getDay();
-    const numCols = Math.ceil((firstDow + daysInMonth) / 7);
-
-    const weeks: HeatmapDay[][] = Array.from({ length: numCols }, () =>
-      Array.from({ length: 7 }, () => ({ date: "", count: 0, padding: true })),
-    );
-
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, month, day);
-      const dateStr = formatDateLocal(date);
-      const col = Math.floor((firstDow + day - 1) / 7);
-      const dow = date.getDay();
-
-      if (date < start) {
-        weeks[col][dow] = { date: "", count: 0, padding: false };
-      } else {
-        weeks[col][dow] = {
-          date: dateStr,
-          count: date <= end ? (data[dateStr] ?? 0) : 0,
-          padding: false,
-        };
+  weeks.forEach((week, wi) => {
+    for (const day of week) {
+      if (!day.date) continue;
+      const d = new Date(day.date + "T00:00:00");
+      const monthKey = `${d.getFullYear()}-${d.getMonth()}`;
+      if (d.getDate() === 1 && !labeled.has(monthKey)) {
+        labels[wi] = monthShort(day.date);
+        labeled.add(monthKey);
+        return;
       }
     }
+  });
 
-    months.push({
-      key: `${year}-${month + 1}`,
-      label: new Date(year, month, 1).toLocaleDateString("en-US", { month: "short" }),
-      weeks,
-    });
-
-    cursor.setMonth(cursor.getMonth() + 1);
+  if (!labels[0]) {
+    const first = weeks[0]?.find((d) => d.date)?.date;
+    if (first) labels[0] = monthShort(first);
   }
 
-  return months;
+  return labels;
 };
 
-const HeatmapCell = ({ day }: { day: HeatmapDay }) => {
-  if (day.padding || !day.date) {
-    return <div className="min-h-0 min-w-0" />;
+export const buildHeatmapWeeks = (data: Record<string, number>): HeatmapDay[][] => {
+  const today = new Date();
+  const start = new Date(today);
+  start.setDate(start.getDate() - 364);
+  start.setDate(start.getDate() - start.getDay());
+
+  const weeks: HeatmapDay[][] = [];
+  const current = new Date(start);
+
+  while (current <= today) {
+    const week: HeatmapDay[] = [];
+    for (let d = 0; d < 7; d++) {
+      if (current > today) {
+        week.push({ date: "", count: 0 });
+      } else {
+        const dateStr = formatDateLocal(current);
+        week.push({ date: dateStr, count: data[dateStr] ?? 0 });
+      }
+      current.setDate(current.getDate() + 1);
+    }
+    weeks.push(week);
   }
 
+  return weeks;
+};
+
+export const HeatmapSummaryLine = ({ summary, className = "" }: { summary: HeatmapSummary; className?: string }) => {
+  const { totalQuestions, activeDays, bestDay } = summary;
+  const qLabel = totalQuestions === 1 ? "question" : "questions";
+  const dLabel = activeDays === 1 ? "active day" : "active days";
+
   return (
-    <div className="group relative min-h-0 min-w-0 overflow-hidden">
-      <div
-        className="h-full w-full rounded-[3px] transition-transform [@media(hover:hover)]:group-hover:scale-125"
-        style={{ backgroundColor: heatmapColor(day.count) }}
-      />
-      <div className="pointer-events-none absolute -top-9 left-1/2 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded-md border border-border bg-popover px-2.5 py-1 text-[10px] font-medium text-popover-foreground shadow-lg [@media(hover:hover)]:group-hover:block">
-        {(() => {
-          const d = new Date(day.date + "T00:00:00");
-          const label = d.toLocaleDateString("en-US", { month: "long", day: "numeric" });
-          return day.count === 0 ? `No completions on ${label}` : `${day.count} solved · ${label}`;
-        })()}
-      </div>
+    <p className={`animate-heatmap-fade-in text-xs text-muted-foreground tabular-nums ${className}`}>
+      <span className="font-medium text-foreground">{totalQuestions}</span> {qLabel}
+      <span className="mx-1.5 text-border">·</span>
+      <span className="font-medium text-foreground">{activeDays}</span> {dLabel}
+      <span className="mx-1.5 text-border">·</span>
+      Best day: <span className="font-medium text-foreground">{bestDay}</span>
+    </p>
+  );
+};
+
+const HeatmapTooltip = ({
+  date,
+  count,
+  milestones,
+}: {
+  date: string;
+  count: number;
+  milestones?: DayMilestone[];
+}) => {
+  if (!date) return null;
+  const d = new Date(date + "T00:00:00");
+  const label = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return (
+    <div className="pointer-events-none absolute bottom-[calc(100%+6px)] left-1/2 z-10 invisible -translate-x-1/2 scale-95 whitespace-nowrap rounded-md border border-border bg-popover px-2.5 py-1.5 text-[10px] font-medium text-popover-foreground opacity-0 shadow-lg transition-all duration-200 group-hover:visible group-hover:scale-100 group-hover:opacity-100">
+      <div>{count === 0 ? `No completions on ${label}` : `${count} solved · ${label}`}</div>
+      {milestones?.map((m) => (
+        <div
+          key={m.label}
+          className={`mt-0.5 text-[9px] font-semibold ${
+            m.kind === "streak"
+              ? "text-stat-orange"
+              : m.kind === "best"
+                ? "text-stat-yellow"
+                : "text-stat-purple"
+          }`}
+        >
+          {m.label}
+        </div>
+      ))}
     </div>
   );
 };
 
-const MonthBlock = ({ month }: { month: MonthCalendar }) => (
-  <div className="flex shrink-0 flex-col md:min-w-0" style={{ flex: month.weeks.length }}>
-    <div className="mb-2 text-center text-[10px] leading-none font-medium text-muted-foreground md:mb-3">
-      {month.label}
-    </div>
-    <div className="flex min-w-0 gap-[2px] md:gap-[3px]">
-      {month.weeks.map((week, wi) => (
-        <div
-          key={wi}
-          className="grid min-w-[9px] flex-1 gap-[2px] md:min-w-0 md:gap-[3px]"
-          style={{ gridTemplateRows: "repeat(7, minmax(0, 1fr))", aspectRatio: "1 / 7" }}
-        >
-          {week.map((day, di) => (
-            <HeatmapCell key={di} day={day} />
-          ))}
-        </div>
-      ))}
-    </div>
-  </div>
-);
+const HeatmapCell = ({
+  day,
+  delayMs = 0,
+  milestones,
+}: {
+  day: HeatmapDay;
+  delayMs?: number;
+  milestones?: DayMilestone[];
+}) => {
+  if (!day.date) return <div className="aspect-square w-full min-w-0" />;
 
-const HeatmapGridInner = ({ months }: { months: MonthCalendar[] }) => (
-  <>
-    <div className="w-full min-w-0">
-      <div className="flex w-max min-w-full items-start gap-3 md:w-full md:gap-5 lg:gap-6">
-        {months.map((month) => (
-          <MonthBlock key={month.key} month={month} />
-        ))}
-      </div>
-    </div>
-    <div className="mt-3 flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground/70 md:justify-end">
-      <span>Less</span>
-      {[0, 1, 2, 3, 4].map((level) => (
-        <div
-          key={level}
-          className="h-2.5 w-2.5 rounded-[2px]"
-          style={{ backgroundColor: heatmapColor(level === 0 ? 0 : level) }}
+  const primary = primaryMilestone(milestones);
+
+  return (
+    <div
+      className="group relative aspect-square w-full min-w-0 animate-heatmap-cell"
+      style={{ animationDelay: `${delayMs}ms` }}
+    >
+      <div
+        className={`relative h-full w-full rounded-[3px] transition-all duration-200 ease-out [@media(hover:hover)]:group-hover:scale-125 [@media(hover:hover)]:group-hover:shadow-sm ${
+          primary ? milestoneRingClass(primary.kind) : ""
+        }`}
+        style={{ backgroundColor: heatmapColor(day.count) }}
+      />
+      {primary && (
+        <span
+          className={`pointer-events-none absolute -right-px -top-px h-1.5 w-1.5 rounded-full ${
+            primary.kind === "streak"
+              ? "bg-stat-orange"
+              : primary.kind === "best"
+                ? "bg-stat-yellow"
+                : "bg-stat-purple"
+          }`}
+          aria-hidden
         />
-      ))}
-      <span>More</span>
+      )}
+      <HeatmapTooltip date={day.date} count={day.count} milestones={milestones} />
     </div>
-  </>
-);
+  );
+};
 
-const Heatmap = ({ data }: { data: Record<string, number> }) => {
-  const months = buildMonthCalendars(data);
-  const mobileMonths = months.slice(-MOBILE_MONTHS);
+const HeatmapGridInner = ({ data }: { data: HeatmapDay[][] }) => {
+  const monthLabels = buildMonthLabels(data);
+  const summary = buildHeatmapSummary(data);
+  const dayMilestones = buildDayMilestones(data, summary.bestDay);
+  const colTemplate = `auto repeat(${data.length}, minmax(0, 1fr))`;
+  const hasMilestones = dayMilestones.size > 0;
 
   return (
     <>
-      <div className="md:hidden"><HeatmapGridInner months={mobileMonths} /></div>
-      <div className="hidden md:block"><HeatmapGridInner months={months} /></div>
+      <div className="grid gap-[3px]" style={{ gridTemplateColumns: colTemplate }}>
+        {/* Month label row */}
+        <div aria-hidden className="h-3" />
+        {monthLabels.map((label, i) => (
+          <div
+            key={`m-${i}`}
+            className="animate-heatmap-fade-in truncate pb-0.5 text-center text-[10px] font-medium leading-none text-muted-foreground"
+            style={{ animationDelay: `${80 + i * 10}ms` }}
+          >
+            {label ?? ""}
+          </div>
+        ))}
+
+        {/* Day rows: weekday gutter + cells */}
+        {WEEKDAY_LABELS.map((weekday, row) => (
+          <Fragment key={row}>
+            <div className="flex items-center pr-1 text-[10px] font-medium leading-none text-muted-foreground">
+              {weekday}
+            </div>
+            {data.map((week, wi) => {
+              const day = week[row];
+              return (
+                <HeatmapCell
+                  key={wi}
+                  day={day}
+                  delayMs={100 + wi * 12 + row * 2}
+                  milestones={day.date ? dayMilestones.get(day.date) : undefined}
+                />
+              );
+            })}
+          </Fragment>
+        ))}
+      </div>
+      <div
+        className="mt-3 flex animate-heatmap-fade-in flex-wrap items-center justify-end gap-x-4 gap-y-1.5 pl-7 text-[10px] text-muted-foreground/70"
+        style={{ animationDelay: "500ms" }}
+      >
+        <div className="flex items-center gap-1.5">
+          <span>Less</span>
+          {[0, 1, 2, 3, 4].map((level) => (
+            <div
+              key={level}
+              className="h-2.5 w-2.5 rounded-[2px] transition-transform duration-200 hover:scale-110"
+              style={{ backgroundColor: heatmapColor(level === 0 ? 0 : level) }}
+            />
+          ))}
+          <span>More</span>
+        </div>
+        {hasMilestones && (
+          <div className="flex flex-wrap items-center gap-3 text-[9px]">
+            <span className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full bg-stat-orange ring-2 ring-stat-orange/50 ring-offset-1 ring-offset-background" />
+              Streak
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full bg-stat-yellow ring-2 ring-stat-yellow/50 ring-offset-1 ring-offset-background" />
+              Best day
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full bg-stat-purple ring-2 ring-stat-purple/50 ring-offset-1 ring-offset-background" />
+              First solve
+            </span>
+          </div>
+        )}
+      </div>
+    </>
+  );
+};
+
+const Heatmap = ({ weeks }: { weeks: HeatmapDay[][] }) => {
+  const mobileWeeks = weeks.slice(-MOBILE_WEEKS);
+
+  return (
+    <>
+      <div className="md:hidden"><HeatmapGridInner data={mobileWeeks} /></div>
+      <div className="hidden md:block"><HeatmapGridInner data={weeks} /></div>
     </>
   );
 };

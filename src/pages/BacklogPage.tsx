@@ -16,6 +16,9 @@ import SearchAndFilters from "@components/questions/SearchAndFilters";
 import ColumnHeader from "@components/questions/ColumnHeader";
 import BacklogRow from "@components/backlog/BacklogRow";
 import SolveDialog from "@components/backlog/SolveDialog";
+import { Button } from "@components/ui/button";
+import { celebrateSolve } from "@lib/celebrate";
+import { statsApi, type OverviewResponse, type StreaksResponse } from "@api/stats";
 import {
   useBacklogList,
   useBacklogInfinite,
@@ -29,7 +32,6 @@ import { queryKeys } from "@lib/queryKeys";
 import type { QuestionListItem } from "@api/questions";
 import type { PrepCategory, Difficulty } from "@api/types";
 import { Archive, Plus, Search, X } from "lucide-react";
-import { Link } from "react-router-dom";
 import { toast } from "@components/ui/sonner";
 
 const ITEMS_PER_PAGE = 15;
@@ -128,9 +130,19 @@ const BacklogPage = () => {
 
   const handleSolve = async (solutions?: Solution[]) => {
     if (!solvingItem) return;
+    const overviewBefore = queryClient.getQueryData<OverviewResponse>(queryKeys.stats.overview());
+    const streaksBefore = queryClient.getQueryData<StreaksResponse>(queryKeys.stats.streaks());
     try {
       await solveMutation.mutateAsync({ id: solvingItem.id, solutions });
-      toast.success("Marked as solved");
+      const streaksAfter = await queryClient.fetchQuery({
+        queryKey: queryKeys.stats.streaks(),
+        queryFn: statsApi.getStreaks,
+      });
+      celebrateSolve({
+        wasFirstQuestion: (overviewBefore?.totalSolved ?? 0) === 0,
+        previousStreak: streaksBefore?.currentStreak ?? 0,
+        currentStreak: streaksAfter.currentStreak,
+      });
       setSolvingItem(null);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to mark as solved");
@@ -149,13 +161,10 @@ const BacklogPage = () => {
         count={total}
         countColor="bg-stat-orange/10 text-stat-orange"
         actions={
-          <Link
-            to="/question/new?mode=backlog"
-            className="flex shrink-0 items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:brightness-110 active:scale-[0.98]"
-          >
+          <PrimaryButton to="/question/new?mode=backlog" size="sm" className="shrink-0">
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">New Item</span>
-          </Link>
+          </PrimaryButton>
         }
       />
 
@@ -182,21 +191,19 @@ const BacklogPage = () => {
                 title="No matching items"
                 description="Try adjusting your search or filters"
                 action={
-                  <button
-                    onClick={clearAll}
-                    className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-secondary transition-colors"
-                  >
+                  <Button variant="outline" size="sm" onClick={clearAll}>
                     <X className="h-3 w-3" />
                     Clear all filters
-                  </button>
+                  </Button>
                 }
               />
             ) : (
               <EmptyState
                 icon={Archive}
-                iconBg="bg-stat-orange/5"
+                iconBg="from-stat-orange/15 via-stat-orange/8 to-transparent"
                 title="Backlog is empty"
                 description="Add questions you want to solve later"
+                tip="Paste a LeetCode or GFG link while browsing — save it for when you have time."
                 action={
                   <PrimaryButton to="/question/new?mode=backlog">
                     <Plus className="h-4 w-4" />
@@ -207,30 +214,40 @@ const BacklogPage = () => {
             )
           ) : (
             <>
-              {!isMobile && (
-                <ColumnHeader currentPage={currentPage} itemsPerPage={ITEMS_PER_PAGE} total={total} sort={sort} onSort={handleSort} dateField="createdAt" />
-              )}
-
-              {isMobile && (
-                <div className="mb-1 px-3 text-[11px] font-medium text-muted-foreground/60">
-                  {total} item{total === 1 ? "" : "s"}
-                </div>
-              )}
-
-              <div className={`glass-card rounded-xl overflow-hidden divide-y divide-border transition-opacity duration-200 ${isTransitioning ? "opacity-40 pointer-events-none" : ""}`}>
-                {backlog.map((q, i) => (
-                  <BacklogRow
-                    key={q.id}
-                    item={q}
-                    index={i}
-                    onStar={(id) => starMutation.mutate(id)}
-                    onDelete={handleDelete}
-                    onSolve={(id) => {
-                      const item = backlog.find((b) => b.id === id);
-                      if (item) setSolvingItem(item);
-                    }}
+              <div className={`glass-card rounded-xl overflow-hidden transition-opacity duration-200 ${isTransitioning ? "opacity-40 pointer-events-none" : ""}`}>
+                {!isMobile && (
+                  <ColumnHeader
+                    sticky
+                    currentPage={currentPage}
+                    itemsPerPage={ITEMS_PER_PAGE}
+                    total={total}
+                    sort={sort}
+                    onSort={handleSort}
+                    dateField="createdAt"
                   />
-                ))}
+                )}
+
+                {isMobile && (
+                  <div className="px-3 py-2 text-[11px] font-medium text-muted-foreground/60 border-b border-border">
+                    {total} item{total === 1 ? "" : "s"}
+                  </div>
+                )}
+
+                <div className="divide-y divide-border">
+                  {backlog.map((q, i) => (
+                    <BacklogRow
+                      key={q.id}
+                      item={q}
+                      index={i}
+                      onStar={(id) => starMutation.mutate(id)}
+                      onDelete={handleDelete}
+                      onSolve={(id) => {
+                        const item = backlog.find((b) => b.id === id);
+                        if (item) setSolvingItem(item);
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
 
               {isMobile && (

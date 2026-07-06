@@ -1,8 +1,7 @@
 import type { QuestionListItem } from "@api/questions";
 import { questionsApi } from "@api/questions";
-import { SOURCE_LABEL } from "@api/types";
 import { capitalize, CATEGORY_BORDER_COLORS } from "@lib/styles";
-import { DifficultyBadge, CategoryBadge } from "@components/Badge";
+import { DifficultyBadge, CategoryBadge, SourceBadge } from "@components/Badge";
 import IconButton from "@components/IconButton";
 import { queryKeys } from "@lib/queryKeys";
 import { useQueryClient } from "@tanstack/react-query";
@@ -23,7 +22,6 @@ const formatDate = (dateStr: string) =>
 const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps) => {
   const queryClient = useQueryClient();
   const borderColor = q.category ? CATEGORY_BORDER_COLORS[q.category] || "border-l-border" : "border-l-border";
-  const sourceLabel = q.source ? SOURCE_LABEL[q.source] || q.source : null;
 
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -51,7 +49,7 @@ const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps)
       onMouseLeave={cancelPrefetch}
       onFocus={startPrefetch}
       onBlur={cancelPrefetch}
-      className={`group flex items-center gap-3 border-l-[3px] ${borderColor} px-3 sm:px-4 py-3 md:py-2.5 transition-all hover:bg-secondary/40 animate-slide-up`}
+      className={`group flex items-center gap-3 border-l-[3px] ${borderColor} px-3 sm:px-4 py-3 md:py-2.5 transition-all hover:bg-secondary/50 hover:shadow-[inset_3px_0_0_0_hsl(var(--primary)/0.45)] animate-slide-up`}
       style={{ animationDelay: `${index * 20}ms` }}
     >
       {/* Star */}
@@ -92,8 +90,8 @@ const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps)
         </div>
         {/* Mobile-only: source + date */}
         <div className="flex items-center gap-2 mt-0.5 md:hidden">
-          {sourceLabel && <span className="text-[10px] font-mono text-muted-foreground/60">{sourceLabel}</span>}
-          {q.solvedAt && <span className="text-[10px] text-muted-foreground/50">{formatDate(q.solvedAt)}</span>}
+          {q.source && <SourceBadge value={q.source} />}
+          {q.solvedAt && <span className="text-[10px] text-muted-foreground/50 tabular-nums">{formatDate(q.solvedAt)}</span>}
         </div>
       </div>
 
@@ -129,7 +127,13 @@ const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps)
             <span className="text-[11px] text-muted-foreground/50">—</span>
           )}
         </span>
-        <span className="w-28 text-center text-[11px] font-mono text-muted-foreground/50">{sourceLabel || "—"}</span>
+        <span className="w-28 flex justify-center">
+          {q.source ? (
+            <SourceBadge value={q.source} />
+          ) : (
+            <span className="text-[11px] text-muted-foreground/50">—</span>
+          )}
+        </span>
         <span className="w-24 text-center text-[11px] text-muted-foreground/50 tabular-nums">
           {q.solvedAt ? formatDate(q.solvedAt) : "—"}
         </span>
