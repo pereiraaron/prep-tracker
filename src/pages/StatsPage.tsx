@@ -11,7 +11,7 @@ import type { PrepCategory } from "@api/types";
 import { CheckCircle, ListTodo, BarChart3, Loader2, Percent } from "lucide-react";
 import { categoryShort } from "@components/stats/constants";
 import { SectionHeader } from "@components/stats/shared";
-import Heatmap, { buildHeatmapWeeks } from "@components/stats/Heatmap";
+import Heatmap from "@components/stats/Heatmap";
 import Streaks from "@components/stats/Streaks";
 
 // Lazy-load chart-heavy components (recharts is 386KB)
@@ -120,8 +120,6 @@ const StatsPage = () => {
     ];
   })();
 
-  const heatmapWeeks = buildHeatmapWeeks(heatmapData ?? {});
-
   return (
     <Layout>
       <PageHeader
@@ -150,15 +148,18 @@ const StatsPage = () => {
 
           <SectionHeader title="Activity" />
 
-          <div className="glass-card mb-6 rounded-xl p-4 md:p-5">
+          <div className="glass-card mb-6 min-w-0 rounded-xl p-4 md:p-5">
             <h3 className="font-display text-sm font-semibold mb-4">Activity Heatmap</h3>
             {Object.keys(heatmapData ?? {}).length > 0 ? (
-              <Heatmap weeks={heatmapWeeks} />
+              <div className="-mx-4 min-w-0 touch-pan-x overflow-x-auto px-4 pb-1 md:-mx-5 md:px-5 [scrollbar-gutter:stable]">
+                <Heatmap data={heatmapData ?? {}} />
+              </div>
             ) : (
               <div className="py-8 text-center">
                 <p className="text-sm text-muted-foreground">Solve some questions and your heatmap will appear here</p>
               </div>
             )}
+
           </div>
 
           <SectionHeader title="Progress" />

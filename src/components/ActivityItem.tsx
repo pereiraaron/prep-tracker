@@ -1,4 +1,4 @@
-import type { Question } from "@api/questions";
+import type { QuestionListItem } from "@api/questions";
 import { questionsApi } from "@api/questions";
 import { useRef } from "react";
 import { Link } from "react-router-dom";
@@ -8,7 +8,7 @@ import { CATEGORY_BORDER_COLORS } from "@lib/styles";
 import { CategoryBadge } from "@components/Badge";
 
 interface ActivityItemProps {
-  question: Question;
+  question: QuestionListItem;
 }
 
 const ActivityItem = ({ question }: ActivityItemProps) => {

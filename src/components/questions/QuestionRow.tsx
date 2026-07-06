@@ -1,4 +1,4 @@
-import type { Question } from "@api/questions";
+import type { QuestionListItem } from "@api/questions";
 import { questionsApi } from "@api/questions";
 import { SOURCE_LABEL } from "@api/types";
 import { capitalize, CATEGORY_BORDER_COLORS } from "@lib/styles";
@@ -11,7 +11,7 @@ import { Star, Trash2, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface QuestionRowProps {
-  question: Question;
+  question: QuestionListItem;
   index: number;
   onStar: (id: string) => void;
   onDelete: (id: string, e: React.MouseEvent) => void;
@@ -84,7 +84,7 @@ const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps)
               <CategoryBadge value={q.category} />
             </span>
           )}
-          {q.topics?.length > 0 && q.topics.map((t) => (
+          {q.topics?.length > 0 && [...q.topics].sort((a, b) => a.localeCompare(b)).map((t) => (
             <span key={t} className="hidden lg:inline rounded bg-secondary/80 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
               {capitalize(t)}
             </span>

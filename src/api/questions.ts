@@ -4,17 +4,32 @@ import type { Difficulty, PrepCategory } from "./types";
 // ---- Enums ----
 
 export type QuestionStatus = "pending" | "solved";
-export type QuestionSource = "leetcode" | "greatfrontend" | "minichallenges" | "geeksforgeeks" | "linkedin" | "medium" | "other";
+export type QuestionSource =
+  | "leetcode"
+  | "greatfrontend"
+  | "minichallenges"
+  | "geeksforgeeks"
+  | "linkedin"
+  | "medium"
+  | "namastedsa"
+  | "fmc"
+  | "other";
+
+// ---- Solution ----
+
+export interface Solution {
+  label?: string;
+  content: string;
+}
 
 // ---- Question ----
 
-export interface Question {
+/** Fields included in list/search/backlog responses */
+export interface QuestionListItem {
   id: string;
   userId: string;
   category: PrepCategory | null;
   title: string;
-  notes?: string;
-  solution?: string;
   status: QuestionStatus;
   difficulty?: Difficulty;
   topics: string[];
@@ -28,6 +43,13 @@ export interface Question {
   updatedAt: string;
 }
 
+/** Full question from GET /questions/:id */
+export interface Question extends QuestionListItem {
+  notes?: string;
+  solutions?: Solution[];
+  templates?: Record<string, string>;
+}
+
 export interface SuggestionsResponse {
   topicsByCategory: Record<string, string[]>;
   tags: string[];
@@ -36,7 +58,7 @@ export interface SuggestionsResponse {
 
 export interface CreateQuestionBody {
   title: string;
-  solution?: string;
+  solutions?: Solution[];
   category: PrepCategory;
   notes?: string;
   difficulty?: Difficulty;
@@ -62,7 +84,7 @@ export interface CreateBacklogQuestionBody {
 export interface UpdateQuestionBody {
   title?: string;
   notes?: string;
-  solution?: string;
+  solutions?: Solution[];
   difficulty?: Difficulty | null;
   topics?: string[] | null;
   source?: QuestionSource | null;
@@ -70,6 +92,10 @@ export interface UpdateQuestionBody {
   tags?: string[];
   companyTags?: string[];
   category?: PrepCategory | null;
+}
+
+export interface SolveQuestionBody {
+  solutions?: Solution[];
 }
 
 export interface QuestionsFilter {
@@ -92,7 +118,7 @@ export interface QuestionsFilter {
 }
 
 export interface PaginatedQuestions {
-  data: Question[];
+  data: QuestionListItem[];
   pagination: {
     page: number;
     limit: number;
@@ -145,10 +171,10 @@ export const questionsApi = {
       method: "DELETE",
     }),
 
-  solve: async (id: string, body?: { solution?: string }) =>
+  solve: async (id: string, body?: SolveQuestionBody) =>
     apiFetch<Question>(`${API_BASE_URL}/questions/${id}/solve`, {
       method: "PATCH",
-      ...(body?.solution ? { body: JSON.stringify(body) } : {}),
+      ...(body?.solutions?.length ? { body: JSON.stringify(body) } : {}),
     }),
 
   reset: async (id: string) =>
@@ -169,7 +195,7 @@ export const questionsApi = {
       category?: PrepCategory;
       page?: number;
       limit?: number;
-    }
+    },
   ) => {
     const params = new URLSearchParams({ q });
     if (filters?.status) params.set("status", filters.status);

@@ -6,7 +6,6 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import RouteErrorBoundary from "@components/RouteErrorBoundary";
 import { Loader2 } from "lucide-react";
 
-const Toaster = lazy(() => import("@components/ui/toaster").then((m) => ({ default: m.Toaster })));
 const Sonner = lazy(() => import("@components/ui/sonner").then((m) => ({ default: m.Toaster })));
 import { TooltipProvider } from "@components/ui/tooltip";
 
@@ -56,7 +55,6 @@ const App = () => (
       <TooltipProvider>
         {/* Lazy-load toast providers — not needed for initial render */}
         <Suspense fallback={null}>
-          <Toaster />
           <Sonner />
         </Suspense>
 

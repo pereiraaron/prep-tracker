@@ -11,6 +11,10 @@ export const SOLUTION_OPTIONAL_CATEGORIES: PrepCategory[] = [
   "language_framework",
 ];
 
+export const MULTIPLE_SOLUTIONS_CATEGORIES: PrepCategory[] = ["dsa", "machine_coding"];
+
+export const MAX_SOLUTIONS = 10;
+
 export type Difficulty = "easy" | "medium" | "hard";
 
 export interface CategoryInfo {
@@ -69,6 +73,8 @@ export const QUESTION_SOURCES = [
   { value: "geeksforgeeks", label: "GeeksforGeeks" },
   { value: "linkedin", label: "LinkedIn" },
   { value: "medium", label: "Medium" },
+  { value: "namastedsa", label: "NamasteDSA" },
+  { value: "fmc", label: "FMC" },
   { value: "other", label: "Other" },
 ] as const;
 
@@ -97,6 +103,8 @@ export const SOURCE_COLOR: Record<string, string> = {
   geeksforgeeks: "green",
   linkedin: "blue",
   medium: "gray",
+  namastedsa: "purple",
+  fmc: "blue",
   other: "gray",
 };
 

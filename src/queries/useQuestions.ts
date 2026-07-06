@@ -108,6 +108,7 @@ export const useCreateQuestion = () => {
     mutationFn: (body: CreateQuestionBody) => questionsApi.create(body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.questions.suggestions() });
       queryClient.invalidateQueries({ queryKey: queryKeys.stats.all });
     },
   });
@@ -117,8 +118,10 @@ export const useUpdateQuestion = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, body }: { id: string; body: UpdateQuestionBody }) => questionsApi.update(id, body),
-    onSuccess: () => {
+    onSuccess: (_data, { id }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.questions.detail(id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.questions.suggestions() });
       queryClient.invalidateQueries({ queryKey: queryKeys.stats.all });
     },
   });
@@ -130,6 +133,7 @@ export const useDeleteQuestion = () => {
     mutationFn: (id: string) => questionsApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.questions.suggestions() });
       queryClient.invalidateQueries({ queryKey: queryKeys.stats.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.backlog.all });
     },

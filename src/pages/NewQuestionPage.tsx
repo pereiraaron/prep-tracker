@@ -4,9 +4,17 @@ import Layout from "@components/Layout";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCreateQuestion, useSuggestions } from "@queries/useQuestions";
 import { useCreateBacklogItem } from "@queries/useBacklog";
-import type { QuestionSource } from "@api/questions";
+import type { QuestionSource, Solution } from "@api/questions";
 import type { PrepCategory, Difficulty } from "@api/types";
-import { PREP_CATEGORIES, DIFFICULTIES, QUESTION_SOURCES, SOLUTION_OPTIONAL_CATEGORIES } from "@api/types";
+import { PREP_CATEGORIES, DIFFICULTIES, QUESTION_SOURCES } from "@api/types";
+import SolutionFields from "@components/SolutionFields";
+import {
+  allowsMultipleSolutions,
+  isSolutionRequired,
+  normalizeSolutionsForSubmit,
+  solutionsHaveContent,
+  validateSolutions,
+} from "@lib/solutions";
 import { toast } from "@components/ui/sonner";
 import { ArrowLeft, Save, Loader2, FileText, Layers, Tag, Building2, StickyNote, Link2, ChevronDown } from "lucide-react";
 import ChipSelect from "@components/ChipSelect";
@@ -33,7 +41,7 @@ const NewQuestionPage = () => {
   const { data: suggestions, isLoading: suggestionsLoading } = useSuggestions();
 
   const [title, setTitle] = useState("");
-  const [solution, setSolution] = useState("");
+  const [solutions, setSolutions] = useState<Solution[]>([{ content: "" }]);
   const [category, setCategory] = useState<PrepCategory>("dsa");
   const [notes, setNotes] = useState("");
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
@@ -49,13 +57,17 @@ const NewQuestionPage = () => {
   };
 
   const urlValid = isValidUrl(url.trim());
-  const solutionRequired = !SOLUTION_OPTIONAL_CATEGORIES.includes(category);
+  const solutionRequired = isSolutionRequired(category);
   const canSubmit = isBacklogMode
     ? !!(title.trim() && category && url.trim() && urlValid)
-    : !!(title.trim() && (!solutionRequired || solution.trim()) && category && difficulty && urlValid);
+    : !!(title.trim() && (!solutionRequired || solutionsHaveContent(solutions)) && category && difficulty && urlValid);
 
   const handleCategoryChange = (val: PrepCategory) => {
     setCategory(val);
+    if (!allowsMultipleSolutions(val)) {
+      const firstWithContent = solutions.find((s) => s.content.trim());
+      setSolutions([firstWithContent ?? solutions[0] ?? { content: "" }]);
+    }
     const newPresets = suggestions?.topicsByCategory?.[val];
     if (newPresets) {
       const newPresetsLower = new Set(newPresets.map((t: string) => t.toLowerCase()));
@@ -65,6 +77,13 @@ const NewQuestionPage = () => {
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
+    if (!isBacklogMode) {
+      const solutionError = validateSolutions(solutions, category);
+      if (solutionError) {
+        toast.error(solutionError);
+        return;
+      }
+    }
     try {
       if (isBacklogMode) {
         await createBacklogMutation.mutateAsync({
@@ -83,7 +102,7 @@ const NewQuestionPage = () => {
       } else {
         await createQuestionMutation.mutateAsync({
           title: title.trim(),
-          solution: solution.trim() || undefined,
+          solutions: normalizeSolutionsForSubmit(solutions, category),
           category,
           notes: notes.trim() || undefined,
           difficulty,
@@ -156,20 +175,16 @@ const NewQuestionPage = () => {
             </div>
 
             {!isBacklogMode && (
-              <div>
-                <label htmlFor="q-solution" className={labelCls}>
-                  Solution {solutionRequired && <span className="text-destructive">*</span>}
-                </label>
-                <textarea
-                  id="q-solution"
-                  value={solution}
-                  onChange={(e) => setSolution(e.target.value)}
-                  rows={6}
-                  className={textareaCls}
-                  placeholder={solutionRequired ? "Describe your approach, include code snippets..." : "Optional — add notes, key points, or a brief explanation..."}
-                  disabled={mutating}
-                />
-              </div>
+              <SolutionFields
+                solutions={solutions}
+                onChange={setSolutions}
+                category={category}
+                disabled={mutating}
+                solutionRequired={solutionRequired}
+                idPrefix="q-solution"
+                labelCls={labelCls}
+                textareaCls={textareaCls}
+              />
             )}
           </div>
         </section>
@@ -275,8 +290,8 @@ const NewQuestionPage = () => {
         {/* ---- Tags ---- */}
         <section className="glass-card rounded-xl p-5">
           <SectionHeader icon={Tag} title="Tags" />
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            <div>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:items-stretch">
+            <div className="flex flex-col">
               <label className={labelCls}>Tags</label>
               <ChipSelect
                 presets={tagPresets}
@@ -289,7 +304,7 @@ const NewQuestionPage = () => {
                 loading={suggestionsLoading}
               />
             </div>
-            <div>
+            <div className="flex flex-col">
               <label className={`${labelCls} flex items-center gap-1.5`}>
                 <Building2 className="h-3 w-3" />
                 Company Tags
@@ -328,7 +343,7 @@ const NewQuestionPage = () => {
                 ? "Pick a category"
                 : isBacklogMode
                   ? !url.trim() ? "Add problem URL" : !urlValid ? "Fix the URL" : ""
-                  : !difficulty ? "Pick difficulty" : (solutionRequired && !solution.trim()) ? "Add a solution" : !urlValid ? "Fix the URL" : ""}
+                  : !difficulty ? "Pick difficulty" : (solutionRequired && !solutionsHaveContent(solutions)) ? "Add a solution" : !urlValid ? "Fix the URL" : ""}
             </p>
           )}
           <button

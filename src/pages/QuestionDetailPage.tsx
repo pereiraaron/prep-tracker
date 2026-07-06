@@ -1,5 +1,5 @@
 import usePageTitle from "@hooks/usePageTitle";
-import { lazy, Suspense, useState, useRef, useEffect } from "react";
+import { lazy, Suspense, useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import Layout from "@components/Layout";
@@ -7,12 +7,20 @@ import { useQuestionDetail, useUpdateQuestion, useStarQuestion, useSuggestions }
 import { DifficultyBadge, CategoryBadge } from "@components/Badge";
 import ChipSelect from "@components/ChipSelect";
 import FormSectionHeader from "@components/FormSectionHeader";
+import SolutionFields from "@components/SolutionFields";
 const MarkdownContent = lazy(() => import("@components/MarkdownContent"));
 import { toast } from "@components/ui/sonner";
-import type { QuestionSource } from "@api/questions";
+import type { QuestionSource, Solution } from "@api/questions";
 import type { PrepCategory, Difficulty } from "@api/types";
 import { PREP_CATEGORIES, DIFFICULTIES, QUESTION_SOURCES } from "@api/types";
 import { capitalize, DIFFICULTY_COLORS, CHIP_BASE, CHIP_ACTIVE, CHIP_INACTIVE } from "@lib/styles";
+import {
+  allowsMultipleSolutions,
+  isSolutionRequired,
+  normalizeSolutionsForSubmit,
+  solutionsToEditable,
+  validateSolutions,
+} from "@lib/solutions";
 import {
   ArrowLeft,
   Star,
@@ -39,7 +47,6 @@ import {
   RotateCcw,
 } from "lucide-react";
 const CodeEditor = lazy(() => import("@components/CodeEditor"));
-
 
 const inputCls =
   "h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30 disabled:opacity-50";
@@ -114,7 +121,7 @@ const QuestionDetailPage = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState("");
-  const [solution, setSolution] = useState("");
+  const [solutions, setSolutions] = useState<Solution[]>([{ content: "" }]);
   const [notes, setNotes] = useState("");
   const [category, setCategory] = useState<PrepCategory>("dsa");
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
@@ -123,13 +130,7 @@ const QuestionDetailPage = () => {
   const [url, setUrl] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [companyTags, setCompanyTags] = useState<string[]>([]);
-  const [copied, setCopied] = useState(false);
-
-  // Sync view-mode state from server data
-  const questionSolution = question?.solution || "";
-  const questionNotes = question?.notes || "";
-  if (!isEditing && solution !== questionSolution) setSolution(questionSolution);
-  if (!isEditing && notes !== questionNotes) setNotes(questionNotes);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   const cat = question?.category ?? null;
   const diff = question?.difficulty;
@@ -144,9 +145,9 @@ const QuestionDetailPage = () => {
   const urlValid = isValidUrl(url.trim());
   const canSave = !!(title.trim() && category);
 
-  const initEditState = () => {
+  const initEditState = useCallback(() => {
     setTitle(question?.title || "");
-    setSolution(question?.solution || "");
+    setSolutions(solutionsToEditable(question?.solutions));
     setNotes(question?.notes || "");
     setCategory((question?.category as PrepCategory) || "dsa");
     setDifficulty((question?.difficulty as Difficulty) || "easy");
@@ -155,10 +156,14 @@ const QuestionDetailPage = () => {
     setUrl(question?.url || "");
     setTags(question?.tags || []);
     setCompanyTags(question?.companyTags || []);
-  };
+  }, [question]);
 
   const handleCategoryChange = (val: PrepCategory) => {
     setCategory(val);
+    if (!allowsMultipleSolutions(val)) {
+      const firstWithContent = solutions.find((s) => s.content.trim());
+      setSolutions([firstWithContent ?? solutions[0] ?? { content: "" }]);
+    }
     const newPresets = suggestions?.topicsByCategory?.[val];
     if (newPresets) {
       const newPresetsLower = new Set(newPresets.map((t: string) => t.toLowerCase()));
@@ -177,12 +182,17 @@ const QuestionDetailPage = () => {
 
   const handleSave = async () => {
     if (!canSave) return;
+    const solutionError = validateSolutions(solutions, category);
+    if (solutionError) {
+      toast.error(solutionError);
+      return;
+    }
     try {
       await updateMutation.mutateAsync({
         id: id!,
         body: {
           title: title.trim(),
-          solution,
+          solutions: normalizeSolutionsForSubmit(solutions, category),
           notes: notes.trim() || undefined,
           category,
           difficulty,
@@ -200,10 +210,10 @@ const QuestionDetailPage = () => {
     }
   };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(solution);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopy = (content: string, index: number) => {
+    navigator.clipboard.writeText(content);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
   };
 
   const formatDate = (dateStr: string) =>
@@ -440,81 +450,137 @@ const QuestionDetailPage = () => {
           )}
         </div>
 
-        {/* Solution */}
-        {isCodeQuestion ? (
-          <div className="rounded-xl overflow-hidden">
-            <div className="flex items-center justify-between bg-[hsl(var(--code-bg))] px-4 py-3 rounded-t-xl">
-              <div className="flex items-center gap-2">
-                <Code2 className={`h-4 w-4 ${isEditing ? "text-stat-blue" : "text-stat-green"}`} />
-                <h2 className="font-display text-sm font-semibold text-[hsl(var(--code-fg))]">Solution</h2>
-              </div>
-              {!isEditing && question.solution && (
-                <button
-                  onClick={handleCopy}
-                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-foreground/10 transition-colors"
-                >
-                  {copied ? <Check className="h-3.5 w-3.5 text-stat-green" /> : <Copy className="h-3.5 w-3.5" />}
-                  {copied ? "Copied!" : "Copy"}
-                </button>
-              )}
-            </div>
+        {/* Solutions */}
+        {(() => {
+          const visibleSolutions = question.solutions?.filter((s) => s.content.trim()) ?? [];
+          const solutionTitle = editCategory && allowsMultipleSolutions(editCategory) && visibleSolutions.length > 1
+            ? "Solutions"
+            : "Solution";
 
-            {question.solution || isEditing ? (
-              <Suspense fallback={<div className="bg-[hsl(var(--code-bg))] rounded-b-xl px-4 py-8 text-center"><p className="text-sm text-muted-foreground">Loading editor...</p></div>}>
-                <CodeEditor
-                  value={isEditing ? solution : question.solution || ""}
-                  onChange={isEditing ? setSolution : undefined}
-                  editable={isEditing}
-                  readOnly={!isEditing}
-                  maxHeight={isEditing ? "500px" : "600px"}
-                  placeholder="Write your solution..."
+          if (isEditing) {
+            if (isCodeQuestion) {
+              return (
+                <SolutionFields
+                  solutions={solutions}
+                  onChange={setSolutions}
+                  category={category}
+                  isCode
+                  disabled={mutating}
+                  solutionRequired={isSolutionRequired(category)}
+                  idPrefix="detail-solution"
                 />
-              </Suspense>
-            ) : (
-              <div className="bg-[hsl(var(--code-bg))] rounded-b-xl px-4 py-6 text-center">
-                <p className="text-sm text-muted-foreground italic">No solution yet. Click Edit to add one.</p>
+              );
+            }
+
+            return (
+              <div className="glass-card rounded-xl p-4 md:p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <FileText className="h-4 w-4 text-stat-blue" />
+                  <h2 className="font-display text-sm font-semibold">
+                    {allowsMultipleSolutions(category) ? "Solutions" : "Solution"}
+                  </h2>
+                </div>
+                <SolutionFields
+                  solutions={solutions}
+                  onChange={setSolutions}
+                  category={category}
+                  disabled={mutating}
+                  solutionRequired={isSolutionRequired(category)}
+                  idPrefix="detail-solution"
+                  labelCls={labelCls}
+                />
               </div>
-            )}
-          </div>
-        ) : (
-          <div className="glass-card rounded-xl p-4 md:p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
+            );
+          }
+
+          if (isCodeQuestion) {
+            if (!visibleSolutions.length) {
+              return (
+                <div className="rounded-xl overflow-hidden">
+                  <div className="flex items-center gap-2 bg-[hsl(var(--code-bg))] px-4 py-3 rounded-t-xl">
+                    <Code2 className="h-4 w-4 text-stat-green" />
+                    <h2 className="font-display text-sm font-semibold text-[hsl(var(--code-fg))]">Solution</h2>
+                  </div>
+                  <div className="bg-[hsl(var(--code-bg))] rounded-b-xl px-4 py-6 text-center">
+                    <p className="text-sm text-muted-foreground italic">No solution yet. Click Edit to add one.</p>
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <div className="space-y-4">
+                {visibleSolutions.map((sol, index) => (
+                  <div key={index} className="rounded-xl overflow-hidden">
+                    <div className="flex items-center justify-between bg-[hsl(var(--code-bg))] px-4 py-3 rounded-t-xl">
+                      <div className="flex items-center gap-2">
+                        <Code2 className="h-4 w-4 text-stat-green" />
+                        <h2 className="font-display text-sm font-semibold text-[hsl(var(--code-fg))]">
+                          {visibleSolutions.length > 1 ? `Solution ${index + 1}` : "Solution"}
+                        </h2>
+                      </div>
+                      <button
+                        onClick={() => handleCopy(sol.content, index)}
+                        className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-foreground/10 transition-colors"
+                      >
+                        {copiedIndex === index ? <Check className="h-3.5 w-3.5 text-stat-green" /> : <Copy className="h-3.5 w-3.5" />}
+                        {copiedIndex === index ? "Copied!" : "Copy"}
+                      </button>
+                    </div>
+                    <Suspense fallback={<div className="bg-[hsl(var(--code-bg))] rounded-b-xl px-4 py-8 text-center"><p className="text-sm text-muted-foreground">Loading editor...</p></div>}>
+                      <CodeEditor value={sol.content} readOnly maxHeight="600px" />
+                    </Suspense>
+                  </div>
+                ))}
+              </div>
+            );
+          }
+
+          return (
+            <div className="glass-card rounded-xl p-4 md:p-5">
+              <div className="flex items-center gap-2 mb-4">
                 <FileText className="h-4 w-4 text-stat-blue" />
-                <h2 className="font-display text-sm font-semibold">Solution</h2>
+                <h2 className="font-display text-sm font-semibold">{solutionTitle}</h2>
               </div>
-              {!isEditing && question.solution && (
-                <button
-                  onClick={handleCopy}
-                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
-                >
-                  {copied ? <Check className="h-3.5 w-3.5 text-stat-green" /> : <Copy className="h-3.5 w-3.5" />}
-                  {copied ? "Copied!" : "Copy"}
-                </button>
+              {!visibleSolutions.length ? (
+                <p className="text-sm text-muted-foreground italic">No solution yet. Click Edit to add one.</p>
+              ) : (
+                <div className="space-y-6">
+                  {visibleSolutions.map((sol, index) => (
+                    <div key={index} className={index > 0 ? "pt-6 border-t border-border/60" : undefined}>
+                      {visibleSolutions.length > 1 && (
+                        <div className="mb-3 flex items-center justify-between">
+                          <span className="text-xs font-semibold text-muted-foreground">Solution {index + 1}</span>
+                          <button
+                            onClick={() => handleCopy(sol.content, index)}
+                            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
+                          >
+                            {copiedIndex === index ? <Check className="h-3.5 w-3.5 text-stat-green" /> : <Copy className="h-3.5 w-3.5" />}
+                            {copiedIndex === index ? "Copied!" : "Copy"}
+                          </button>
+                        </div>
+                      )}
+                      {visibleSolutions.length === 1 && (
+                        <div className="mb-3 flex justify-end">
+                          <button
+                            onClick={() => handleCopy(sol.content, index)}
+                            className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
+                          >
+                            {copiedIndex === index ? <Check className="h-3.5 w-3.5 text-stat-green" /> : <Copy className="h-3.5 w-3.5" />}
+                            {copiedIndex === index ? "Copied!" : "Copy"}
+                          </button>
+                        </div>
+                      )}
+                      <Suspense fallback={<p className="text-sm text-muted-foreground/50 animate-pulse">Rendering...</p>}>
+                        <MarkdownContent content={sol.content} />
+                      </Suspense>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
-            {isEditing ? (
-              <textarea
-                value={solution}
-                onChange={(e) => setSolution(e.target.value)}
-                rows={10}
-                disabled={mutating}
-                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 resize-none disabled:opacity-50 font-mono"
-                placeholder="Write your solution (supports markdown)..."
-              />
-            ) : (
-              <div>
-                {question.solution ? (
-                  <Suspense fallback={<p className="text-sm text-muted-foreground/50 animate-pulse">Rendering...</p>}>
-                    <MarkdownContent content={question.solution} />
-                  </Suspense>
-                ) : (
-                  <p className="text-sm text-muted-foreground italic">No solution yet. Click Edit to add one.</p>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+          );
+        })()}
 
         {/* Notes */}
         <div className="glass-card rounded-xl p-4 md:p-5">
@@ -637,8 +703,8 @@ const QuestionDetailPage = () => {
             {/* Tags */}
             <section className="glass-card rounded-xl p-5">
               <SectionHeader icon={Tag} title="Tags" />
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                <div>
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:items-stretch">
+                <div className="flex flex-col">
                   <label className={labelCls}>Tags</label>
                   <ChipSelect
                     presets={tagPresets}
@@ -651,7 +717,7 @@ const QuestionDetailPage = () => {
                     loading={suggestionsLoading}
                   />
                 </div>
-                <div>
+                <div className="flex flex-col">
                   <label className={`${labelCls} flex items-center gap-1.5`}>
                     <Building2 className="h-3 w-3" />
                     Company Tags

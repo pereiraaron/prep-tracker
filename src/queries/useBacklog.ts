@@ -1,5 +1,5 @@
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
-import { questionsApi, type QuestionsFilter, type CreateBacklogQuestionBody } from "@api/questions";
+import { questionsApi, type QuestionsFilter, type CreateBacklogQuestionBody, type Solution } from "@api/questions";
 import { queryKeys } from "@lib/queryKeys";
 import { useQuestionsFilterStore } from "@store/useQuestionsFilterStore";
 
@@ -60,6 +60,7 @@ export const useCreateBacklogItem = () => {
     mutationFn: (body: CreateBacklogQuestionBody) => questionsApi.createBacklog(body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.backlog.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.questions.suggestions() });
       queryClient.invalidateQueries({ queryKey: queryKeys.stats.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.all });
     },
@@ -72,6 +73,7 @@ export const useDeleteBacklogItem = () => {
     mutationFn: (id: string) => questionsApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.backlog.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.questions.suggestions() });
       queryClient.invalidateQueries({ queryKey: queryKeys.stats.all });
     },
   });
@@ -122,8 +124,8 @@ export const useStarBacklogItem = () => {
 export const useSolveBacklogItem = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, solution }: { id: string; solution?: string }) =>
-      questionsApi.solve(id, { solution }),
+    mutationFn: ({ id, solutions }: { id: string; solutions?: Solution[] }) =>
+      questionsApi.solve(id, solutions?.length ? { solutions } : undefined),
     onSuccess: () => {
       useQuestionsFilterStore.getState().setCurrentPage(1);
       queryClient.invalidateQueries({ queryKey: queryKeys.backlog.all });

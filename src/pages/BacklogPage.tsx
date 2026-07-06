@@ -4,6 +4,7 @@ import useDebouncedValue from "@hooks/useDebouncedValue";
 import useBacklogFilter from "@hooks/useBacklogFilter";
 import { useState } from "react";
 import Layout from "@components/Layout";
+import type { Solution } from "@api/questions";
 import PageHeader from "@components/PageHeader";
 import EmptyState from "@components/EmptyState";
 import { QuestionsListSkeleton } from "@components/Skeleton";
@@ -25,7 +26,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { questionsApi } from "@api/questions";
 import { queryKeys } from "@lib/queryKeys";
-import type { Question } from "@api/questions";
+import type { QuestionListItem } from "@api/questions";
 import type { PrepCategory, Difficulty } from "@api/types";
 import { Archive, Plus, Search, X } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -46,7 +47,7 @@ const BacklogPage = () => {
     sort, setSort,
     clearAll,
   } = useBacklogFilter();
-  const [solvingItem, setSolvingItem] = useState<Question | null>(null);
+  const [solvingItem, setSolvingItem] = useState<QuestionListItem | null>(null);
 
   const debouncedSearch = useDebouncedValue(search, 300);
 
@@ -125,14 +126,14 @@ const BacklogPage = () => {
     }
   };
 
-  const handleSolve = async (solution?: string) => {
+  const handleSolve = async (solutions?: Solution[]) => {
     if (!solvingItem) return;
     try {
-      await solveMutation.mutateAsync({ id: solvingItem.id, solution });
+      await solveMutation.mutateAsync({ id: solvingItem.id, solutions });
       toast.success("Marked as solved");
       setSolvingItem(null);
-    } catch {
-      toast.error("Failed to mark as solved");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to mark as solved");
     }
   };
 

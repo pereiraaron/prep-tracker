@@ -46,45 +46,47 @@ const ChipSelect = ({ presets, selected, onToggle, onAdd, onRemove, placeholder,
 
   if (loading && presets.length === 0) {
     return (
-      <div className="space-y-3">
-        <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-1 flex-col gap-3">
+        <div className="flex flex-1 flex-wrap content-start gap-1.5">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="h-7 rounded-lg bg-secondary/70 animate-pulse" style={{ width: `${60 + (i % 3) * 20}px` }} />
           ))}
         </div>
-        <input disabled className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm opacity-50" placeholder={placeholder} />
+        <input disabled className="h-11 w-full shrink-0 rounded-xl border border-border bg-background px-4 text-sm opacity-50" placeholder={placeholder} />
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap gap-1.5">
-        {selectedPresets.map((p) => (
+    <div className="flex flex-1 flex-col gap-3">
+      <div className="flex flex-1 flex-col gap-3">
+        <div className="flex flex-wrap content-start gap-1.5">
+          {selectedPresets.map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => onToggle(normalize(p))}
+              className={`${CHIP_BASE} ${CHIP_ACTIVE}`}
+            >
+              {display(p)}
+            </button>
+          ))}
+          {visibleUnselected.map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => onToggle(normalize(p))}
+              className={`${CHIP_BASE} ${CHIP_INACTIVE}`}
+            >
+              {display(p)}
+            </button>
+          ))}
+        </div>
+        {canCollapse && hiddenCount > 0 && !expanded && (
           <button
-            key={p}
             type="button"
-            onClick={() => onToggle(normalize(p))}
-            className={`${CHIP_BASE} ${CHIP_ACTIVE}`}
-          >
-            {display(p)}
-          </button>
-        ))}
-        {visibleUnselected.map((p) => (
-          <button
-            key={p}
-            type="button"
-            onClick={() => onToggle(normalize(p))}
-            className={`${CHIP_BASE} ${CHIP_INACTIVE}`}
-          >
-            {display(p)}
-          </button>
-        ))}
-        {canCollapse && hiddenCount > 0 && (
-          <button
-            type="button"
-            onClick={() => setExpanded(!expanded)}
-            className={`${CHIP_BASE} border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/20 inline-flex items-center gap-1`}
+            onClick={() => setExpanded(true)}
+            className={`${CHIP_BASE} self-start border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/20 inline-flex items-center gap-1`}
           >
             +{hiddenCount} more <ChevronDown className="h-3 w-3" />
           </button>
@@ -93,32 +95,32 @@ const ChipSelect = ({ presets, selected, onToggle, onAdd, onRemove, placeholder,
           <button
             type="button"
             onClick={() => setExpanded(false)}
-            className={`${CHIP_BASE} border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/20 inline-flex items-center gap-1`}
+            className={`${CHIP_BASE} self-start border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/20 inline-flex items-center gap-1`}
           >
             Show less <ChevronUp className="h-3 w-3" />
           </button>
         )}
+        {custom.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {custom.map((c) => (
+              <span
+                key={c}
+                className={`inline-flex items-center gap-1 ${CHIP_BASE} ${CHIP_ACTIVE}`}
+              >
+                {display(c)}
+                <button type="button" onClick={() => onRemove(c)} className="hover:text-destructive transition-colors">
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
-      {custom.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {custom.map((c) => (
-            <span
-              key={c}
-              className={`inline-flex items-center gap-1 ${CHIP_BASE} ${CHIP_ACTIVE}`}
-            >
-              {display(c)}
-              <button type="button" onClick={() => onRemove(c)} className="hover:text-destructive transition-colors">
-                <X className="h-3 w-3" />
-              </button>
-            </span>
-          ))}
-        </div>
-      )}
       <input
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
-        className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30"
+        className="h-11 w-full shrink-0 rounded-xl border border-border bg-background px-4 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30"
         placeholder={placeholder}
       />
     </div>

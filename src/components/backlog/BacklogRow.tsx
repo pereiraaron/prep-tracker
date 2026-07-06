@@ -1,4 +1,4 @@
-import type { Question } from "@api/questions";
+import type { QuestionListItem } from "@api/questions";
 import { SOURCE_LABEL } from "@api/types";
 import { capitalize, CATEGORY_BORDER_COLORS } from "@lib/styles";
 import { DifficultyBadge, CategoryBadge } from "@components/Badge";
@@ -7,7 +7,7 @@ import { Star, Trash2, ExternalLink, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface BacklogRowProps {
-  item: Question;
+  item: QuestionListItem;
   index: number;
   onStar: (id: string) => void;
   onDelete: (id: string, e: React.MouseEvent) => void;

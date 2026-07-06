@@ -25,9 +25,6 @@ export const useTopicBreakdown = () =>
 export const useSourceBreakdown = () =>
   useQuery({ queryKey: queryKeys.stats.sources(), queryFn: statsApi.getSourceBreakdown });
 
-export const useCompanyTagBreakdown = () =>
-  useQuery({ queryKey: queryKeys.stats.companyTags(), queryFn: statsApi.getCompanyTagBreakdown });
-
 export const useHeatmap = (year?: number) =>
   useQuery({ queryKey: queryKeys.stats.heatmap(), queryFn: () => statsApi.getHeatmap(year) });
 
