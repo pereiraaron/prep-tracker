@@ -22,7 +22,8 @@ const RevisionPage = () => {
     status: "solved",
     category: categoryFilter || undefined,
     difficulty: difficultyFilter || undefined,
-    limit: 100,
+    limit: 30,
+    sort: "-solvedAt",
   });
 
   const allQuestions = data?.data ?? [];

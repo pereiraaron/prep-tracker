@@ -1,6 +1,7 @@
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { questionsApi, type QuestionsFilter, type CreateQuestionBody, type UpdateQuestionBody } from "@api/questions";
 import { queryKeys } from "@lib/queryKeys";
+import { invalidateCoreStats } from "@lib/invalidateStats";
 
 // ---- Queries ----
 
@@ -109,7 +110,7 @@ export const useCreateQuestion = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.suggestions() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.stats.all });
+      invalidateCoreStats(queryClient);
     },
   });
 };
@@ -122,7 +123,7 @@ export const useUpdateQuestion = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.detail(id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.suggestions() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.stats.all });
+      invalidateCoreStats(queryClient);
     },
   });
 };
@@ -134,7 +135,7 @@ export const useDeleteQuestion = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.suggestions() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.stats.all });
+      invalidateCoreStats(queryClient);
       queryClient.invalidateQueries({ queryKey: queryKeys.backlog.all });
     },
   });
@@ -180,8 +181,6 @@ export const useStarQuestion = () => {
         }
       }
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.questions.all });
-    },
+    // Trust optimistic update — no full list refetch on settle
   });
 };

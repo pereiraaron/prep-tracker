@@ -20,13 +20,13 @@ const queryClient = new QueryClient({
   },
 });
 
-// Eagerly load primary pages to avoid lazy-load waterfall on LCP
+// Eagerly load post-auth landing routes to avoid LCP waterfall
 import DashboardPage from "@pages/DashboardPage";
-import LoginPage from "@pages/LoginPage";
 import QuestionsPage from "@pages/QuestionsPage";
-import StatsPage from "@pages/StatsPage";
 
-// Lazy-load everything else
+// Lazy-load everything else (including Stats + auth — not on critical path)
+const LoginPage = lazy(() => import("@pages/LoginPage"));
+const StatsPage = lazy(() => import("@pages/StatsPage"));
 const QuestionDetailPage = lazy(() => import("@pages/QuestionDetailPage"));
 const NewQuestionPage = lazy(() => import("@pages/NewQuestionPage"));
 const BacklogPage = lazy(() => import("@pages/BacklogPage"));

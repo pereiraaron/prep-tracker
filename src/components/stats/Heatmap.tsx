@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import useIsMobile from "@hooks/useIsMobile";
 
 const MOBILE_WEEKS = 16;
 
@@ -362,14 +363,9 @@ const HeatmapGridInner = ({ data }: { data: HeatmapDay[][] }) => {
 };
 
 const Heatmap = ({ weeks }: { weeks: HeatmapDay[][] }) => {
-  const mobileWeeks = weeks.slice(-MOBILE_WEEKS);
-
-  return (
-    <>
-      <div className="md:hidden"><HeatmapGridInner data={mobileWeeks} /></div>
-      <div className="hidden md:block"><HeatmapGridInner data={weeks} /></div>
-    </>
-  );
+  const isMobile = useIsMobile();
+  const data = isMobile ? weeks.slice(-MOBILE_WEEKS) : weeks;
+  return <HeatmapGridInner data={data} />;
 };
 
 export default Heatmap;

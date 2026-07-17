@@ -7,7 +7,7 @@ import StaggerSection from "@components/StaggerSection";
 import PrimaryButton from "@components/PrimaryButton";
 import { DashboardStatsSkeleton, DashboardActivitySkeleton } from "@components/Skeleton";
 import QuickAction from "@components/QuickAction";
-import { useOverview, useInsights, useStreaks, useProgress } from "@queries/useStats";
+import { useDashboardStats } from "@queries/useStats";
 import { useRecentQuestions } from "@queries/useQuestions";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
@@ -200,11 +200,12 @@ const InterviewCountdown = () => {
 
 const Dashboard = () => {
   usePageTitle("Dashboard");
-  const { data: overview, isLoading: statsLoading } = useOverview();
-  const { data: progress } = useProgress(14);
+  const { data: batch, isLoading: statsLoading } = useDashboardStats();
+  const overview = batch?.overview;
+  const progress = batch?.progress;
+  const insights = batch?.insights;
+  const streaks = batch?.streaks;
   const { data: recentData, isLoading: recentLoading } = useRecentQuestions();
-  const { data: insights } = useInsights();
-  const { data: streaks } = useStreaks();
   const tips = insights?.tips ?? [];
   const recentSolved = recentData?.data ?? [];
 
@@ -220,7 +221,6 @@ const Dashboard = () => {
   const last7 = progressDays.slice(-7);
   const prev7 = progressDays.slice(-14, -7);
   const solvedTrend = sumDays(last7) - sumDays(prev7);
-  const solvedSparkline = last7.map((d) => d.solved);
 
   return (
     <Layout>
@@ -250,8 +250,6 @@ const Dashboard = () => {
               icon={CheckCircle}
               color="bg-stat-green/10 text-stat-green"
               trend={solvedTrend !== 0 ? solvedTrend : undefined}
-              sparkline={solvedSparkline}
-              sparkColor="hsl(var(--stat-green))"
             />
             <StatCard label="Backlog" value={backlog || "—"} icon={ListTodo} color="bg-stat-orange/10 text-stat-orange" />
             <StatCard

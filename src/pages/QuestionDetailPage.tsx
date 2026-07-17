@@ -165,7 +165,7 @@ const QuestionDetailPage = () => {
       setSolutions([firstWithContent ?? solutions[0] ?? { content: "" }]);
     }
     const newPresets = suggestions?.topicsByCategory?.[val];
-    if (newPresets) {
+    if (newPresets?.length) {
       const newPresetsLower = new Set(newPresets.map((t: string) => t.toLowerCase()));
       setTopics((prev) => prev.filter((t) => newPresetsLower.has(t)));
     }
@@ -177,7 +177,7 @@ const QuestionDetailPage = () => {
 
   const activeCat = isEditing ? category : (cat as PrepCategory);
   const topicPresets = suggestions?.topicsByCategory?.[activeCat] ?? [];
-  const tagPresets = suggestions?.tags ?? [];
+  const tagPresets = suggestions?.tagsByCategory?.[activeCat] ?? suggestions?.tags ?? [];
   const companyPresets = suggestions?.companyTags ?? [];
 
   const handleSave = async () => {
@@ -646,7 +646,7 @@ const QuestionDetailPage = () => {
                   </div>
                 </div>
               </div>
-              <div className="mt-5">
+              <div className="mt-5 w-full">
                 <label className={labelCls}>Topics</label>
                 <ChipSelect
                   presets={topicPresets}
@@ -657,6 +657,7 @@ const QuestionDetailPage = () => {
                   placeholder="Custom topic + Enter..."
                   lowercase
                   loading={suggestionsLoading}
+                  alwaysOpen
                 />
               </div>
             </section>

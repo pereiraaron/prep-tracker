@@ -1,14 +1,16 @@
 import usePageTitle from "@hooks/usePageTitle";
 import useIsMobile from "@hooks/useIsMobile";
+import useIsLg from "@hooks/useIsLg";
 import useDebouncedValue from "@hooks/useDebouncedValue";
 import useQuestionsFilter from "@hooks/useQuestionsFilter";
+import { useEffect } from "react";
 import Layout from "@components/Layout";
 import PageHeader from "@components/PageHeader";
 import EmptyState from "@components/EmptyState";
 import { QuestionsListSkeleton } from "@components/Skeleton";
 import Pagination from "@components/Pagination";
 import PrimaryButton from "@components/PrimaryButton";
-import InfiniteScrollTrigger from "@components/InfiniteScrollTrigger";
+import VirtualList from "@components/VirtualList";
 import StatsSidebar from "@components/StatsSidebar";
 import SearchAndFilters from "@components/questions/SearchAndFilters";
 import QuestionRow from "@components/questions/QuestionRow";
@@ -27,6 +29,7 @@ const ITEMS_PER_PAGE = 15;
 const QuestionsPage = () => {
   usePageTitle("Questions");
   const isMobile = useIsMobile();
+  const isLg = useIsLg();
   const queryClient = useQueryClient();
   const {
     search, setSearch,
@@ -52,7 +55,6 @@ const QuestionsPage = () => {
     sort,
   };
 
-  // Only run the query for the current mode
   const paginatedQuery = useQuestionsList({
     ...filterParams,
     page: currentPage,
@@ -65,7 +67,6 @@ const QuestionsPage = () => {
     enabled: isMobile,
   });
 
-  // Derive data based on mode
   const questions = isMobile
     ? infiniteQuery.data?.pages.flatMap((p) => p.data) ?? []
     : paginatedQuery.data?.data ?? [];
@@ -76,13 +77,12 @@ const QuestionsPage = () => {
   const pagination = paginatedQuery.data?.pagination ?? null;
   const totalPages = pagination?.totalPages ?? 1;
 
-  // Total count — use whichever query has data
   const total = isMobile
     ? infiniteQuery.data?.pages[0]?.pagination.total ?? 0
     : pagination?.total ?? 0;
 
-  // Prefetch next page for instant pagination
-  if (!isMobile && currentPage < totalPages) {
+  useEffect(() => {
+    if (isMobile || currentPage >= totalPages) return;
     const nextParams = { ...filterParams, page: currentPage + 1, limit: ITEMS_PER_PAGE };
     queryClient.prefetchQuery({
       queryKey: queryKeys.questions.list(nextParams),
@@ -98,7 +98,7 @@ const QuestionsPage = () => {
           : questionsApi.getAll({ ...filterParams, page: currentPage + 1, limit: ITEMS_PER_PAGE }),
       staleTime: 30_000,
     });
-  }
+  }, [isMobile, currentPage, totalPages, debouncedSearch, categoryFilter, difficultyFilter, sort, queryClient]);
 
   const deleteMutation = useDeleteQuestion();
   const starMutation = useStarQuestion();
@@ -201,29 +201,38 @@ const QuestionsPage = () => {
                   </div>
                 )}
 
-                <div className="divide-y divide-border">
-                  {questions.map((q, i) => (
-                    <QuestionRow
-                      key={q.id}
-                      question={q}
-                      index={i}
-                      onStar={(id) => starMutation.mutate(id)}
-                      onDelete={handleDelete}
-                    />
-                  ))}
-                </div>
+                {isMobile ? (
+                  <VirtualList
+                    items={questions}
+                    getKey={(q) => q.id}
+                    estimateSize={72}
+                    onNearEnd={() => infiniteQuery.fetchNextPage()}
+                    hasMore={infiniteQuery.hasNextPage ?? false}
+                    isLoadingMore={infiniteQuery.isFetchingNextPage}
+                    renderItem={(q, i) => (
+                      <QuestionRow
+                        question={q}
+                        index={i}
+                        onStar={(id) => starMutation.mutate(id)}
+                        onDelete={handleDelete}
+                      />
+                    )}
+                  />
+                ) : (
+                  <div className="divide-y divide-border">
+                    {questions.map((q, i) => (
+                      <QuestionRow
+                        key={q.id}
+                        question={q}
+                        index={i}
+                        onStar={(id) => starMutation.mutate(id)}
+                        onDelete={handleDelete}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {/* Mobile: infinite scroll trigger */}
-              {isMobile && (
-                <InfiniteScrollTrigger
-                  onTrigger={() => infiniteQuery.fetchNextPage()}
-                  hasMore={infiniteQuery.hasNextPage ?? false}
-                  isLoading={infiniteQuery.isFetchingNextPage}
-                />
-              )}
-
-              {/* Desktop: pagination */}
               {!isMobile && (
                 <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
               )}
@@ -231,9 +240,11 @@ const QuestionsPage = () => {
           )}
         </div>
 
-        <aside className="hidden lg:block w-72 xl:w-80 shrink-0 sticky top-8">
-          <StatsSidebar />
-        </aside>
+        {isLg && (
+          <aside className="w-72 xl:w-80 shrink-0 sticky top-8">
+            <StatsSidebar />
+          </aside>
+        )}
       </div>
     </Layout>
   );

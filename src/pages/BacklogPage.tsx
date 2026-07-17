@@ -1,8 +1,9 @@
 import usePageTitle from "@hooks/usePageTitle";
 import useIsMobile from "@hooks/useIsMobile";
+import useIsLg from "@hooks/useIsLg";
 import useDebouncedValue from "@hooks/useDebouncedValue";
 import useBacklogFilter from "@hooks/useBacklogFilter";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Layout from "@components/Layout";
 import type { Solution } from "@api/questions";
 import PageHeader from "@components/PageHeader";
@@ -10,7 +11,7 @@ import EmptyState from "@components/EmptyState";
 import { QuestionsListSkeleton } from "@components/Skeleton";
 import Pagination from "@components/Pagination";
 import PrimaryButton from "@components/PrimaryButton";
-import InfiniteScrollTrigger from "@components/InfiniteScrollTrigger";
+import VirtualList from "@components/VirtualList";
 import BacklogStatsSidebar from "@components/backlog/BacklogStatsSidebar";
 import SearchAndFilters from "@components/questions/SearchAndFilters";
 import ColumnHeader from "@components/questions/ColumnHeader";
@@ -39,6 +40,7 @@ const ITEMS_PER_PAGE = 15;
 const BacklogPage = () => {
   usePageTitle("Backlog");
   const isMobile = useIsMobile();
+  const isLg = useIsLg();
   const queryClient = useQueryClient();
   const {
     search, setSearch,
@@ -90,8 +92,8 @@ const BacklogPage = () => {
     ? infiniteQuery.data?.pages[0]?.pagination.total ?? 0
     : pagination?.total ?? 0;
 
-  // Prefetch next page for instant pagination
-  if (!isMobile && currentPage < totalPages) {
+  useEffect(() => {
+    if (isMobile || currentPage >= totalPages) return;
     const nextParams = { ...filterParams, page: currentPage + 1, limit: ITEMS_PER_PAGE };
     queryClient.prefetchQuery({
       queryKey: queryKeys.backlog.list(nextParams),
@@ -107,7 +109,7 @@ const BacklogPage = () => {
           : questionsApi.getBacklog({ ...filterParams, page: currentPage + 1, limit: ITEMS_PER_PAGE }),
       staleTime: 30_000,
     });
-  }
+  }, [isMobile, currentPage, totalPages, debouncedSearch, categoryFilter, difficultyFilter, sort, queryClient]);
 
   const deleteMutation = useDeleteBacklogItem();
   const starMutation = useStarBacklogItem();
@@ -233,30 +235,45 @@ const BacklogPage = () => {
                   </div>
                 )}
 
-                <div className="divide-y divide-border">
-                  {backlog.map((q, i) => (
-                    <BacklogRow
-                      key={q.id}
-                      item={q}
-                      index={i}
-                      onStar={(id) => starMutation.mutate(id)}
-                      onDelete={handleDelete}
-                      onSolve={(id) => {
-                        const item = backlog.find((b) => b.id === id);
-                        if (item) setSolvingItem(item);
-                      }}
-                    />
-                  ))}
-                </div>
+                {isMobile ? (
+                  <VirtualList
+                    items={backlog}
+                    getKey={(q) => q.id}
+                    estimateSize={72}
+                    onNearEnd={() => infiniteQuery.fetchNextPage()}
+                    hasMore={infiniteQuery.hasNextPage ?? false}
+                    isLoadingMore={infiniteQuery.isFetchingNextPage}
+                    renderItem={(q, i) => (
+                      <BacklogRow
+                        item={q}
+                        index={i}
+                        onStar={(id) => starMutation.mutate(id)}
+                        onDelete={handleDelete}
+                        onSolve={(id) => {
+                          const item = backlog.find((b) => b.id === id);
+                          if (item) setSolvingItem(item);
+                        }}
+                      />
+                    )}
+                  />
+                ) : (
+                  <div className="divide-y divide-border">
+                    {backlog.map((q, i) => (
+                      <BacklogRow
+                        key={q.id}
+                        item={q}
+                        index={i}
+                        onStar={(id) => starMutation.mutate(id)}
+                        onDelete={handleDelete}
+                        onSolve={(id) => {
+                          const item = backlog.find((b) => b.id === id);
+                          if (item) setSolvingItem(item);
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
-
-              {isMobile && (
-                <InfiniteScrollTrigger
-                  onTrigger={() => infiniteQuery.fetchNextPage()}
-                  hasMore={infiniteQuery.hasNextPage ?? false}
-                  isLoading={infiniteQuery.isFetchingNextPage}
-                />
-              )}
 
               {!isMobile && (
                 <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
@@ -265,9 +282,11 @@ const BacklogPage = () => {
           )}
         </div>
 
-        <aside className="hidden lg:block w-72 xl:w-80 shrink-0 sticky top-8">
-          <BacklogStatsSidebar />
-        </aside>
+        {isLg && (
+          <aside className="w-72 xl:w-80 shrink-0 sticky top-8">
+            <BacklogStatsSidebar />
+          </aside>
+        )}
       </div>
 
       <SolveDialog

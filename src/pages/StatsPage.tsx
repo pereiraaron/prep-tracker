@@ -1,5 +1,5 @@
 import usePageTitle from "@hooks/usePageTitle";
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import Layout from "@components/Layout";
 import PageHeader from "@components/PageHeader";
 import StaggerSection from "@components/StaggerSection";
@@ -59,76 +59,123 @@ const StatsPage = () => {
   const total = solved + backlog;
   const solveRate = total > 0 ? Math.round((solved / total) * 100) : 0;
 
-  const categoryData = (categoryBreakdown ?? [])
-    .filter((c) => c.count > 0)
-    .map((c) => ({
-      name: CATEGORY_LABEL[c.category as keyof typeof CATEGORY_LABEL] || c.category,
-      short: categoryShort(c.category),
-      count: c.count,
-      key: c.category,
+  const {
+    categoryData,
+    diffData,
+    dailyData,
+    weeklyChartData,
+    cumulativeChartData,
+    topicData,
+    sourceData,
+    companyData,
+    diffByCatData,
+    deepDiveDiffData,
+    heatmapWeeks,
+    heatmapSummary,
+    solvedTrend,
+  } = useMemo(() => {
+    const categoryData = (categoryBreakdown ?? [])
+      .filter((c) => c.count > 0)
+      .map((c) => ({
+        name: CATEGORY_LABEL[c.category as keyof typeof CATEGORY_LABEL] || c.category,
+        short: categoryShort(c.category),
+        count: c.count,
+        key: c.category,
+      }));
+
+    const diffData = (difficultyBreakdown ?? []).map((d) => ({
+      name: d.difficulty.charAt(0).toUpperCase() + d.difficulty.slice(1),
+      count: d.count,
     }));
 
-  const diffData = (difficultyBreakdown ?? []).map((d) => ({
-    name: d.difficulty.charAt(0).toUpperCase() + d.difficulty.slice(1),
-    count: d.count,
-  }));
+    const dailyData = (progressData ?? []).map((d) => ({
+      date: new Date(d.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      solved: d.solved,
+    }));
 
-  const dailyData = (progressData ?? []).map((d) => ({
-    date: new Date(d.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-    solved: d.solved,
-  }));
+    const weeklyChartData = (weeklyData ?? []).map((w) => ({
+      week: new Date(w.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      solved: w.solved,
+    }));
 
-  const weeklyChartData = (weeklyData ?? []).map((w) => ({
-    week: new Date(w.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-    solved: w.solved,
-  }));
+    const cumulativeChartData = (cumulativeData ?? []).map((c) => ({
+      date: new Date(c.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      total: c.total,
+    }));
 
-  const cumulativeChartData = (cumulativeData ?? []).map((c) => ({
-    date: new Date(c.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-    total: c.total,
-  }));
+    const topicData = (topicBreakdown ?? [])
+      .filter((t) => t.count > 0)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10)
+      .map((t) => ({ name: t.topic, count: t.count }));
 
-  const topicData = (topicBreakdown ?? [])
-    .filter((t) => t.count > 0)
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 10)
-    .map((t) => ({ name: t.topic, count: t.count }));
+    const sourceData = (sourceBreakdown ?? [])
+      .filter((s) => s.count > 0)
+      .sort((a, b) => b.count - a.count)
+      .map((s) => ({ name: SOURCE_LABEL[s.source] || s.source, count: s.count, key: s.source }));
 
-  const sourceData = (sourceBreakdown ?? [])
-    .filter((s) => s.count > 0)
-    .sort((a, b) => b.count - a.count)
-    .map((s) => ({ name: SOURCE_LABEL[s.source] || s.source, count: s.count, key: s.source }));
+    const companyData = (companyBreakdown ?? [])
+      .filter((c) => c.count > 0)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10)
+      .map((c) => ({ name: c.companyTag, count: c.count }));
 
-  const companyData = (companyBreakdown ?? [])
-    .filter((c) => c.count > 0)
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 10)
-    .map((c) => ({ name: c.companyTag, count: c.count }));
+    const diffByCatData = (diffByCategory ?? [])
+      .filter((d) => d.total > 0)
+      .map((d) => ({ name: categoryShort(d.category), Easy: d.easy, Medium: d.medium, Hard: d.hard }));
 
-  const diffByCatData = (diffByCategory ?? [])
-    .filter((d) => d.total > 0)
-    .map((d) => ({ name: categoryShort(d.category), Easy: d.easy, Medium: d.medium, Hard: d.hard }));
+    let deepDiveDiffData = diffData;
+    if (activityCategory) {
+      const catEntry = (diffByCategory ?? []).find((d) => d.category === activityCategory);
+      deepDiveDiffData = catEntry
+        ? [
+            { name: "Easy", count: catEntry.easy },
+            { name: "Medium", count: catEntry.medium },
+            { name: "Hard", count: catEntry.hard },
+          ]
+        : [
+            { name: "Easy", count: 0 },
+            { name: "Medium", count: 0 },
+            { name: "Hard", count: 0 },
+          ];
+    }
 
-  // Filtered difficulty for Deep Dive
-  const deepDiveDiffData = (() => {
-    if (!activityCategory) return diffData;
-    const catEntry = (diffByCategory ?? []).find((d) => d.category === activityCategory);
-    if (!catEntry) return [{ name: "Easy", count: 0 }, { name: "Medium", count: 0 }, { name: "Hard", count: 0 }];
-    return [
-      { name: "Easy", count: catEntry.easy },
-      { name: "Medium", count: catEntry.medium },
-      { name: "Hard", count: catEntry.hard },
-    ];
-  })();
+    const heatmapWeeks = buildHeatmapWeeks(heatmapData ?? {});
+    const heatmapSummary = buildHeatmapSummary(heatmapWeeks);
 
-  const heatmapWeeks = buildHeatmapWeeks(heatmapData ?? {});
-  const heatmapSummary = buildHeatmapSummary(heatmapWeeks);
+    const progressDays = progressData ?? [];
+    const last7 = progressDays.slice(-7);
+    const prev7 = progressDays.slice(-14, -7);
+    const solvedTrend = last7.reduce((a, d) => a + d.solved, 0) - prev7.reduce((a, d) => a + d.solved, 0);
 
-  const progressDays = progressData ?? [];
-  const last7 = progressDays.slice(-7);
-  const prev7 = progressDays.slice(-14, -7);
-  const solvedTrend = last7.reduce((a, d) => a + d.solved, 0) - prev7.reduce((a, d) => a + d.solved, 0);
-  const solvedSparkline = last7.map((d) => d.solved);
+    return {
+      categoryData,
+      diffData,
+      dailyData,
+      weeklyChartData,
+      cumulativeChartData,
+      topicData,
+      sourceData,
+      companyData,
+      diffByCatData,
+      deepDiveDiffData,
+      heatmapWeeks,
+      heatmapSummary,
+      solvedTrend,
+    };
+  }, [
+    categoryBreakdown,
+    difficultyBreakdown,
+    progressData,
+    weeklyData,
+    cumulativeData,
+    topicBreakdown,
+    sourceBreakdown,
+    companyBreakdown,
+    diffByCategory,
+    activityCategory,
+    heatmapData,
+  ]);
 
   return (
     <Layout>
@@ -157,8 +204,6 @@ const StatsPage = () => {
                 icon={CheckCircle}
                 color="bg-stat-green/10 text-stat-green"
                 trend={solvedTrend !== 0 ? solvedTrend : undefined}
-                sparkline={solvedSparkline}
-                sparkColor="hsl(var(--stat-green))"
               />
               <StatCard label="Backlog" value={backlog || "—"} icon={ListTodo} color="bg-stat-yellow/10 text-stat-yellow" />
               <StatCard label="Solve Rate" value={total > 0 ? `${solveRate}%` : "—"} icon={Percent} color="bg-stat-blue/10 text-stat-blue" />

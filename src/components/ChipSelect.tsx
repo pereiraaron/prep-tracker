@@ -13,17 +13,29 @@ interface ChipSelectProps {
   placeholder: string;
   lowercase?: boolean;
   loading?: boolean;
+  /** When true, show all presets with no "+N more" collapse. */
+  alwaysOpen?: boolean;
 }
 
-const ChipSelect = ({ presets, selected, onToggle, onAdd, onRemove, placeholder, lowercase, loading }: ChipSelectProps) => {
+const ChipSelect = ({
+  presets,
+  selected,
+  onToggle,
+  onAdd,
+  onRemove,
+  placeholder,
+  lowercase,
+  loading,
+  alwaysOpen = false,
+}: ChipSelectProps) => {
   const [input, setInput] = useState("");
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(alwaysOpen);
 
   const eq = lowercase
     ? (a: string, b: string) => a.toLowerCase() === b.toLowerCase()
     : (a: string, b: string) => a === b;
   const isSelected = (p: string) => selected.some((s) => eq(s, p));
-  const normalize = (v: string) => lowercase ? v.toLowerCase() : v;
+  const normalize = (v: string) => (lowercase ? v.toLowerCase() : v);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if ((e.key === "Enter" || e.key === ",") && input.trim()) {
@@ -40,27 +52,38 @@ const ChipSelect = ({ presets, selected, onToggle, onAdd, onRemove, placeholder,
   const dedupedPresets = presets.filter((p, i) => presets.findIndex((q) => eq(p, q)) === i);
   const selectedPresets = dedupedPresets.filter((p) => isSelected(p));
   const unselectedPresets = dedupedPresets.filter((p) => !isSelected(p));
-  const canCollapse = dedupedPresets.length > VISIBLE_LIMIT;
-  const visibleUnselected = expanded ? unselectedPresets : unselectedPresets.slice(0, Math.max(0, VISIBLE_LIMIT - selectedPresets.length));
+  const canCollapse = !alwaysOpen && dedupedPresets.length > VISIBLE_LIMIT;
+  const showAll = alwaysOpen || expanded;
+  const visibleUnselected = showAll
+    ? unselectedPresets
+    : unselectedPresets.slice(0, Math.max(0, VISIBLE_LIMIT - selectedPresets.length));
   const hiddenCount = unselectedPresets.length - visibleUnselected.length;
 
   if (loading && presets.length === 0) {
     return (
-      <div className="flex flex-1 flex-col gap-3">
-        <div className="flex flex-1 flex-wrap content-start gap-1.5">
+      <div className="flex w-full flex-1 flex-col gap-3">
+        <div className="flex w-full flex-1 flex-wrap content-start gap-1.5">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-7 rounded-lg bg-secondary/70 animate-pulse" style={{ width: `${60 + (i % 3) * 20}px` }} />
+            <div
+              key={i}
+              className="h-7 rounded-lg bg-secondary/70 animate-pulse"
+              style={{ width: `${60 + (i % 3) * 20}px` }}
+            />
           ))}
         </div>
-        <input disabled className="h-11 w-full shrink-0 rounded-xl border border-border bg-background px-4 text-sm opacity-50" placeholder={placeholder} />
+        <input
+          disabled
+          className="h-11 w-full shrink-0 rounded-xl border border-border bg-background px-4 text-sm opacity-50"
+          placeholder={placeholder}
+        />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-3">
-      <div className="flex flex-1 flex-col gap-3">
-        <div className="flex flex-wrap content-start gap-1.5">
+    <div className="flex w-full flex-1 flex-col gap-3">
+      <div className="flex w-full flex-1 flex-col gap-3">
+        <div className="flex w-full flex-wrap content-start gap-1.5">
           {selectedPresets.map((p) => (
             <button
               key={p}
@@ -101,12 +124,9 @@ const ChipSelect = ({ presets, selected, onToggle, onAdd, onRemove, placeholder,
           </button>
         )}
         {custom.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex w-full flex-wrap gap-1.5">
             {custom.map((c) => (
-              <span
-                key={c}
-                className={`inline-flex items-center gap-1 ${CHIP_BASE} ${CHIP_ACTIVE}`}
-              >
+              <span key={c} className={`inline-flex items-center gap-1 ${CHIP_BASE} ${CHIP_ACTIVE}`}>
                 {display(c)}
                 <button type="button" onClick={() => onRemove(c)} className="hover:text-destructive transition-colors">
                   <X className="h-3 w-3" />

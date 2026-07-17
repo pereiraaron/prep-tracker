@@ -72,7 +72,7 @@ const NewQuestionPage = () => {
       setSolutions([firstWithContent ?? solutions[0] ?? { content: "" }]);
     }
     const newPresets = suggestions?.topicsByCategory?.[val];
-    if (newPresets) {
+    if (newPresets?.length) {
       const newPresetsLower = new Set(newPresets.map((t: string) => t.toLowerCase()));
       setTopics((prev) => prev.filter((t) => newPresetsLower.has(t)));
     }
@@ -139,7 +139,7 @@ const NewQuestionPage = () => {
 
   const labelCls = "mb-1.5 block text-xs font-semibold text-muted-foreground";
   const topicPresets = suggestions?.topicsByCategory?.[category] ?? [];
-  const tagPresets = suggestions?.tags ?? [];
+  const tagPresets = suggestions?.tagsByCategory?.[category] ?? suggestions?.tags ?? [];
   const companyPresets = suggestions?.companyTags ?? [];
 
   return (
@@ -244,7 +244,7 @@ const NewQuestionPage = () => {
           </div>
 
           {/* Topics — based on selected category */}
-          <div className="mt-5">
+          <div className="mt-5 w-full">
             <label className={labelCls}>Topics</label>
             <ChipSelect
               presets={topicPresets}
@@ -255,6 +255,7 @@ const NewQuestionPage = () => {
               placeholder="Custom topic + Enter..."
               lowercase
               loading={suggestionsLoading}
+              alwaysOpen
             />
           </div>
         </section>

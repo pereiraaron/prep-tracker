@@ -2,6 +2,7 @@ import { useQuery, useInfiniteQuery, useMutation, useQueryClient, keepPreviousDa
 import { questionsApi, type QuestionsFilter, type CreateBacklogQuestionBody, type Solution } from "@api/questions";
 import { queryKeys } from "@lib/queryKeys";
 import { useQuestionsFilterStore } from "@store/useQuestionsFilterStore";
+import { invalidateCoreStats } from "@lib/invalidateStats";
 
 // ---- Queries ----
 
@@ -61,7 +62,7 @@ export const useCreateBacklogItem = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.backlog.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.suggestions() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.stats.all });
+      invalidateCoreStats(queryClient);
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.all });
     },
   });
@@ -74,7 +75,7 @@ export const useDeleteBacklogItem = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.backlog.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.suggestions() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.stats.all });
+      invalidateCoreStats(queryClient);
     },
   });
 };
@@ -115,9 +116,7 @@ export const useStarBacklogItem = () => {
         }
       }
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.backlog.all });
-    },
+    // Trust optimistic update — no full list refetch on settle
   });
 };
 
@@ -129,7 +128,7 @@ export const useSolveBacklogItem = () => {
     onSuccess: () => {
       useQuestionsFilterStore.getState().setCurrentPage(1);
       queryClient.invalidateQueries({ queryKey: queryKeys.backlog.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.stats.all });
+      invalidateCoreStats(queryClient);
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.all });
     },
   });

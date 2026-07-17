@@ -52,6 +52,7 @@ export interface Question extends QuestionListItem {
 
 export interface SuggestionsResponse {
   topicsByCategory: Record<string, string[]>;
+  tagsByCategory: Record<string, string[]>;
   tags: string[];
   companyTags: string[];
 }
