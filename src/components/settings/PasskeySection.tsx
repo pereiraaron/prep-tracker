@@ -1,48 +1,42 @@
-import { useState, useEffect } from "react";
-import { passkeyApi, type PasskeyCredential } from "@api/passkey";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { passkeyApi } from "@api/passkey";
 import { Button } from "@components/ui/button";
 import { Fingerprint, Plus, Trash2, Loader2 } from "lucide-react";
 import Skeleton from "@components/Skeleton";
 
+const PASSKEYS_KEY = ["passkeys"] as const;
+
 const PasskeySection = () => {
-  const [credentials, setCredentials] = useState<PasskeyCredential[]>([]);
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
+  const { data: credentials = [], isLoading, error: queryError, refetch } = useQuery({
+    queryKey: PASSKEYS_KEY,
+    queryFn: async () => {
+      const { credentials: creds } = await passkeyApi.listCredentials();
+      return creds;
+    },
+  });
   const [registering, setRegistering] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
-  const loadCredentials = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { credentials: creds } = await passkeyApi.listCredentials();
-      setCredentials(creds);
-    } catch {
-      setError("Could not load passkeys.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadCredentials();
-  }, []);
+  const error = actionError ?? (queryError ? "Could not load passkeys." : null);
 
   const handleRegister = async () => {
     setRegistering(true);
-    setError(null);
+    setActionError(null);
     try {
       const { options, challengeId } = await passkeyApi.getRegisterOptions();
       const { startRegistration } = await import("@simplewebauthn/browser");
       const credential = await startRegistration({ optionsJSON: options });
       await passkeyApi.verifyRegister(challengeId, credential);
-      await loadCredentials();
+      await refetch();
     } catch (err) {
       if (err instanceof Error && err.name === "NotAllowedError") {
         setRegistering(false);
         return;
       }
-      setError("Failed to register passkey. Please try again.");
+      setActionError("Failed to register passkey. Please try again.");
     } finally {
       setRegistering(false);
     }
@@ -50,12 +44,14 @@ const PasskeySection = () => {
 
   const handleDelete = async (id: string) => {
     setDeletingId(id);
-    setError(null);
+    setActionError(null);
     try {
       await passkeyApi.deleteCredential(id);
-      setCredentials((prev) => prev.filter((c) => c.id !== id));
+      queryClient.setQueryData(PASSKEYS_KEY, (prev: typeof credentials) =>
+        (prev ?? []).filter((c) => c.id !== id),
+      );
     } catch {
-      setError("Failed to remove passkey.");
+      setActionError("Failed to remove passkey.");
     } finally {
       setDeletingId(null);
     }
@@ -86,7 +82,7 @@ const PasskeySection = () => {
         </div>
       )}
 
-      {loading ? (
+      {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 2 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3 rounded-lg border border-border/50 bg-secondary/30 px-3 py-2.5">

@@ -1,6 +1,7 @@
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { questionsApi, type QuestionsFilter, type CreateBacklogQuestionBody, type Solution } from "@api/questions";
 import { queryKeys } from "@lib/queryKeys";
+import { useBacklogFilterStore } from "@store/useBacklogFilterStore";
 import { useQuestionsFilterStore } from "@store/useQuestionsFilterStore";
 import { invalidateCoreStats } from "@lib/invalidateStats";
 
@@ -20,6 +21,7 @@ export const useBacklogList = (params: BacklogListParams = {}, enabled = true) =
             status: "pending",
             difficulty: filter.difficulty,
             category: filter.category,
+            sort: filter.sort,
             page: filter.page,
             limit: filter.limit,
           })
@@ -41,6 +43,7 @@ export const useBacklogInfinite = (params: Omit<BacklogListParams, "page"> & { l
             status: "pending",
             difficulty: filter.difficulty,
             category: filter.category,
+            sort: filter.sort,
             page: pageParam,
             limit,
           })
@@ -126,6 +129,7 @@ export const useSolveBacklogItem = () => {
     mutationFn: ({ id, solutions }: { id: string; solutions?: Solution[] }) =>
       questionsApi.solve(id, solutions?.length ? { solutions } : undefined),
     onSuccess: () => {
+      useBacklogFilterStore.getState().setCurrentPage(1);
       useQuestionsFilterStore.getState().setCurrentPage(1);
       queryClient.invalidateQueries({ queryKey: queryKeys.backlog.all });
       invalidateCoreStats(queryClient);

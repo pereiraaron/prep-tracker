@@ -9,17 +9,19 @@ interface PaginationProps {
 const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) => {
   if (totalPages <= 1) return null;
 
-  // On mobile, show limited page numbers to avoid overflow
+  // Avoid duplicate page numbers when current is near the edges
   const getVisiblePages = () => {
     if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1);
-    const pages: (number | "...")[] = [];
-    pages.push(1);
-    if (currentPage > 3) pages.push("...");
-    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
-      pages.push(i);
-    }
-    if (currentPage < totalPages - 2) pages.push("...");
+
+    const pages: (number | "...")[] = [1];
+    const start = Math.max(2, currentPage - 1);
+    const end = Math.min(totalPages - 1, currentPage + 1);
+
+    if (start > 2) pages.push("...");
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (end < totalPages - 1) pages.push("...");
     pages.push(totalPages);
+
     return pages;
   };
 

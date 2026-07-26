@@ -19,6 +19,7 @@ export const useQuestionsList = (params: ListParams = {}, enabled = true) => {
             status: filter.status,
             difficulty: filter.difficulty,
             category: filter.category,
+            sort: filter.sort,
             page: filter.page,
             limit: filter.limit,
           })
@@ -40,6 +41,7 @@ export const useQuestionsInfinite = (params: Omit<ListParams, "page"> & { limit:
             status: filter.status,
             difficulty: filter.difficulty,
             category: filter.category,
+            sort: filter.sort,
             page: pageParam,
             limit,
           })

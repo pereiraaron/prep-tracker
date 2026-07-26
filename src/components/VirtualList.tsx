@@ -28,6 +28,8 @@ const VirtualList = <T,>({
   isLoadingMore,
 }: VirtualListProps<T>) => {
   const parentRef = useRef<HTMLDivElement>(null);
+  const onNearEndRef = useRef(onNearEnd);
+  onNearEndRef.current = onNearEnd;
 
   const virtualizer = useVirtualizer({
     count: items.length,
@@ -40,9 +42,13 @@ const VirtualList = <T,>({
   const lastIndex = virtualItems[virtualItems.length - 1]?.index ?? -1;
 
   useEffect(() => {
-    if (!onNearEnd || !hasMore || isLoadingMore || lastIndex < 0) return;
-    if (lastIndex >= items.length - 5) onNearEnd();
-  }, [lastIndex, items.length, hasMore, isLoadingMore, onNearEnd]);
+    if (!hasMore || isLoadingMore || lastIndex < 0 || items.length === 0) return;
+    // Only fetch when scrolled near the end — not when the whole list fits on screen
+    // with fewer than a page of items left to load (threshold of 5)
+    if (lastIndex >= items.length - 5) {
+      onNearEndRef.current?.();
+    }
+  }, [lastIndex, items.length, hasMore, isLoadingMore]);
 
   return (
     <div

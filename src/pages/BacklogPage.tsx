@@ -86,11 +86,17 @@ const BacklogPage = () => {
   const isFetching = isMobile ? infiniteQuery.isFetching : paginatedQuery.isFetching;
   const isTransitioning = isFetching && !isLoading;
   const pagination = paginatedQuery.data?.pagination ?? null;
-  const totalPages = pagination?.totalPages ?? 1;
+  const totalPages = Math.max(1, pagination?.totalPages ?? 1);
 
   const total = isMobile
     ? infiniteQuery.data?.pages[0]?.pagination.total ?? 0
     : pagination?.total ?? 0;
+
+  useEffect(() => {
+    if (isMobile || !pagination) return;
+    const pages = Math.max(1, pagination.totalPages);
+    if (currentPage > pages) setCurrentPage(pages);
+  }, [isMobile, pagination, currentPage, setCurrentPage]);
 
   useEffect(() => {
     if (isMobile || currentPage >= totalPages) return;
@@ -103,6 +109,7 @@ const BacklogPage = () => {
               status: "pending",
               difficulty: filterParams.difficulty,
               category: filterParams.category,
+              sort: filterParams.sort,
               page: currentPage + 1,
               limit: ITEMS_PER_PAGE,
             })
@@ -186,7 +193,7 @@ const BacklogPage = () => {
 
           {isLoading ? (
             <QuestionsListSkeleton />
-          ) : backlog.length === 0 ? (
+          ) : total === 0 ? (
             hasFilters ? (
               <EmptyState
                 icon={Search}
@@ -214,6 +221,8 @@ const BacklogPage = () => {
                 }
               />
             )
+          ) : backlog.length === 0 ? (
+            <QuestionsListSkeleton />
           ) : (
             <>
               <div className={`glass-card rounded-xl overflow-hidden transition-opacity duration-200 ${isTransitioning ? "opacity-40 pointer-events-none" : ""}`}>
