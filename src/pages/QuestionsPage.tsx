@@ -3,7 +3,7 @@ import useIsMobile from "@hooks/useIsMobile";
 import useIsLg from "@hooks/useIsLg";
 import useDebouncedValue from "@hooks/useDebouncedValue";
 import useQuestionsFilter from "@hooks/useQuestionsFilter";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import Layout from "@components/Layout";
 import PageHeader from "@components/PageHeader";
 import EmptyState from "@components/EmptyState";
@@ -67,9 +67,13 @@ const QuestionsPage = () => {
     enabled: isMobile,
   });
 
-  const questions = isMobile
-    ? infiniteQuery.data?.pages.flatMap((p) => p.data) ?? []
-    : paginatedQuery.data?.data ?? [];
+  const questions = useMemo(
+    () =>
+      isMobile
+        ? infiniteQuery.data?.pages.flatMap((p) => p.data) ?? []
+        : paginatedQuery.data?.data ?? [],
+    [isMobile, infiniteQuery.data, paginatedQuery.data],
+  );
 
   const isLoading = isMobile ? infiniteQuery.isLoading : paginatedQuery.isLoading;
   const isFetching = isMobile ? infiniteQuery.isFetching : paginatedQuery.isFetching;

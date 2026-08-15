@@ -17,7 +17,7 @@ export const authHeaders = (token?: string): HeadersInit => ({
   ...(token ? { Authorization: `Bearer ${token}` } : {}),
 });
 
-export const apiHeaders = (): HeadersInit => {
+const apiHeaders = (): HeadersInit => {
   const token = useAuthStore.getState().token;
   return {
     "Content-Type": "application/json",
@@ -28,7 +28,8 @@ export const apiHeaders = (): HeadersInit => {
 /** Unwrap backend envelope: { success, data, ...rest } → { data, ...rest } or just data */
 const unwrapEnvelope = <T>(raw: any): T => {
   if (raw && typeof raw === "object" && "success" in raw && "data" in raw) {
-    const { success: _, data, ...rest } = raw;
+    const { success, data, ...rest } = raw;
+    void success;
     // Paginated responses have sibling fields like `pagination`
     if (Object.keys(rest).length > 0) return { data, ...rest } as T;
     return data as T;

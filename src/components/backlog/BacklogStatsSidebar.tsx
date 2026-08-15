@@ -1,4 +1,4 @@
-import { useCategoryBreakdown, useDifficultyBreakdown, useSourceBreakdown } from "@queries/useStats";
+import { useBacklogSidebarStats } from "@queries/useStats";
 import { StatsSidebarSkeleton } from "@components/Skeleton";
 import { CATEGORY_COLORS } from "@lib/styles";
 import { CATEGORY_LABEL, SOURCE_LABEL } from "@api/types";
@@ -20,11 +20,12 @@ const DifficultyBar = ({ label, count, total, color }: { label: string; count: n
 };
 
 const BacklogStatsSidebar = () => {
-  const { data: categories, isLoading: categoriesLoading } = useCategoryBreakdown();
-  const { data: difficulties } = useDifficultyBreakdown();
-  const { data: sources } = useSourceBreakdown();
+  const { data: batch, isLoading } = useBacklogSidebarStats();
+  const categories = batch?.categories;
+  const difficulties = batch?.difficulties;
+  const sources = batch?.sources;
 
-  if (categoriesLoading) return <StatsSidebarSkeleton />;
+  if (isLoading) return <StatsSidebarSkeleton />;
 
   const pendingByDiff = {
     easy: difficulties?.find((d) => d.difficulty === "easy")?.pending ?? 0,

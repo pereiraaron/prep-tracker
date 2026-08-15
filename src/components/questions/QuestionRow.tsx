@@ -1,9 +1,10 @@
 import type { QuestionListItem } from "@api/questions";
 import { questionsApi } from "@api/questions";
-import { capitalize, CATEGORY_BORDER_COLORS } from "@lib/styles";
+import { capitalize, CATEGORY_BORDER_COLORS, sortAlpha } from "@lib/styles";
 import { DifficultyBadge, CategoryBadge, SourceBadge } from "@components/Badge";
 import IconButton from "@components/IconButton";
 import { queryKeys } from "@lib/queryKeys";
+import { prefetchDetailChunks } from "@lib/prefetchDetailChunks";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 import { Star, Trash2, ExternalLink } from "lucide-react";
@@ -32,6 +33,7 @@ const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps)
         queryFn: () => questionsApi.getById(q.id),
         staleTime: 30_000,
       });
+      prefetchDetailChunks(q.category);
     }, 500);
   };
 
@@ -82,7 +84,7 @@ const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps)
               <CategoryBadge value={q.category} />
             </span>
           )}
-          {q.topics?.length > 0 && [...q.topics].sort((a, b) => a.localeCompare(b)).map((t) => (
+          {q.topics?.length > 0 && sortAlpha(q.topics).map((t) => (
             <span key={t} className="hidden lg:inline rounded bg-secondary/80 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
               {capitalize(t)}
             </span>

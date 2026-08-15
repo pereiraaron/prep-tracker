@@ -1,4 +1,4 @@
-import { useOverview, useStreaks, useCategoryBreakdown, useDifficultyBreakdown, useSourceBreakdown } from "@queries/useStats";
+import { useQuestionsSidebarStats } from "@queries/useStats";
 import { StatsSidebarSkeleton } from "@components/Skeleton";
 import { CATEGORY_COLORS } from "@lib/styles";
 import { CATEGORY_LABEL, SOURCE_LABEL } from "@api/types";
@@ -21,13 +21,14 @@ const DifficultyBar = ({ label, count, total, color }: { label: string; count: n
 };
 
 const StatsSidebar = () => {
-  const { data: overview, isLoading: overviewLoading } = useOverview();
-  const { data: streaks, isLoading: streaksLoading } = useStreaks();
-  const { data: categories } = useCategoryBreakdown();
-  const { data: difficulties } = useDifficultyBreakdown();
-  const { data: sources } = useSourceBreakdown();
+  const { data: batch, isLoading } = useQuestionsSidebarStats();
+  const overview = batch?.overview;
+  const streaks = batch?.streaks;
+  const categories = batch?.categories;
+  const difficulties = batch?.difficulties;
+  const sources = batch?.sources;
 
-  if (overviewLoading || streaksLoading) return <StatsSidebarSkeleton />;
+  if (isLoading) return <StatsSidebarSkeleton />;
 
   const solved = overview?.totalSolved ?? 0;
   const currentStreak = streaks?.currentStreak ?? 0;

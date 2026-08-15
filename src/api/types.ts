@@ -61,11 +61,6 @@ export const DIFFICULTIES = [
   { value: "hard", label: "Hard" },
 ] as const;
 
-export const QUESTION_STATUSES = [
-  { value: "pending", label: "Pending" },
-  { value: "solved", label: "Solved" },
-] as const;
-
 export const QUESTION_SOURCES = [
   { value: "leetcode", label: "LeetCode" },
   { value: "greatfrontend", label: "GreatFrontend" },
@@ -78,37 +73,7 @@ export const QUESTION_SOURCES = [
   { value: "other", label: "Other" },
 ] as const;
 
-export const CATEGORY_COLOR: Record<string, string> = {
-  dsa: "purple",
-  system_design: "blue",
-  machine_coding: "orange",
-  language_framework: "teal",
-  theory: "cyan",
-};
-
-export const DIFFICULTY_COLOR: Record<string, string> = {
-  easy: "green",
-  medium: "yellow",
-  hard: "red",
-};
-
 export const SOURCE_LABEL: Record<string, string> = Object.fromEntries(
   QUESTION_SOURCES.map((s) => [s.value, s.label])
 ) as Record<string, string>;
 
-export const SOURCE_COLOR: Record<string, string> = {
-  leetcode: "orange",
-  greatfrontend: "teal",
-  minichallenges: "purple",
-  geeksforgeeks: "green",
-  linkedin: "blue",
-  medium: "gray",
-  namastedsa: "yellow",
-  fmc: "pink",
-  other: "gray",
-};
-
-export const STATUS_COLOR: Record<string, string> = {
-  pending: "orange",
-  solved: "green",
-};

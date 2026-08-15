@@ -16,20 +16,4 @@ const IconButton = ({ label, children, ...props }: IconButtonProps) => (
   </Tooltip>
 );
 
-interface IconLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-  label: string;
-  children: React.ReactNode;
-}
-
-export const IconLink = ({ label, children, ...props }: IconLinkProps) => (
-  <Tooltip>
-    <TooltipTrigger asChild>
-      <a aria-label={label} {...props}>
-        {children}
-      </a>
-    </TooltipTrigger>
-    <TooltipContent>{label}</TooltipContent>
-  </Tooltip>
-);
-
 export default IconButton;

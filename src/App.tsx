@@ -5,8 +5,7 @@ import { useAuthStore } from "@store/useAuthStore";
 import ErrorBoundary from "@components/ErrorBoundary";
 import RouteErrorBoundary from "@components/RouteErrorBoundary";
 import { Loader2 } from "lucide-react";
-
-const Sonner = lazy(() => import("@components/ui/sonner").then((m) => ({ default: m.Toaster })));
+import { Toaster } from "@components/ui/sonner";
 import { TooltipProvider } from "@components/ui/tooltip";
 
 const queryClient = new QueryClient({
@@ -33,7 +32,6 @@ const BacklogPage = lazy(() => import("@pages/BacklogPage"));
 const SettingsPage = lazy(() => import("@pages/SettingsPage"));
 const RegisterPage = lazy(() => import("@pages/RegisterPage"));
 const AuthCallbackPage = lazy(() => import("@pages/AuthCallbackPage"));
-const PracticePage = lazy(() => import("@pages/PracticePage"));
 const RevisionPage = lazy(() => import("@pages/RevisionPage"));
 const NotFound = lazy(() => import("@pages/NotFound"));
 
@@ -53,10 +51,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ErrorBoundary>
       <TooltipProvider>
-        {/* Lazy-load toast providers — not needed for initial render */}
-        <Suspense fallback={null}>
-          <Sonner />
-        </Suspense>
+        <Toaster />
 
         <BrowserRouter>
         <Suspense fallback={<PageLoader />}>
@@ -68,7 +63,6 @@ const App = () => (
               <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
               <Route path="/questions" element={<ProtectedRoute><QuestionsPage /></ProtectedRoute>} />
               <Route path="/questions/:id" element={<ProtectedRoute><QuestionDetailPage /></ProtectedRoute>} />
-              <Route path="/questions/:id/practice" element={<ProtectedRoute><PracticePage /></ProtectedRoute>} />
               <Route path="/question/new" element={<ProtectedRoute><NewQuestionPage /></ProtectedRoute>} />
               <Route path="/backlog" element={<ProtectedRoute><BacklogPage /></ProtectedRoute>} />
               <Route path="/stats" element={<ProtectedRoute><StatsPage /></ProtectedRoute>} />

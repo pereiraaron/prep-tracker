@@ -47,7 +47,6 @@ export interface QuestionListItem {
 export interface Question extends QuestionListItem {
   notes?: string;
   solutions?: Solution[];
-  templates?: Record<string, string>;
 }
 
 export interface SuggestionsResponse {
@@ -244,18 +243,4 @@ export const questionsApi = {
 
   getSuggestions: async () =>
     apiFetch<SuggestionsResponse>(`${API_BASE_URL}/questions/suggestions`),
-
-  // ---- Playground ----
-
-  getTemplates: async (id: string) =>
-    apiFetch<Record<string, string> | null>(`${API_BASE_URL}/questions/${id}/templates`),
-
-  getSubmission: async (id: string) =>
-    apiFetch<{ files: Record<string, string>; updatedAt: string } | null>(`${API_BASE_URL}/questions/${id}/submission`),
-
-  saveSubmission: async (id: string, files: Record<string, string>) =>
-    apiFetch<{ files: Record<string, string>; updatedAt: string }>(`${API_BASE_URL}/questions/${id}/submission`, {
-      method: "PUT",
-      body: JSON.stringify({ files }),
-    }),
 };

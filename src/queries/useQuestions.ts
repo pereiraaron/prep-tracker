@@ -2,6 +2,7 @@ import { useQuery, useInfiniteQuery, useMutation, useQueryClient, keepPreviousDa
 import { questionsApi, type QuestionsFilter, type CreateQuestionBody, type UpdateQuestionBody } from "@api/questions";
 import { queryKeys } from "@lib/queryKeys";
 import { invalidateCoreStats } from "@lib/invalidateStats";
+import { invalidateQuestionLists, invalidateBacklogLists } from "@lib/invalidateLists";
 
 // ---- Queries ----
 
@@ -69,39 +70,13 @@ export const useRecentQuestions = () =>
 
 // ---- Suggestions ----
 
-export const useSuggestions = () =>
+export const useSuggestions = (enabled = true) =>
   useQuery({
     queryKey: queryKeys.questions.suggestions(),
     queryFn: () => questionsApi.getSuggestions(),
     staleTime: Infinity,
+    enabled,
   });
-
-// ---- Playground ----
-
-export const useTemplates = (id: string | undefined) =>
-  useQuery({
-    queryKey: queryKeys.questions.templates(id!),
-    queryFn: () => questionsApi.getTemplates(id!),
-    enabled: !!id,
-  });
-
-export const useSubmission = (id: string | undefined) =>
-  useQuery({
-    queryKey: queryKeys.questions.submission(id!),
-    queryFn: () => questionsApi.getSubmission(id!),
-    enabled: !!id,
-  });
-
-export const useSaveSubmission = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, files }: { id: string; files: Record<string, string> }) =>
-      questionsApi.saveSubmission(id, files),
-    onSuccess: (_data, { id }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.questions.submission(id) });
-    },
-  });
-};
 
 // ---- Mutations ----
 
@@ -110,7 +85,7 @@ export const useCreateQuestion = () => {
   return useMutation({
     mutationFn: (body: CreateQuestionBody) => questionsApi.create(body),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.questions.all });
+      invalidateQuestionLists(queryClient);
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.suggestions() });
       invalidateCoreStats(queryClient);
     },
@@ -123,7 +98,7 @@ export const useUpdateQuestion = () => {
     mutationFn: ({ id, body }: { id: string; body: UpdateQuestionBody }) => questionsApi.update(id, body),
     onSuccess: (_data, { id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.detail(id) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.questions.all });
+      invalidateQuestionLists(queryClient);
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.suggestions() });
       invalidateCoreStats(queryClient);
     },
@@ -135,10 +110,10 @@ export const useDeleteQuestion = () => {
   return useMutation({
     mutationFn: (id: string) => questionsApi.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.questions.all });
+      invalidateQuestionLists(queryClient);
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.suggestions() });
       invalidateCoreStats(queryClient);
-      queryClient.invalidateQueries({ queryKey: queryKeys.backlog.all });
+      invalidateBacklogLists(queryClient);
     },
   });
 };

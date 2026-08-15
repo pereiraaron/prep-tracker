@@ -1,5 +1,5 @@
 import usePageTitle from "@hooks/usePageTitle";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Layout from "@components/Layout";
 import PageHeader from "@components/PageHeader";
 import PrimaryButton from "@components/PrimaryButton";
@@ -28,13 +28,13 @@ const RevisionPage = () => {
 
   const allQuestions = data?.data ?? [];
 
-  // Shuffle deterministically based on seed
-  const shuffled = [...allQuestions].sort(() => {
-    const x = Math.sin(seed + 1) * 10000;
-    return x - Math.floor(x) - 0.5;
-  });
-
-  const questions = shuffled.slice(0, 5);
+  const questions = useMemo(() => {
+    const shuffled = [...allQuestions].sort(() => {
+      const x = Math.sin(seed + 1) * 10000;
+      return x - Math.floor(x) - 0.5;
+    });
+    return shuffled.slice(0, 5);
+  }, [allQuestions, seed]);
 
   const handleShuffle = () => setSeed((s) => s + 1);
 

@@ -2,9 +2,9 @@ import type { Solution } from "@api/questions";
 import type { PrepCategory } from "@api/types";
 import { MAX_SOLUTIONS, MULTIPLE_SOLUTIONS_CATEGORIES, SOLUTION_OPTIONAL_CATEGORIES } from "@api/types";
 
-export const emptySolution = (): Solution => ({ content: "" });
+const emptySolution = (): Solution => ({ content: "" });
 
-export const defaultSolutions = (): Solution[] => [emptySolution()];
+const defaultSolutions = (): Solution[] => [emptySolution()];
 
 export const solutionsHaveContent = (solutions: Solution[]) =>
   solutions.some((s) => s.content.trim());

@@ -9,9 +9,6 @@ import { DashboardStatsSkeleton, DashboardActivitySkeleton } from "@components/S
 import QuickAction from "@components/QuickAction";
 import { useDashboardStats } from "@queries/useStats";
 import { useRecentQuestions } from "@queries/useQuestions";
-import { Button } from "@components/ui/button";
-import { Input } from "@components/ui/input";
-import { Label } from "@components/ui/label";
 import {
   BookOpen,
   CheckCircle,
@@ -24,13 +21,9 @@ import {
   Clock,
   Lightbulb,
   ArrowRight,
-  CalendarClock,
   Shuffle,
-  Pencil,
-  X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
 
 const getGreeting = () => {
   const hour = new Date().getHours();
@@ -41,162 +34,6 @@ const getGreeting = () => {
 
 const sumDays = (days: { solved: number }[] | undefined) =>
   (days ?? []).reduce((acc, d) => acc + d.solved, 0);
-
-const InterviewCountdown = () => {
-  const [, setTick] = useState(0);
-  const [editing, setEditing] = useState(false);
-  const [dateInput, setDateInput] = useState(() => localStorage.getItem("interviewDate") || "");
-  const [labelInput, setLabelInput] = useState(() => localStorage.getItem("interviewLabel") || "");
-
-  const dateStr = localStorage.getItem("interviewDate");
-  const label = localStorage.getItem("interviewLabel");
-
-  useEffect(() => {
-    const now = new Date();
-    const msToMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() - now.getTime();
-    const timer = setTimeout(() => setTick((t) => t + 1), msToMidnight);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleSave = () => {
-    if (dateInput) {
-      localStorage.setItem("interviewDate", dateInput);
-      localStorage.setItem("interviewLabel", labelInput.trim());
-      setEditing(false);
-      setTick((t) => t + 1);
-    }
-  };
-
-  const handleClear = () => {
-    setDateInput("");
-    setLabelInput("");
-    localStorage.removeItem("interviewDate");
-    localStorage.removeItem("interviewLabel");
-    setEditing(false);
-    setTick((t) => t + 1);
-  };
-
-  if (!dateStr && !editing) {
-    return (
-      <button
-        onClick={() => setEditing(true)}
-        className="glass-card mb-8 w-full rounded-xl p-4 flex items-center gap-3 text-left transition-colors hover:bg-secondary/50"
-      >
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-secondary text-muted-foreground">
-          <Plus className="h-5 w-5" />
-        </div>
-        <div>
-          <p className="text-sm font-semibold">Add Interview Countdown</p>
-          <p className="text-xs text-muted-foreground">Track days until your next interview</p>
-        </div>
-      </button>
-    );
-  }
-
-  if (editing) {
-    return (
-      <div className="glass-card mb-8 rounded-xl p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <CalendarClock className="h-4 w-4 text-muted-foreground" />
-          <h3 className="font-display text-sm font-semibold">Interview Countdown</h3>
-        </div>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-          <div className="flex-1">
-            <Label className="mb-1.5 block text-[11px] font-semibold text-muted-foreground">Label (optional)</Label>
-            <Input
-              type="text"
-              value={labelInput}
-              onChange={(e) => setLabelInput(e.target.value)}
-              placeholder="e.g. Google Round 1"
-              className="h-9 rounded-lg"
-            />
-          </div>
-          <div className="flex-1">
-            <Label className="mb-1.5 block text-[11px] font-semibold text-muted-foreground">Date</Label>
-            <Input
-              type="date"
-              value={dateInput}
-              onChange={(e) => setDateInput(e.target.value)}
-              min={new Date().toISOString().split("T")[0]}
-              className="h-9 rounded-lg"
-            />
-          </div>
-          <div className="flex gap-2">
-            <Button variant="brand" size="sm" onClick={handleSave} disabled={!dateInput}>
-              Save
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setEditing(false);
-                setDateInput(localStorage.getItem("interviewDate") || "");
-                setLabelInput(localStorage.getItem("interviewLabel") || "");
-              }}
-            >
-              Cancel
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const target = new Date(`${dateStr}T00:00:00`);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const diffMs = target.getTime() - today.getTime();
-  const daysLeft = Math.ceil(diffMs / 86400000);
-
-  if (daysLeft < 0) return null;
-
-  const urgency = daysLeft <= 3 ? "text-destructive" : daysLeft <= 7 ? "text-stat-orange" : "text-stat-blue";
-
-  return (
-    <div className="glass-card mb-8 rounded-xl p-4 flex items-center gap-4">
-      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-secondary ${urgency}`}>
-        <CalendarClock className="h-5 w-5" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          {label || "Interview"}
-        </p>
-        <p className="font-display text-lg font-bold">
-          {daysLeft === 0 ? (
-            <span className={urgency}>Today!</span>
-          ) : (
-            <>
-              <span className={urgency}>{daysLeft}</span>
-              <span className="text-sm font-normal text-muted-foreground ml-1">
-                day{daysLeft === 1 ? "" : "s"} left
-              </span>
-            </>
-          )}
-        </p>
-      </div>
-      <p className="text-xs text-muted-foreground hidden sm:block tabular-nums">
-        {target.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
-      </p>
-      <div className="flex items-center gap-1 shrink-0">
-        <Button
-          variant="ghost"
-          size="iconSm"
-          onClick={() => {
-            setDateInput(dateStr || "");
-            setLabelInput(label || "");
-            setEditing(true);
-          }}
-          aria-label="Edit countdown"
-        >
-          <Pencil className="h-3.5 w-3.5" />
-        </Button>
-        <Button variant="ghost" size="iconSm" onClick={handleClear} aria-label="Remove countdown" className="hover:text-destructive hover:bg-destructive/10">
-          <X className="h-3.5 w-3.5" />
-        </Button>
-      </div>
-    </div>
-  );
-};
 
 const Dashboard = () => {
   usePageTitle("Dashboard");
@@ -269,12 +106,8 @@ const Dashboard = () => {
         )}
       </StaggerSection>
 
-      <StaggerSection index={2}>
-        <InterviewCountdown />
-      </StaggerSection>
-
       {tips.length > 0 && (
-        <StaggerSection index={3}>
+        <StaggerSection index={2}>
           <div className="glass-card mb-8 rounded-xl p-4 md:p-5">
             <div className="flex items-center gap-2 mb-3">
               <Lightbulb className="h-4 w-4 text-stat-blue" />
@@ -307,7 +140,7 @@ const Dashboard = () => {
       )}
 
       <div className="grid gap-6 lg:grid-cols-5 min-w-0">
-        <StaggerSection index={4} className="lg:col-span-3 min-w-0">
+        <StaggerSection index={3} className="lg:col-span-3 min-w-0">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-display text-base font-bold">Recent Activity</h2>
             {recentSolved.length > 0 && (
@@ -341,7 +174,7 @@ const Dashboard = () => {
           </div>
         </StaggerSection>
 
-        <StaggerSection index={5} className="lg:col-span-2">
+        <StaggerSection index={4} className="lg:col-span-2">
           <h2 className="font-display text-base font-bold mb-3">Quick Actions</h2>
           <div className="space-y-2">
             <QuickAction to="/question/new" icon={Plus} label="New Question" description="Log a solved question" />

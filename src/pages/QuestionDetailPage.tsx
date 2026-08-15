@@ -1,5 +1,5 @@
 import usePageTitle from "@hooks/usePageTitle";
-import { lazy, Suspense, useState, useRef, useEffect, useCallback } from "react";
+import { lazy, Suspense, useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import Layout from "@components/Layout";
@@ -13,7 +13,7 @@ import { toast } from "@components/ui/sonner";
 import type { QuestionSource, Solution } from "@api/questions";
 import type { PrepCategory, Difficulty } from "@api/types";
 import { PREP_CATEGORIES, DIFFICULTIES, QUESTION_SOURCES } from "@api/types";
-import { capitalize, DIFFICULTY_COLORS, CHIP_BASE, CHIP_ACTIVE, CHIP_INACTIVE, FORM_INPUT } from "@lib/styles";
+import { capitalize, DIFFICULTY_COLORS, CHIP_BASE, CHIP_ACTIVE, CHIP_INACTIVE, FORM_INPUT, sortAlpha } from "@lib/styles";
 import { Button } from "@components/ui/button";
 import {
   allowsMultipleSolutions,
@@ -39,13 +39,9 @@ import {
   Copy,
   Check,
   Loader2,
-  Play,
   Layers,
   Link2,
   ChevronDown,
-  Timer,
-  Pause,
-  RotateCcw,
 } from "lucide-react";
 const CodeEditor = lazy(() => import("@components/CodeEditor"));
 
@@ -54,72 +50,18 @@ const labelCls = "mb-2.5 block text-xs font-semibold text-muted-foreground";
 
 const SectionHeader = FormSectionHeader;
 
-
-const QuestionTimer = () => {
-  const [seconds, setSeconds] = useState(0);
-  const [running, setRunning] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    if (running) {
-      intervalRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);
-    } else if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [running]);
-
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  const display = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
-
-  if (!running && seconds === 0) {
-    return (
-      <button
-        onClick={() => setRunning(true)}
-        className="flex h-9 items-center gap-2 rounded-xl border border-border px-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
-      >
-        <Timer className="h-3.5 w-3.5" />
-        Timer
-      </button>
-    );
-  }
-
-  return (
-    <div className="flex items-center gap-1.5">
-      <span className="font-mono text-sm font-semibold tabular-nums min-w-14 text-center">{display}</span>
-      <button
-        onClick={() => setRunning(!running)}
-        className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-all ${
-          running ? "border-stat-orange/30 text-stat-orange hover:bg-stat-orange/10" : "border-stat-green/30 text-stat-green hover:bg-stat-green/10"
-        }`}
-        aria-label={running ? "Pause timer" : "Resume timer"}
-      >
-        {running ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
-      </button>
-      <button
-        onClick={() => { setRunning(false); setSeconds(0); }}
-        className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
-        aria-label="Reset timer"
-      >
-        <RotateCcw className="h-3.5 w-3.5" />
-      </button>
-    </div>
-  );
-};
-
 const QuestionDetailPage = () => {
   usePageTitle("Question Details");
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: question, isLoading } = useQuestionDetail(id);
-  const { data: suggestions, isLoading: suggestionsLoading } = useSuggestions();
   const updateMutation = useUpdateQuestion();
   const starMutation = useStarQuestion();
   const mutating = updateMutation.isPending;
 
   const [isEditing, setIsEditing] = useState(false);
+  const { data: suggestions, isLoading: suggestionsLoading } = useSuggestions(isEditing);
   const [title, setTitle] = useState("");
   const [solutions, setSolutions] = useState<Solution[]>([{ content: "" }]);
   const [notes, setNotes] = useState("");
@@ -151,7 +93,7 @@ const QuestionDetailPage = () => {
     setNotes(question?.notes || "");
     setCategory((question?.category as PrepCategory) || "dsa");
     setDifficulty((question?.difficulty as Difficulty) || "easy");
-    setTopics(question?.topics?.length ? [...question.topics] : []);
+    setTopics(question?.topics?.length ? sortAlpha(question.topics) : []);
     setSource((question?.source as QuestionSource) || "");
     setUrl(question?.url || "");
     setTags(question?.tags || []);
@@ -167,7 +109,7 @@ const QuestionDetailPage = () => {
     const newPresets = suggestions?.topicsByCategory?.[val];
     if (newPresets?.length) {
       const newPresetsLower = new Set(newPresets.map((t: string) => t.toLowerCase()));
-      setTopics((prev) => prev.filter((t) => newPresetsLower.has(t)));
+      setTopics((prev) => sortAlpha(prev.filter((t) => newPresetsLower.has(t))));
     }
   };
 
@@ -175,8 +117,14 @@ const QuestionDetailPage = () => {
     setList(list.includes(value) ? list.filter((i) => i !== value) : [...list, value]);
   };
 
+  const toggleTopic = (value: string) => {
+    setTopics((prev) =>
+      sortAlpha(prev.includes(value) ? prev.filter((t) => t !== value) : [...prev, value]),
+    );
+  };
+
   const activeCat = isEditing ? category : (cat as PrepCategory);
-  const topicPresets = suggestions?.topicsByCategory?.[activeCat] ?? [];
+  const topicPresets = sortAlpha(suggestions?.topicsByCategory?.[activeCat] ?? []);
   const tagPresets = suggestions?.tagsByCategory?.[activeCat] ?? suggestions?.tags ?? [];
   const companyPresets = suggestions?.companyTags ?? [];
 
@@ -196,7 +144,7 @@ const QuestionDetailPage = () => {
           notes: notes.trim() || undefined,
           category,
           difficulty,
-          topics: topics.length ? topics : null,
+          topics: topics.length ? sortAlpha(topics) : null,
           source: (source as QuestionSource) || null,
           url: url.trim() || undefined,
           tags: tags.length ? tags : [],
@@ -340,7 +288,6 @@ const QuestionDetailPage = () => {
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              {!isEditing && <QuestionTimer />}
               {!isEditing && question.url && (
                 <a
                   href={question.url}
@@ -359,15 +306,6 @@ const QuestionDetailPage = () => {
               >
                 <Star className={`h-4 w-4 ${question.starred ? "fill-stat-orange text-stat-orange" : ""}`} />
               </button>
-              {isCodeQuestion && !isEditing && (
-                <button
-                  onClick={() => navigate(`/questions/${id}/practice`)}
-                  className="flex h-9 items-center gap-2 rounded-xl border border-stat-green/30 bg-stat-green/10 px-3 text-sm font-medium text-stat-green hover:bg-stat-green/20 active:scale-[0.98] transition-all"
-                >
-                  <Play className="h-3.5 w-3.5" />
-                  Practice
-                </button>
-              )}
               <button
                 onClick={() => {
                   if (!isEditing) initEditState();
@@ -393,7 +331,7 @@ const QuestionDetailPage = () => {
                   {hasTopics && (
                     <>
                       <FileText className="h-3 w-3 text-muted-foreground shrink-0" />
-                      {question.topics.map((t) => (
+                      {sortAlpha(question.topics).map((t) => (
                         <span
                           key={t}
                           className="rounded-md bg-secondary border border-border px-2 py-0.5 text-[11px] font-medium text-foreground"
@@ -651,9 +589,9 @@ const QuestionDetailPage = () => {
                 <ChipSelect
                   presets={topicPresets}
                   selected={topics}
-                  onToggle={(v) => toggleItem(topics, setTopics, v)}
-                  onAdd={(v) => setTopics([...topics, v])}
-                  onRemove={(v) => setTopics(topics.filter((t) => t !== v))}
+                  onToggle={toggleTopic}
+                  onAdd={(v) => setTopics((prev) => sortAlpha([...prev, v]))}
+                  onRemove={(v) => setTopics((prev) => prev.filter((t) => t !== v))}
                   placeholder="Custom topic + Enter..."
                   lowercase
                   loading={suggestionsLoading}

@@ -3,7 +3,7 @@ import useIsMobile from "@hooks/useIsMobile";
 import useIsLg from "@hooks/useIsLg";
 import useDebouncedValue from "@hooks/useDebouncedValue";
 import useBacklogFilter from "@hooks/useBacklogFilter";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Layout from "@components/Layout";
 import type { Solution } from "@api/questions";
 import PageHeader from "@components/PageHeader";
@@ -78,9 +78,13 @@ const BacklogPage = () => {
     enabled: isMobile,
   });
 
-  const backlog = isMobile
-    ? infiniteQuery.data?.pages.flatMap((p) => p.data) ?? []
-    : paginatedQuery.data?.data ?? [];
+  const backlog = useMemo(
+    () =>
+      isMobile
+        ? infiniteQuery.data?.pages.flatMap((p) => p.data) ?? []
+        : paginatedQuery.data?.data ?? [],
+    [isMobile, infiniteQuery.data, paginatedQuery.data],
+  );
 
   const isLoading = isMobile ? infiniteQuery.isLoading : paginatedQuery.isLoading;
   const isFetching = isMobile ? infiniteQuery.isFetching : paginatedQuery.isFetching;

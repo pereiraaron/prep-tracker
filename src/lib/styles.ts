@@ -22,6 +22,10 @@ export const capitalize = (s: string) =>
     return capitalizeWord(word);
   }).join(" ");
 
+/** Case-insensitive alphabetical sort (stable copy). */
+export const sortAlpha = (items: string[]) =>
+  [...items].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+
 // Shared color maps for badges and chips across pages
 
 export const DIFFICULTY_COLORS: Record<string, string> = {

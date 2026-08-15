@@ -4,6 +4,7 @@ import { queryKeys } from "@lib/queryKeys";
 import { useBacklogFilterStore } from "@store/useBacklogFilterStore";
 import { useQuestionsFilterStore } from "@store/useQuestionsFilterStore";
 import { invalidateCoreStats } from "@lib/invalidateStats";
+import { invalidateQuestionLists, invalidateBacklogLists } from "@lib/invalidateLists";
 
 // ---- Queries ----
 
@@ -63,10 +64,10 @@ export const useCreateBacklogItem = () => {
   return useMutation({
     mutationFn: (body: CreateBacklogQuestionBody) => questionsApi.createBacklog(body),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.backlog.all });
+      invalidateBacklogLists(queryClient);
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.suggestions() });
       invalidateCoreStats(queryClient);
-      queryClient.invalidateQueries({ queryKey: queryKeys.questions.all });
+      invalidateQuestionLists(queryClient);
     },
   });
 };
@@ -76,7 +77,7 @@ export const useDeleteBacklogItem = () => {
   return useMutation({
     mutationFn: (id: string) => questionsApi.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.backlog.all });
+      invalidateBacklogLists(queryClient);
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.suggestions() });
       invalidateCoreStats(queryClient);
     },
@@ -131,9 +132,9 @@ export const useSolveBacklogItem = () => {
     onSuccess: () => {
       useBacklogFilterStore.getState().setCurrentPage(1);
       useQuestionsFilterStore.getState().setCurrentPage(1);
-      queryClient.invalidateQueries({ queryKey: queryKeys.backlog.all });
+      invalidateBacklogLists(queryClient);
       invalidateCoreStats(queryClient);
-      queryClient.invalidateQueries({ queryKey: queryKeys.questions.all });
+      invalidateQuestionLists(queryClient);
     },
   });
 };

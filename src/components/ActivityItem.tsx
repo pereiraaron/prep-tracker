@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@lib/queryKeys";
+import { prefetchDetailChunks } from "@lib/prefetchDetailChunks";
 import { CATEGORY_BORDER_COLORS } from "@lib/styles";
 import { CategoryBadge } from "@components/Badge";
 
@@ -29,6 +30,7 @@ const ActivityItem = ({ question }: ActivityItemProps) => {
         queryFn: () => questionsApi.getById(question.id),
         staleTime: 30_000,
       });
+      prefetchDetailChunks(question.category);
     }, 500);
   };
 

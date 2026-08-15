@@ -23,7 +23,7 @@ import { toast } from "@components/ui/sonner";
 import { ArrowLeft, Save, Loader2, FileText, Layers, Tag, Building2, StickyNote, Link2, ChevronDown } from "lucide-react";
 import ChipSelect from "@components/ChipSelect";
 import FormSectionHeader from "@components/FormSectionHeader";
-import { DIFFICULTY_COLORS, CHIP_BASE, CHIP_ACTIVE, CHIP_INACTIVE, FORM_INPUT, FORM_TEXTAREA } from "@lib/styles";
+import { DIFFICULTY_COLORS, CHIP_BASE, CHIP_ACTIVE, CHIP_INACTIVE, FORM_INPUT, FORM_TEXTAREA, sortAlpha } from "@lib/styles";
 
 
 const inputCls = FORM_INPUT;
@@ -74,7 +74,7 @@ const NewQuestionPage = () => {
     const newPresets = suggestions?.topicsByCategory?.[val];
     if (newPresets?.length) {
       const newPresetsLower = new Set(newPresets.map((t: string) => t.toLowerCase()));
-      setTopics((prev) => prev.filter((t) => newPresetsLower.has(t)));
+      setTopics((prev) => sortAlpha(prev.filter((t) => newPresetsLower.has(t))));
     }
   };
 
@@ -95,7 +95,7 @@ const NewQuestionPage = () => {
           url: url.trim(),
           notes: notes.trim() || undefined,
           difficulty: difficulty || undefined,
-          topics: topics.length ? topics : undefined,
+          topics: topics.length ? sortAlpha(topics) : undefined,
           source: (source as QuestionSource) || undefined,
           tags: tags.length ? tags : undefined,
           companyTags: companyTags.length ? companyTags : undefined,
@@ -111,7 +111,7 @@ const NewQuestionPage = () => {
           category,
           notes: notes.trim() || undefined,
           difficulty,
-          topics: topics.length ? topics : undefined,
+          topics: topics.length ? sortAlpha(topics) : undefined,
           source: (source as QuestionSource) || undefined,
           url: url.trim() || undefined,
           tags: tags.length ? tags : undefined,
@@ -138,9 +138,15 @@ const NewQuestionPage = () => {
   };
 
   const labelCls = "mb-1.5 block text-xs font-semibold text-muted-foreground";
-  const topicPresets = suggestions?.topicsByCategory?.[category] ?? [];
+  const topicPresets = sortAlpha(suggestions?.topicsByCategory?.[category] ?? []);
   const tagPresets = suggestions?.tagsByCategory?.[category] ?? suggestions?.tags ?? [];
   const companyPresets = suggestions?.companyTags ?? [];
+
+  const toggleTopic = (value: string) => {
+    setTopics((prev) =>
+      sortAlpha(prev.includes(value) ? prev.filter((t) => t !== value) : [...prev, value]),
+    );
+  };
 
   return (
     <Layout>
@@ -249,9 +255,9 @@ const NewQuestionPage = () => {
             <ChipSelect
               presets={topicPresets}
               selected={topics}
-              onToggle={(v) => toggleItem(topics, setTopics, v)}
-              onAdd={(v) => setTopics([...topics, v])}
-              onRemove={(v) => setTopics(topics.filter((t) => t !== v))}
+              onToggle={toggleTopic}
+              onAdd={(v) => setTopics((prev) => sortAlpha([...prev, v]))}
+              onRemove={(v) => setTopics((prev) => prev.filter((t) => t !== v))}
               placeholder="Custom topic + Enter..."
               lowercase
               loading={suggestionsLoading}
