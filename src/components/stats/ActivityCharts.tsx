@@ -20,7 +20,7 @@ const ActivityCharts = ({ dailyData, weeklyData, cumulativeData }: ActivityChart
                 <stop offset="95%" stopColor={CHART_BLUE} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid vertical={false} stroke={getGridColor()} strokeDasharray="3 3" />
+            <CartesianGrid vertical={false} stroke={getGridColor()} strokeDasharray="4 6" />
             <XAxis
               dataKey="date"
               tick={{ fontSize: 10, fill: getTextColor() }}
@@ -56,7 +56,7 @@ const ActivityCharts = ({ dailyData, weeklyData, cumulativeData }: ActivityChart
                 <stop offset="100%" stopColor={CHART_VIOLET} stopOpacity={0.45} />
               </linearGradient>
             </defs>
-            <CartesianGrid vertical={false} stroke={getGridColor()} strokeDasharray="3 3" />
+            <CartesianGrid vertical={false} stroke={getGridColor()} strokeDasharray="4 6" />
             <XAxis
               dataKey="week"
               tick={{ fontSize: 10, fill: getTextColor() }}
@@ -84,7 +84,7 @@ const ActivityCharts = ({ dailyData, weeklyData, cumulativeData }: ActivityChart
                 <stop offset="95%" stopColor={CHART_TEAL} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid vertical={false} stroke={getGridColor()} strokeDasharray="3 3" />
+            <CartesianGrid vertical={false} stroke={getGridColor()} strokeDasharray="4 6" />
             <XAxis
               dataKey="date"
               tick={{ fontSize: 10, fill: getTextColor() }}

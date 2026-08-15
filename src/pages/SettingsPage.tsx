@@ -29,25 +29,20 @@ const SettingsPage = () => {
     <Layout>
       <PageHeader
         icon={SettingsIcon}
-        iconColor="bg-muted text-muted-foreground"
+        iconColor="bg-primary/10 text-primary"
         title="Settings"
         subtitle="Manage your account and preferences"
       />
 
       <div className="max-w-2xl space-y-4">
         {/* Profile */}
-        <div className="glass-card rounded-xl p-5">
+        <div className="glass-card rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-4">
             <User className="h-4 w-4 text-muted-foreground" />
             <h2 className="font-display text-sm font-semibold">Profile</h2>
           </div>
           <div className="flex items-center gap-4">
-            <div
-              className="flex h-12 w-12 items-center justify-center rounded-xl font-display text-lg font-bold text-primary-foreground"
-              style={{
-                background: "linear-gradient(135deg, hsl(230, 65%, 55%), hsl(170, 70%, 45%))",
-              }}
-            >
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl font-display text-lg font-bold text-primary-foreground bg-gradient-to-br from-primary to-primary/70 shadow-md shadow-primary/20">
               {(user?.username || user?.email || "U")[0].toUpperCase()}
             </div>
             <div>
@@ -60,7 +55,7 @@ const SettingsPage = () => {
         </div>
 
         {/* Appearance */}
-        <div className="glass-card rounded-xl p-5">
+        <div className="glass-card rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-4">
             <Palette className="h-4 w-4 text-muted-foreground" />
             <h2 className="font-display text-sm font-semibold">Appearance</h2>

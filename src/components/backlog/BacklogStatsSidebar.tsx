@@ -49,7 +49,7 @@ const BacklogStatsSidebar = () => {
     <div className="space-y-4">
       {/* Difficulty breakdown */}
       {diffTotal > 0 && (
-        <div className="glass-card rounded-xl p-4">
+        <div className="glass-card rounded-2xl p-4">
           <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">Difficulty</h3>
           <div className="space-y-2.5">
             <DifficultyBar label="Easy" count={pendingByDiff.easy} total={diffTotal} color="bg-emerald-500" />
@@ -65,7 +65,7 @@ const BacklogStatsSidebar = () => {
 
       {/* Category breakdown */}
       {pendingCategories.length > 0 && (
-        <div className="glass-card rounded-xl p-4">
+        <div className="glass-card rounded-2xl p-4">
           <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">Top Categories</h3>
           <div className="space-y-2">
             {pendingCategories.map((cat) => {
@@ -93,7 +93,7 @@ const BacklogStatsSidebar = () => {
 
       {/* Source breakdown */}
       {pendingSources.length > 0 && (
-        <div className="glass-card rounded-xl p-4">
+        <div className="glass-card rounded-2xl p-4">
           <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">Sources</h3>
           <div className="space-y-2">
             {pendingSources.map((src) => {

@@ -7,7 +7,7 @@ import { queryKeys } from "@lib/queryKeys";
 import { prefetchDetailChunks } from "@lib/prefetchDetailChunks";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
-import { Star, Trash2, ExternalLink } from "lucide-react";
+import { Star, Trash2, ExternalLink, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface QuestionRowProps {
@@ -51,10 +51,9 @@ const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps)
       onMouseLeave={cancelPrefetch}
       onFocus={startPrefetch}
       onBlur={cancelPrefetch}
-      className={`group flex items-center gap-3 border-l-[3px] ${borderColor} px-3 sm:px-4 py-3 md:py-2.5 transition-all hover:bg-secondary/50 hover:shadow-[inset_3px_0_0_0_hsl(var(--primary)/0.45)] animate-slide-up`}
-      style={{ animationDelay: `${index * 20}ms` }}
+      className={`list-row group flex items-center gap-3 border-l-[3px] ${borderColor} px-3 sm:px-4 py-3 md:py-2.5 animate-list-in`}
+      style={{ animationDelay: `${Math.min(index, 12) * 22}ms` }}
     >
-      {/* Star */}
       <IconButton
         label={q.starred ? "Remove from favorites" : "Add to favorites"}
         onClick={(e) => {
@@ -68,10 +67,9 @@ const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps)
         <Star className={`h-3.5 w-3.5 ${q.starred ? "fill-stat-orange" : ""}`} />
       </IconButton>
 
-      {/* Main content */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-display text-[13px] font-semibold group-hover:text-primary transition-colors truncate">
+          <span className="font-display text-[13px] font-semibold tracking-tight group-hover:text-primary transition-colors truncate">
             {q.title}
           </span>
           {q.difficulty && (
@@ -84,20 +82,26 @@ const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps)
               <CategoryBadge value={q.category} />
             </span>
           )}
-          {q.topics?.length > 0 && sortAlpha(q.topics).map((t) => (
-            <span key={t} className="hidden lg:inline rounded bg-secondary/80 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-              {capitalize(t)}
-            </span>
-          ))}
+          {q.topics?.length > 0 &&
+            sortAlpha(q.topics).map((t) => (
+              <span
+                key={t}
+                className="hidden lg:inline rounded bg-secondary/80 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
+              >
+                {capitalize(t)}
+              </span>
+            ))}
         </div>
-        {/* Mobile-only: source + date */}
         <div className="flex items-center gap-2 mt-0.5 md:hidden">
           {q.source && <SourceBadge value={q.source} />}
-          {q.solvedAt && <span className="text-[10px] text-muted-foreground/50 tabular-nums">{formatDate(q.solvedAt)}</span>}
+          {q.solvedAt && (
+            <span className="text-[10px] text-muted-foreground/50 tabular-nums">{formatDate(q.solvedAt)}</span>
+          )}
         </div>
       </div>
 
-      {/* Mobile actions — always visible */}
+      <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/0 -translate-x-1 transition-all duration-200 group-hover:translate-x-0 group-hover:text-muted-foreground/40 md:hidden" />
+
       <div className="flex md:hidden shrink-0 items-center gap-0.5">
         {q.url && (
           <IconButton
@@ -113,7 +117,6 @@ const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps)
         )}
       </div>
 
-      {/* Desktop: difficulty, category, source, date, hover-actions */}
       <div className="hidden md:flex items-center gap-4 shrink-0">
         <span className="w-16 flex justify-center">
           {q.difficulty ? (
@@ -139,7 +142,7 @@ const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps)
         <span className="w-24 text-center text-[11px] text-muted-foreground/50 tabular-nums">
           {q.solvedAt ? formatDate(q.solvedAt) : "—"}
         </span>
-        <div className="flex items-center w-24 justify-end gap-0.5">
+        <div className="flex items-center w-24 justify-end gap-0.5 opacity-70 transition-opacity group-hover:opacity-100">
           {q.url && (
             <IconButton
               label="Open problem"

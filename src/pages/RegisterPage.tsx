@@ -4,10 +4,11 @@ import { Card, CardContent, CardHeader } from "@components/ui/card";
 import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
 import { Label } from "@components/ui/label";
-import { Mail, Lock, ArrowRight, Zap, Loader2 } from "lucide-react";
+import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "@hooks/useAuth";
 import GoogleSignInButton from "@components/GoogleSignInButton";
+import AuthShell from "@components/AuthShell";
 
 const RegisterPage = () => {
   usePageTitle("Sign Up");
@@ -27,99 +28,103 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      {/* Subtle gradient orb */}
-      <div className="pointer-events-none fixed left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 h-125 w-125 rounded-full bg-primary/5 blur-3xl" />
-
-      <div className="relative w-full max-w-md space-y-6 animate-fade-in">
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-2">
-            <Zap className="w-7 h-7 text-primary" />
-          </div>
-          <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">Create Account</h1>
-          <p className="text-muted-foreground text-sm">Start tracking your interview prep</p>
-        </div>
-
-        <Card className="glass-card border-border/50">
-          <CardHeader className="pb-4">
-            <h2 className="text-base font-display font-semibold text-center">Sign Up</h2>
-          </CardHeader>
-
-          <CardContent className="space-y-4">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2 text-sm text-destructive animate-slide-up">
-                  {error}
-                </div>
-              )}
-
-              <div className="space-y-1.5">
-                <Label htmlFor="register-email" className="text-xs font-medium">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
-                  <Input
-                    id="register-email"
-                    name="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    className="pl-10"
-                    required
-                    disabled={isLoading}
-                    onFocus={clearError}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="register-password" className="text-xs font-medium">Password</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
-                  <Input
-                    id="register-password"
-                    name="password"
-                    type="password"
-                    placeholder="••••••••"
-                    className="pl-10"
-                    required
-                    disabled={isLoading}
-                    onFocus={clearError}
-                  />
-                </div>
-              </div>
-
-              <Button type="submit" className="w-full gap-2 shadow-lg shadow-primary/25 hover:shadow-xl transition-all active:scale-[0.98]" disabled={isLoading}>
-                {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <>
-                    Sign Up
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </Button>
-            </form>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-[10px] uppercase tracking-wider">
-                <span className="bg-card px-3 text-muted-foreground/60">or continue with</span>
-              </div>
-            </div>
-
-            <GoogleSignInButton label="Sign up with Google" disabled={isLoading} />
-          </CardContent>
-        </Card>
-
-        <p className="text-center text-sm text-muted-foreground">
+    <AuthShell
+      title="Create account"
+      subtitle="Start tracking your interview prep"
+      footer={
+        <p className="text-center text-sm text-muted-foreground/75">
           Already have an account?{" "}
-          <Link to="/auth/login" className="text-primary underline-offset-4 hover:underline font-medium">
+          <Link to="/auth/login" className="text-primary underline-offset-4 hover:underline font-semibold">
             Sign in
           </Link>
         </p>
-      </div>
-    </div>
+      }
+    >
+      <Card className="glass-card rounded-2xl border-border/40 shadow-none">
+        <CardHeader className="pb-3 pt-6">
+          <h2 className="text-sm font-display font-semibold text-center tracking-tight text-muted-foreground">
+            Sign Up
+          </h2>
+        </CardHeader>
+
+        <CardContent className="space-y-4 pb-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="rounded-xl bg-destructive/10 border border-destructive/20 px-3 py-2.5 text-sm text-destructive animate-slide-up">
+                {error}
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <Label htmlFor="register-email" className="text-xs font-medium">
+                Email
+              </Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
+                <Input
+                  id="register-email"
+                  name="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  className="pl-10 rounded-xl"
+                  required
+                  disabled={isLoading}
+                  onFocus={clearError}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="register-password" className="text-xs font-medium">
+                Password
+              </Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
+                <Input
+                  id="register-password"
+                  name="password"
+                  type="password"
+                  placeholder="••••••••"
+                  className="pl-10 rounded-xl"
+                  required
+                  disabled={isLoading}
+                  onFocus={clearError}
+                />
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              variant="brand"
+              className="w-full gap-2"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  Sign Up
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </Button>
+          </form>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-border/70" />
+            </div>
+            <div className="relative flex justify-center text-[10px] uppercase tracking-[0.14em]">
+              <span className="bg-transparent px-3 text-muted-foreground/50 backdrop-blur-sm">
+                or continue with
+              </span>
+            </div>
+          </div>
+
+          <GoogleSignInButton label="Sign up with Google" disabled={isLoading} />
+        </CardContent>
+      </Card>
+    </AuthShell>
   );
 };
 

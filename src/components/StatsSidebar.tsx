@@ -53,31 +53,31 @@ const StatsSidebar = () => {
   return (
     <div className="space-y-4">
       {/* Quick stats */}
-      <div className="glass-card rounded-xl p-4">
+      <div className="glass-card rounded-2xl p-4">
         <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">Overview</h3>
         <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-lg bg-secondary/50 p-2.5 text-center">
+          <div className="rounded-lg glass-inset p-2.5 text-center">
             <div className="flex items-center justify-center gap-1.5 mb-1">
               <Target className="h-3 w-3 text-stat-green" />
               <span className="text-[10px] font-medium text-muted-foreground">Solved</span>
             </div>
             <p className="font-display text-lg font-bold">{solved}</p>
           </div>
-          <div className="rounded-lg bg-secondary/50 p-2.5 text-center">
+          <div className="rounded-lg glass-inset p-2.5 text-center">
             <div className="flex items-center justify-center gap-1.5 mb-1">
               <Flame className="h-3 w-3 text-stat-orange" />
               <span className="text-[10px] font-medium text-muted-foreground">Streak</span>
             </div>
             <p className="font-display text-lg font-bold">{currentStreak}<span className="text-xs font-normal text-muted-foreground ml-0.5">d</span></p>
           </div>
-          <div className="rounded-lg bg-secondary/50 p-2.5 text-center">
+          <div className="rounded-lg glass-inset p-2.5 text-center">
             <div className="flex items-center justify-center gap-1.5 mb-1">
               <Trophy className="h-3 w-3 text-stat-purple" />
               <span className="text-[10px] font-medium text-muted-foreground">Best</span>
             </div>
             <p className="font-display text-lg font-bold">{longestStreak}<span className="text-xs font-normal text-muted-foreground ml-0.5">d</span></p>
           </div>
-          <div className="rounded-lg bg-secondary/50 p-2.5 text-center">
+          <div className="rounded-lg glass-inset p-2.5 text-center">
             <div className="flex items-center justify-center gap-1.5 mb-1">
               <TrendingUp className="h-3 w-3 text-stat-blue" />
               <span className="text-[10px] font-medium text-muted-foreground">Backlog</span>
@@ -88,7 +88,7 @@ const StatsSidebar = () => {
       </div>
 
       {/* Difficulty breakdown */}
-      <div className="glass-card rounded-xl p-4">
+      <div className="glass-card rounded-2xl p-4">
         <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">Difficulty</h3>
         <div className="space-y-2.5">
           <DifficultyBar label="Easy" count={easyCount} total={diffTotal} color="bg-emerald-500" />
@@ -105,7 +105,7 @@ const StatsSidebar = () => {
 
       {/* Category breakdown */}
       {topCategories.length > 0 && (
-        <div className="glass-card rounded-xl p-4">
+        <div className="glass-card rounded-2xl p-4">
           <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">Top Categories</h3>
           <div className="space-y-2">
             {topCategories.map((cat) => {
@@ -133,7 +133,7 @@ const StatsSidebar = () => {
 
       {/* Sources breakdown */}
       {topSources.length > 0 && (
-        <div className="glass-card rounded-xl p-4">
+        <div className="glass-card rounded-2xl p-4">
           <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">Sources</h3>
           <div className="space-y-2">
             {topSources.map((src) => {

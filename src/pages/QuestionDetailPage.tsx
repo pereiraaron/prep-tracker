@@ -248,7 +248,7 @@ const QuestionDetailPage = () => {
         </button>
 
         {/* Header */}
-        <div className="glass-card rounded-xl p-5 md:p-6 space-y-4">
+        <div className="glass-card rounded-2xl p-5 md:p-6 space-y-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-2.5 min-w-0 flex-1">
               {isEditing ? (
@@ -411,7 +411,7 @@ const QuestionDetailPage = () => {
             }
 
             return (
-              <div className="glass-card rounded-xl p-4 md:p-5">
+              <div className="glass-card rounded-2xl p-4 md:p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <FileText className="h-4 w-4 text-stat-blue" />
                   <h2 className="font-display text-sm font-semibold">
@@ -475,7 +475,7 @@ const QuestionDetailPage = () => {
           }
 
           return (
-            <div className="glass-card rounded-xl p-4 md:p-5">
+            <div className="glass-card rounded-2xl p-4 md:p-5">
               <div className="flex items-center gap-2 mb-4">
                 <FileText className="h-4 w-4 text-stat-blue" />
                 <h2 className="font-display text-sm font-semibold">{solutionTitle}</h2>
@@ -521,7 +521,7 @@ const QuestionDetailPage = () => {
         })()}
 
         {/* Notes */}
-        <div className="glass-card rounded-xl p-4 md:p-5">
+        <div className="glass-card rounded-2xl p-4 md:p-5">
           <div className="flex items-center gap-2 mb-4">
             <StickyNote className="h-4 w-4 text-stat-orange" />
             <h2 className="font-display text-sm font-semibold">Notes</h2>
@@ -532,7 +532,7 @@ const QuestionDetailPage = () => {
               onChange={(e) => setNotes(e.target.value)}
               rows={5}
               disabled={mutating}
-              className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 resize-none disabled:opacity-50"
+              className="w-full rounded-xl border border-border/60 bg-white/45 px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 resize-none disabled:opacity-50 backdrop-blur-sm dark:bg-white/5"
               placeholder="Personal notes, edge cases, tips..."
             />
           ) : (
@@ -550,7 +550,7 @@ const QuestionDetailPage = () => {
         {isEditing && (
           <div className="space-y-5">
             {/* Classification */}
-            <section className="glass-card rounded-xl p-5">
+            <section className="glass-card rounded-2xl p-5">
               <SectionHeader icon={Layers} title="Classification" />
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                 <div>
@@ -601,7 +601,7 @@ const QuestionDetailPage = () => {
             </section>
 
             {/* Source & URL */}
-            <section className="glass-card rounded-xl p-5">
+            <section className="glass-card rounded-2xl p-5">
               <SectionHeader icon={Link2} title="Source" />
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                 <div>
@@ -640,7 +640,7 @@ const QuestionDetailPage = () => {
             </section>
 
             {/* Tags */}
-            <section className="glass-card rounded-xl p-5">
+            <section className="glass-card rounded-2xl p-5">
               <SectionHeader icon={Tag} title="Tags" />
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:items-stretch">
                 <div className="flex flex-col">

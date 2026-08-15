@@ -36,10 +36,13 @@ const AuthCallbackPage = () => {
   }, [error, navigate]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center space-y-3">
-        <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-        <p className="text-sm text-muted-foreground">Signing you in...</p>
+    <div className="relative flex min-h-screen items-center justify-center bg-background">
+      <div className="app-background" aria-hidden>
+        <div className="app-background-orb left-1/2 top-1/3 h-80 w-80 -translate-x-1/2 bg-primary/12" />
+      </div>
+      <div className="relative glass-card rounded-2xl px-8 py-7 text-center space-y-3">
+        <Loader2 className="h-7 w-7 animate-spin text-primary mx-auto" />
+        <p className="text-sm text-muted-foreground/80">Signing you in…</p>
       </div>
     </div>
   );

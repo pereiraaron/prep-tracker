@@ -26,22 +26,22 @@ export const capitalize = (s: string) =>
 export const sortAlpha = (items: string[]) =>
   [...items].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
 
-// Shared color maps for badges and chips across pages
+// Shared color maps — design tokens only (primary = brand, stats = data ink)
 
 export const DIFFICULTY_COLORS: Record<string, string> = {
-  easy: "bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border-emerald-500/20",
-  medium: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
-  hard: "bg-red-500/10 text-red-500 dark:text-red-400 border-red-500/20",
+  easy: "bg-stat-green/10 text-stat-green border-stat-green/20",
+  medium: "bg-stat-orange/10 text-stat-orange border-stat-orange/20",
+  hard: "bg-destructive/10 text-destructive border-destructive/20",
 };
 
 export const CATEGORY_COLORS: Record<string, string> = {
-  dsa: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
-  system_design: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
-  machine_coding: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20",
-  language_framework: "bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20",
-  behavioral: "bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20",
-  theory: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20",
-  quiz: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",
+  dsa: "bg-stat-blue/10 text-stat-blue border-stat-blue/20",
+  system_design: "bg-stat-purple/10 text-stat-purple border-stat-purple/20",
+  machine_coding: "bg-stat-orange/10 text-stat-orange border-stat-orange/20",
+  language_framework: "bg-stat-green/10 text-stat-green border-stat-green/20",
+  behavioral: "bg-stat-pink/10 text-stat-pink border-stat-pink/20",
+  theory: "bg-stat-blue/10 text-stat-blue/80 border-stat-blue/15",
+  quiz: "bg-stat-yellow/10 text-stat-yellow border-stat-yellow/20",
 };
 
 export const CATEGORY_BORDER_COLORS: Record<string, string> = {
@@ -49,31 +49,30 @@ export const CATEGORY_BORDER_COLORS: Record<string, string> = {
   system_design: "border-l-stat-purple",
   machine_coding: "border-l-stat-orange",
   language_framework: "border-l-stat-green",
-  behavioral: "border-l-pink-400",
-  theory: "border-l-cyan-400",
-  quiz: "border-l-pink-300",
+  behavioral: "border-l-stat-pink",
+  theory: "border-l-stat-blue",
+  quiz: "border-l-stat-yellow",
 };
 
-// Chip styles for filter/selection chips
 export const CHIP_BASE = "rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-all active:scale-[0.97]";
 export const CHIP_ACTIVE = "border-primary/40 bg-primary/15 text-primary shadow-sm shadow-primary/5";
 export const CHIP_INACTIVE =
-  "border-border bg-secondary/50 text-muted-foreground hover:border-primary/20 hover:text-foreground";
+  "border-border/60 bg-white/35 text-muted-foreground hover:border-primary/20 hover:text-foreground dark:bg-white/5";
 
 export const FORM_INPUT =
-  "flex h-10 w-full rounded-lg border border-input bg-background px-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+  "flex h-10 w-full rounded-lg border border-border/60 bg-white/45 px-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 backdrop-blur-sm dark:bg-white/5";
 
 export const FORM_TEXTAREA =
-  "flex w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none";
+  "flex w-full rounded-lg border border-border/60 bg-white/45 px-3 py-2.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none backdrop-blur-sm dark:bg-white/5";
 
 export const SOURCE_COLORS: Record<string, string> = {
-  leetcode: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20",
-  greatfrontend: "bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20",
-  minichallenges: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
-  geeksforgeeks: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
-  linkedin: "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20",
+  leetcode: "bg-stat-orange/10 text-stat-orange border-stat-orange/20",
+  greatfrontend: "bg-stat-green/10 text-stat-green border-stat-green/20",
+  minichallenges: "bg-stat-purple/10 text-stat-purple border-stat-purple/20",
+  geeksforgeeks: "bg-stat-blue/10 text-stat-blue border-stat-blue/20",
+  linkedin: "bg-stat-blue/10 text-stat-blue border-stat-blue/20",
   medium: "bg-muted text-muted-foreground border-border",
-  namastedsa: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
-  fmc: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+  namastedsa: "bg-stat-yellow/10 text-stat-yellow border-stat-yellow/20",
+  fmc: "bg-stat-green/10 text-stat-green border-stat-green/20",
   other: "bg-muted text-muted-foreground border-border",
 };

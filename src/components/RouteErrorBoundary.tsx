@@ -37,14 +37,14 @@ class RouteErrorBoundary extends Component<Props, State> {
 
       return (
         <div className="flex min-h-[50vh] items-center justify-center px-4">
-          <div className="text-center max-w-sm">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-destructive/10">
+          <div className="glass-card rounded-2xl p-7 text-center max-w-sm">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-destructive/10 ring-1 ring-destructive/15">
               <RefreshCw className="h-5 w-5 text-destructive" />
             </div>
-            <p className="font-display text-base font-semibold">
+            <p className="font-display text-base font-semibold tracking-tight">
               {isChunkError ? "Update available" : "Something went wrong"}
             </p>
-            <p className="mt-1.5 text-sm text-muted-foreground">
+            <p className="mt-1.5 text-sm text-muted-foreground/80">
               {isChunkError
                 ? "A new version was deployed. Reload to get the latest."
                 : "This page encountered an error. Try again or go back."}
@@ -59,7 +59,7 @@ class RouteErrorBoundary extends Component<Props, State> {
               </button>
               <a
                 href="/"
-                className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-medium hover:bg-secondary active:scale-[0.98] transition-all"
+                className="inline-flex items-center gap-2 rounded-xl border border-border/70 bg-white/40 px-4 py-2 text-sm font-medium backdrop-blur-sm hover:bg-white/60 active:scale-[0.98] transition-all dark:bg-white/5 dark:hover:bg-white/10"
               >
                 <Home className="h-3.5 w-3.5" />
                 Home

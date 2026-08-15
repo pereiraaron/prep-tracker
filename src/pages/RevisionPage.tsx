@@ -3,6 +3,7 @@ import { useState, useMemo } from "react";
 import Layout from "@components/Layout";
 import PageHeader from "@components/PageHeader";
 import PrimaryButton from "@components/PrimaryButton";
+import Skeleton from "@components/Skeleton";
 import { DifficultyBadge, CategoryBadge } from "@components/Badge";
 import { useQuestionsList } from "@queries/useQuestions";
 import type { PrepCategory, Difficulty } from "@api/types";
@@ -49,7 +50,7 @@ const RevisionPage = () => {
     <Layout>
       <PageHeader
         icon={Shuffle}
-        iconColor="bg-stat-purple/10 text-stat-purple"
+        iconColor="bg-primary/10 text-primary"
         title="Revision Mode"
         subtitle="Review solved questions to keep them fresh"
         actions={
@@ -75,7 +76,7 @@ const RevisionPage = () => {
           )}
         </button>
         {showFilters && (
-          <div className="mt-3 glass-card rounded-xl p-4 space-y-4">
+          <div className="mt-3 glass-card rounded-2xl p-4 space-y-4">
             <div>
               <label className="mb-2 block text-xs font-semibold text-muted-foreground">Category</label>
               <div className="flex flex-wrap gap-1.5">
@@ -132,24 +133,28 @@ const RevisionPage = () => {
       {/* Questions */}
       {isLoading ? (
         <div className="space-y-3">
-          <div className="h-3 w-40 rounded bg-muted/60 animate-pulse mb-3" />
+          <Skeleton className="h-3 w-40 mb-3" />
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="glass-card flex items-center gap-4 rounded-xl p-4 animate-pulse" style={{ animationDelay: `${i * 80}ms` }}>
-              <div className="h-9 w-9 shrink-0 rounded-lg bg-muted/60" />
+            <div
+              key={i}
+              className="glass-card flex items-center gap-4 rounded-2xl p-4 animate-list-in"
+              style={{ animationDelay: `${i * 50}ms` }}
+            >
+              <Skeleton className="h-9 w-9 shrink-0 rounded-lg" />
               <div className="flex-1 min-w-0 space-y-2">
-                <div className="h-4 w-3/5 rounded bg-muted/60" />
+                <Skeleton className="h-4 w-3/5 max-w-[14rem]" />
                 <div className="flex items-center gap-2">
-                  <div className="h-4 w-14 rounded-md bg-muted/60" />
-                  <div className="h-4 w-16 rounded-md bg-muted/60" />
-                  <div className="h-3 w-12 rounded bg-muted/60" />
+                  <Skeleton className="h-4 w-14 rounded-md" />
+                  <Skeleton className="h-4 w-16 rounded-md" />
+                  <Skeleton className="h-3 w-12" />
                 </div>
               </div>
-              <div className="h-4 w-4 shrink-0 rounded bg-muted/60" />
+              <Skeleton className="h-4 w-4 shrink-0" />
             </div>
           ))}
         </div>
       ) : allQuestions.length === 0 ? (
-        <div className="glass-card rounded-xl py-16 text-center">
+        <div className="glass-card rounded-2xl py-16 text-center">
           <Shuffle className="mx-auto mb-3 h-7 w-7 text-muted-foreground/30" />
           <p className="font-display font-medium text-sm">No solved questions to review</p>
           <p className="mt-1 text-xs text-muted-foreground">
@@ -166,10 +171,10 @@ const RevisionPage = () => {
               <Link
                 key={q.id}
                 to={`/questions/${q.id}`}
-                className="glass-card group flex items-center gap-4 rounded-xl p-4 transition-all hover:shadow-sm hover:bg-card/80 animate-slide-up"
-                style={{ animationDelay: `${i * 50}ms` }}
+                className="glass-card glass-lift group flex items-center gap-4 rounded-2xl p-4 animate-list-in"
+                style={{ animationDelay: `${Math.min(i, 12) * 32}ms` }}
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-stat-purple/10 text-stat-purple font-display text-sm font-bold">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary font-display text-sm font-bold">
                   {i + 1}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -187,7 +192,7 @@ const RevisionPage = () => {
                     )}
                   </div>
                 </div>
-                <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/30 group-hover:text-primary transition-colors" />
+                <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/25 -translate-x-0.5 transition-all duration-200 group-hover:translate-x-0 group-hover:text-primary" />
               </Link>
             ))}
           </div>

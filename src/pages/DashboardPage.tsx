@@ -64,7 +64,7 @@ const Dashboard = () => {
       <StaggerSection index={0}>
         <PageHeader
           icon={Clock}
-          iconColor="bg-stat-blue/10 text-stat-blue"
+          iconColor="bg-primary/10 text-primary"
           title={getGreeting()}
           subtitle={today}
           actions={
@@ -93,7 +93,7 @@ const Dashboard = () => {
               label="Streak"
               value={`${streaks?.currentStreak ?? 0}d`}
               icon={Flame}
-              color="bg-stat-purple/10 text-stat-purple"
+              color="bg-stat-orange/10 text-stat-orange"
               sublabel={streaks?.longestStreak ? `Best: ${streaks.longestStreak}d` : undefined}
             />
             <StatCard
@@ -108,9 +108,9 @@ const Dashboard = () => {
 
       {tips.length > 0 && (
         <StaggerSection index={2}>
-          <div className="glass-card mb-8 rounded-xl p-4 md:p-5">
+          <div className="glass-card mb-8 rounded-2xl p-4 md:p-5">
             <div className="flex items-center gap-2 mb-3">
-              <Lightbulb className="h-4 w-4 text-stat-blue" />
+              <Lightbulb className="h-4 w-4 text-primary" />
               <h2 className="font-display text-sm font-semibold">Tips</h2>
             </div>
             <div className="space-y-2">
@@ -121,7 +121,7 @@ const Dashboard = () => {
                 return (
                   <div
                     key={i}
-                    className={`rounded-lg bg-secondary/30 pl-4 pr-3.5 py-2.5 ${
+                    className={`glass-inset rounded-lg pl-4 pr-3.5 py-2.5 ${
                       tip.priority === "high" ? "tip-glow-fast" : tip.priority === "medium" ? "tip-glow" : ""
                     }`}
                     style={{
@@ -153,7 +153,7 @@ const Dashboard = () => {
               </Link>
             )}
           </div>
-          <div className="glass-card rounded-xl overflow-hidden">
+          <div className="glass-card rounded-2xl overflow-hidden">
             {recentLoading ? (
               <DashboardActivitySkeleton />
             ) : recentSolved.length === 0 ? (
@@ -163,11 +163,9 @@ const Dashboard = () => {
                 <p className="mt-1 text-xs text-muted-foreground/70">Start solving questions and they'll show up here</p>
               </div>
             ) : (
-              <div className="divide-y divide-border">
+              <div className="divide-y divide-border/70">
                 {recentSolved.map((q, i) => (
-                  <div key={q.id} className="animate-slide-up" style={{ animationDelay: `${i * 30}ms` }}>
-                    <ActivityItem question={q} />
-                  </div>
+                  <ActivityItem key={q.id} question={q} index={i} />
                 ))}
               </div>
             )}

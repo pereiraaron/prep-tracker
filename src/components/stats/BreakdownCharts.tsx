@@ -142,7 +142,7 @@ const BreakdownCharts = ({
           {diffByCatData.length > 0 ? (
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={diffByCatData} margin={{ top: 0, right: 4, bottom: 0, left: -12 }} barCategoryGap="25%">
-                <CartesianGrid vertical={false} stroke={getGridColor()} strokeDasharray="3 3" />
+                <CartesianGrid vertical={false} stroke={getGridColor()} strokeDasharray="4 6" />
                 <XAxis dataKey="name" tick={{ fontSize: 10, fill: getTextColor() }} tickLine={false} axisLine={false} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: getTextColor() }} tickLine={false} axisLine={false} width={28} />
                 <Tooltip {...chartTooltipStyle} />
@@ -233,7 +233,7 @@ export const DetailCharts = ({ dailyByCategoryData, diffData, weeklyProgressData
               margin={{ top: 0, right: 4, bottom: 0, left: -12 }}
               barCategoryGap="20%"
             >
-              <CartesianGrid vertical={false} stroke={getGridColor()} strokeDasharray="3 3" />
+              <CartesianGrid vertical={false} stroke={getGridColor()} strokeDasharray="4 6" />
               <XAxis
                 dataKey="date"
                 tick={{ fontSize: 10, fill: getTextColor() }}
@@ -315,7 +315,7 @@ export const DetailCharts = ({ dailyByCategoryData, diffData, weeklyProgressData
                   <stop offset="95%" stopColor={CHART_BLUE} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid vertical={false} stroke={getGridColor()} strokeDasharray="3 3" />
+              <CartesianGrid vertical={false} stroke={getGridColor()} strokeDasharray="4 6" />
               <XAxis dataKey="label" tick={{ fontSize: 10, fill: getTextColor() }} tickLine={false} axisLine={false} />
               <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: getTextColor() }} tickLine={false} axisLine={false} width={28} />
               <Tooltip {...chartTooltipStyle} />

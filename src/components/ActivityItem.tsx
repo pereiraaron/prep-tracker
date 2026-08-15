@@ -7,12 +7,14 @@ import { queryKeys } from "@lib/queryKeys";
 import { prefetchDetailChunks } from "@lib/prefetchDetailChunks";
 import { CATEGORY_BORDER_COLORS } from "@lib/styles";
 import { CategoryBadge } from "@components/Badge";
+import { ChevronRight } from "lucide-react";
 
 interface ActivityItemProps {
   question: QuestionListItem;
+  index?: number;
 }
 
-const ActivityItem = ({ question }: ActivityItemProps) => {
+const ActivityItem = ({ question, index = 0 }: ActivityItemProps) => {
   const queryClient = useQueryClient();
   const cat = question.category;
   const solvedDate = question.solvedAt
@@ -48,15 +50,21 @@ const ActivityItem = ({ question }: ActivityItemProps) => {
       onMouseLeave={cancelPrefetch}
       onFocus={startPrefetch}
       onBlur={cancelPrefetch}
-      className={`flex items-center gap-3 border-l-[3px] ${borderColor} px-4 py-3 transition-all hover:bg-secondary/40`}
+      className={`list-row group flex items-center gap-3 border-l-[3px] ${borderColor} px-4 py-3 animate-list-in`}
+      style={{ animationDelay: `${Math.min(index, 12) * 28}ms` }}
     >
       <div className="min-w-0 flex-1 overflow-hidden">
-        <p className="text-sm font-semibold font-display truncate">{question.title}</p>
+        <p className="text-sm font-semibold font-display truncate tracking-tight transition-colors group-hover:text-primary">
+          {question.title}
+        </p>
         <div className="flex items-center gap-2 mt-1">
           {cat && <CategoryBadge value={cat} />}
         </div>
       </div>
-      {solvedDate && <span className="shrink-0 text-xs text-muted-foreground">{solvedDate}</span>}
+      {solvedDate && (
+        <span className="shrink-0 text-xs text-muted-foreground/70 tabular-nums">{solvedDate}</span>
+      )}
+      <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/0 -translate-x-1 transition-all duration-200 group-hover:translate-x-0 group-hover:text-muted-foreground/45" />
     </Link>
   );
 };

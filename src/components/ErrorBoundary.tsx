@@ -27,9 +27,12 @@ class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex min-h-screen items-center justify-center bg-background px-4">
-          <div className="text-center max-w-md">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-destructive/10">
+        <div className="relative flex min-h-screen items-center justify-center bg-background px-4">
+          <div className="app-background" aria-hidden>
+            <div className="app-background-orb left-1/2 top-1/3 h-80 w-80 -translate-x-1/2 bg-destructive/10" />
+          </div>
+          <div className="relative glass-card rounded-2xl p-8 text-center max-w-md">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-destructive/10 ring-1 ring-destructive/15">
               <svg
                 className="h-7 w-7 text-destructive"
                 fill="none"
@@ -44,13 +47,13 @@ class ErrorBoundary extends Component<Props, State> {
                 />
               </svg>
             </div>
-            <h1 className="font-display text-xl font-bold text-foreground">Something went wrong</h1>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <h1 className="font-display text-xl font-bold tracking-tight text-foreground">Something went wrong</h1>
+            <p className="mt-2 text-sm text-muted-foreground/80">
               An unexpected error occurred. Please refresh the page to try again.
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:shadow-xl"
+              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:shadow-xl active:scale-[0.98]"
             >
               Refresh Page
             </button>

@@ -24,9 +24,13 @@ const InsightsSection = lazy(() => import("@components/stats/Insights"));
 const ChartSkeleton = () => (
   <div className="mb-6 grid gap-6 md:grid-cols-3">
     {Array.from({ length: 3 }).map((_, i) => (
-      <div key={i} className="glass-card rounded-xl p-5">
-        <Skeleton className="h-4 w-24 mb-4" />
-        <Skeleton className="h-48 w-full" />
+      <div
+        key={i}
+        className="glass-card rounded-2xl p-5 animate-list-in"
+        style={{ animationDelay: `${i * 60}ms` }}
+      >
+        <Skeleton className="h-4 w-28 mb-4" />
+        <Skeleton className="h-48 w-full rounded-xl" />
       </div>
     ))}
   </div>
@@ -182,7 +186,7 @@ const StatsPage = () => {
       <StaggerSection index={0}>
         <PageHeader
           icon={BarChart3}
-          iconColor="bg-stat-purple/10 text-stat-purple"
+          iconColor="bg-primary/10 text-primary"
           title="Stats & Insights"
           subtitle="Track your interview prep progress"
         />
@@ -191,7 +195,7 @@ const StatsPage = () => {
       {isLoading ? (
         <>
           <DashboardStatsSkeleton />
-          <Skeleton className="h-12 w-full rounded-xl mb-8" />
+          <Skeleton className="h-12 w-full rounded-2xl mb-8" />
           <ChartSkeleton />
         </>
       ) : (
@@ -221,7 +225,7 @@ const StatsPage = () => {
           </StaggerSection>
 
           <StaggerSection index={4}>
-            <div className="glass-card mb-6 rounded-xl p-4 md:p-5">
+            <div className="glass-card mb-6 rounded-2xl p-4 md:p-5">
             <div className="mb-4 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <h3 className="font-display text-sm font-semibold shrink-0">Activity Heatmap</h3>
               {Object.keys(heatmapData ?? {}).length > 0 && (
@@ -268,30 +272,32 @@ const StatsPage = () => {
             <SectionHeader title="Deep Dive" />
           </StaggerSection>
           <StaggerSection index={10}>
-          <div className="mb-4 flex flex-wrap gap-2">
-            <button
-              onClick={() => setActivityCategory(undefined)}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                !activityCategory
-                  ? "bg-foreground text-background"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
-            >
-              All
-            </button>
-            {PREP_CATEGORIES.map((c) => (
+          <div className="sticky top-0 z-20 -mx-1 mb-4 border-b border-border/30 bg-background/75 px-1 py-2.5 backdrop-blur-xl supports-[backdrop-filter]:bg-background/55">
+            <div className="flex flex-wrap gap-2">
               <button
-                key={c.value}
-                onClick={() => setActivityCategory(activityCategory === c.value ? undefined : c.value)}
+                onClick={() => setActivityCategory(undefined)}
                 className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                  activityCategory === c.value
-                    ? "bg-foreground text-background"
-                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  !activityCategory
+                    ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
+                    : "bg-muted/80 text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
-                {c.label}
+                All
               </button>
-            ))}
+              {PREP_CATEGORIES.map((c) => (
+                <button
+                  key={c.value}
+                  onClick={() => setActivityCategory(activityCategory === c.value ? undefined : c.value)}
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                    activityCategory === c.value
+                      ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
+                      : "bg-muted/80 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
           </div>
           </StaggerSection>
           <StaggerSection index={11}>

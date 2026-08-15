@@ -168,11 +168,11 @@ const BacklogPage = () => {
     <Layout>
       <PageHeader
         icon={Archive}
-        iconColor="bg-stat-orange/10 text-stat-orange"
+        iconColor="bg-primary/10 text-primary"
         title="Backlog"
         subtitle={total > 0 ? "Questions saved for later" : "Save questions you want to tackle later"}
         count={total}
-        countColor="bg-stat-orange/10 text-stat-orange"
+        countColor="bg-primary/10 text-primary"
         actions={
           <PrimaryButton to="/question/new?mode=backlog" size="sm" className="shrink-0">
             <Plus className="h-4 w-4" />
@@ -213,7 +213,7 @@ const BacklogPage = () => {
             ) : (
               <EmptyState
                 icon={Archive}
-                iconBg="from-stat-orange/15 via-stat-orange/8 to-transparent"
+                iconBg="from-primary/15 via-primary/8 to-transparent"
                 title="Backlog is empty"
                 description="Add questions you want to solve later"
                 tip="Paste a LeetCode or GFG link while browsing — save it for when you have time."
@@ -229,7 +229,7 @@ const BacklogPage = () => {
             <QuestionsListSkeleton />
           ) : (
             <>
-              <div className={`glass-card rounded-xl overflow-hidden transition-opacity duration-200 ${isTransitioning ? "opacity-40 pointer-events-none" : ""}`}>
+              <div className={`glass-card rounded-2xl overflow-hidden transition-opacity duration-200 ${isTransitioning ? "opacity-40 pointer-events-none" : ""}`}>
                 {!isMobile && (
                   <ColumnHeader
                     sticky

@@ -8,7 +8,7 @@ import { Code2, Plus, Trash2 } from "lucide-react";
 const CodeEditor = lazy(() => import("@components/CodeEditor"));
 
 const defaultTextareaCls =
-  "w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30 resize-none disabled:opacity-50";
+  "w-full rounded-lg border border-border/60 bg-white/45 px-3 py-2.5 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30 resize-none disabled:opacity-50 backdrop-blur-sm dark:bg-white/5";
 const defaultLabelCls = "mb-1.5 block text-xs font-semibold text-muted-foreground";
 
 interface SolutionFieldsProps {

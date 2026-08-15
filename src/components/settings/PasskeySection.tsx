@@ -58,7 +58,7 @@ const PasskeySection = () => {
   };
 
   return (
-    <div className="glass-card rounded-xl p-5">
+    <div className="glass-card rounded-2xl p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Fingerprint className="h-4 w-4 text-muted-foreground" />

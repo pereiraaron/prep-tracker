@@ -2,7 +2,7 @@ import type { QuestionListItem } from "@api/questions";
 import { capitalize, CATEGORY_BORDER_COLORS, sortAlpha } from "@lib/styles";
 import { DifficultyBadge, CategoryBadge, SourceBadge } from "@components/Badge";
 import IconButton from "@components/IconButton";
-import { Star, Trash2, ExternalLink, CheckCircle } from "lucide-react";
+import { Star, Trash2, ExternalLink, CheckCircle, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface BacklogRowProps {
@@ -22,10 +22,9 @@ const BacklogRow = ({ item: q, index, onStar, onDelete, onSolve }: BacklogRowPro
   return (
     <Link
       to={`/questions/${q.id}`}
-      className={`group flex items-center gap-3 border-l-[3px] ${borderColor} px-3 sm:px-4 py-3 md:py-2.5 transition-all hover:bg-secondary/50 hover:shadow-[inset_3px_0_0_0_hsl(var(--primary)/0.45)] animate-slide-up`}
-      style={{ animationDelay: `${index * 20}ms` }}
+      className={`list-row group flex items-center gap-3 border-l-[3px] ${borderColor} px-3 sm:px-4 py-3 md:py-2.5 animate-list-in`}
+      style={{ animationDelay: `${Math.min(index, 12) * 22}ms` }}
     >
-      {/* Star */}
       <IconButton
         label={q.starred ? "Remove from favorites" : "Add to favorites"}
         onClick={(e) => {
@@ -39,10 +38,9 @@ const BacklogRow = ({ item: q, index, onStar, onDelete, onSolve }: BacklogRowPro
         <Star className={`h-3.5 w-3.5 ${q.starred ? "fill-stat-orange" : ""}`} />
       </IconButton>
 
-      {/* Main content */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-display text-[13px] font-semibold group-hover:text-primary transition-colors truncate">
+          <span className="font-display text-[13px] font-semibold tracking-tight group-hover:text-primary transition-colors truncate">
             {q.title}
           </span>
           {q.difficulty && <span className="md:hidden"><DifficultyBadge value={q.difficulty} /></span>}
@@ -53,14 +51,14 @@ const BacklogRow = ({ item: q, index, onStar, onDelete, onSolve }: BacklogRowPro
             </span>
           ))}
         </div>
-        {/* Mobile-only: source + date */}
         <div className="flex items-center gap-2 mt-0.5 md:hidden">
           {q.source && <SourceBadge value={q.source} />}
           <span className="text-[10px] text-muted-foreground/50 tabular-nums">{formatDate(q.createdAt)}</span>
         </div>
       </div>
 
-      {/* Mobile actions */}
+      <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/0 -translate-x-1 transition-all duration-200 group-hover:translate-x-0 group-hover:text-muted-foreground/40 md:hidden" />
+
       <div className="flex md:hidden shrink-0 items-center gap-0.5">
         <IconButton
           label="Solve this question"
@@ -86,7 +84,6 @@ const BacklogRow = ({ item: q, index, onStar, onDelete, onSolve }: BacklogRowPro
         )}
       </div>
 
-      {/* Desktop: difficulty, category, source, date, actions */}
       <div className="hidden md:flex items-center gap-4 shrink-0">
         <span className="w-16 flex justify-center">
           {q.difficulty ? <DifficultyBadge value={q.difficulty} /> : <span className="text-[11px] text-muted-foreground/50">—</span>}
@@ -104,7 +101,7 @@ const BacklogRow = ({ item: q, index, onStar, onDelete, onSolve }: BacklogRowPro
         <span className="w-24 text-center text-[11px] text-muted-foreground/50 tabular-nums">
           {formatDate(q.createdAt)}
         </span>
-        <div className="flex items-center w-24 justify-end gap-0.5">
+        <div className="flex items-center w-24 justify-end gap-0.5 opacity-70 transition-opacity group-hover:opacity-100">
           <IconButton
             label="Solve this question"
             onClick={(e) => {

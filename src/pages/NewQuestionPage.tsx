@@ -176,7 +176,7 @@ const NewQuestionPage = () => {
 
       <div className="space-y-5 pb-8">
         {/* ---- Essentials ---- */}
-        <section className="glass-card rounded-xl p-5">
+        <section className="glass-card rounded-2xl p-5">
           <SectionHeader icon={FileText} title="Essentials" />
           <div className="space-y-4">
             <div>
@@ -209,7 +209,7 @@ const NewQuestionPage = () => {
         </section>
 
         {/* ---- Classification ---- */}
-        <section className="glass-card rounded-xl p-5">
+        <section className="glass-card rounded-2xl p-5">
           <SectionHeader icon={Layers} title="Classification" />
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <div>
@@ -267,7 +267,7 @@ const NewQuestionPage = () => {
         </section>
 
         {/* ---- Source & URL ---- */}
-        <section className="glass-card rounded-xl p-5">
+        <section className="glass-card rounded-2xl p-5">
           <SectionHeader icon={Link2} title="Source" />
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <div>
@@ -308,7 +308,7 @@ const NewQuestionPage = () => {
         </section>
 
         {/* ---- Tags ---- */}
-        <section className="glass-card rounded-xl p-5">
+        <section className="glass-card rounded-2xl p-5">
           <SectionHeader icon={Tag} title="Tags" />
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:items-stretch">
             <div className="flex flex-col">
@@ -343,7 +343,7 @@ const NewQuestionPage = () => {
         </section>
 
         {/* ---- Notes ---- */}
-        <section className="glass-card rounded-xl p-5">
+        <section className="glass-card rounded-2xl p-5">
           <SectionHeader icon={StickyNote} title="Notes" />
           <textarea
             value={notes}

@@ -46,7 +46,7 @@ const SortableColumn = ({
 const ColumnHeader = ({ currentPage, itemsPerPage, total, sort, onSort, dateField = "solvedAt", sticky }: ColumnHeaderProps) => (
   <div
     className={`flex items-center justify-between px-4 py-2.5 text-[11px] font-medium text-muted-foreground/60 ${
-      sticky ? "sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur-sm" : "mb-1"
+      sticky ? "glass-shell sticky top-0 z-10 border-b border-border/50" : "mb-1"
     }`}
   >
     <span>

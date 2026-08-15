@@ -34,16 +34,23 @@ const SearchAndFilters = ({
       <div className="flex gap-2">
         <div className="relative flex-1">
           <label htmlFor="search-questions" className="sr-only">Search questions</label>
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
           <input
             id="search-questions"
+            name="question-search"
+            type="text"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search by title, topic, or tag..."
-            className="glass-card h-10 w-full rounded-xl pl-10 pr-9 text-sm outline-none transition-all placeholder:text-muted-foreground/40 focus:ring-2 focus:ring-primary/20 focus:border-primary/30"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            className="h-10 w-full rounded-2xl border border-border/60 bg-background pl-10 pr-9 text-sm outline-none transition-all placeholder:text-muted-foreground/40 focus:ring-2 focus:ring-primary/20 focus:border-primary/30 dark:bg-card"
           />
           {search && (
             <button
+              type="button"
               onClick={() => onSearchChange("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-0.5 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
             >
@@ -56,7 +63,7 @@ const SearchAndFilters = ({
           className={`flex h-10 shrink-0 items-center gap-2 rounded-xl border px-3 text-sm font-medium transition-all ${
             showFilters || hasFilters
               ? "border-primary/30 bg-primary/5 text-primary"
-              : "border-border bg-card text-muted-foreground hover:text-foreground hover:bg-secondary"
+              : "glass-panel border-border/60 text-muted-foreground hover:text-foreground"
           }`}
         >
           <SlidersHorizontal className="h-3.5 w-3.5" />
@@ -71,7 +78,7 @@ const SearchAndFilters = ({
 
       {/* Expandable Filters */}
       {showFilters && (
-        <div className="glass-card animate-slide-up rounded-xl p-3.5 space-y-2.5">
+        <div className="glass-card animate-slide-up rounded-2xl p-3.5 space-y-2.5">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="w-16 shrink-0 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Category</span>
             {PREP_CATEGORIES.map((cat) => (
