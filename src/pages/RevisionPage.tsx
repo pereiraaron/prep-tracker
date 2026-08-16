@@ -50,7 +50,7 @@ const RevisionPage = () => {
     <Layout>
       <PageHeader
         icon={Shuffle}
-        iconColor="bg-primary/10 text-primary"
+        iconColor="bg-stat-pink/15 text-stat-pink"
         title="Revision Mode"
         subtitle="Review solved questions to keep them fresh"
         actions={
@@ -174,7 +174,7 @@ const RevisionPage = () => {
                 className="glass-card glass-lift group flex items-center gap-4 rounded-2xl p-4 animate-list-in"
                 style={{ animationDelay: `${Math.min(i, 12) * 32}ms` }}
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary font-display text-sm font-bold">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-stat-pink/15 text-stat-pink font-display text-sm font-bold">
                   {i + 1}
                 </div>
                 <div className="min-w-0 flex-1">

@@ -46,7 +46,7 @@ const SearchAndFilters = ({
             autoCorrect="off"
             autoCapitalize="off"
             spellCheck={false}
-            className="h-10 w-full rounded-2xl border border-border/60 bg-background pl-10 pr-9 text-sm outline-none transition-all placeholder:text-muted-foreground/40 focus:ring-2 focus:ring-primary/20 focus:border-primary/30 dark:bg-card"
+            className="glass-card h-10 w-full rounded-2xl pl-10 pr-9 text-sm outline-none transition-all placeholder:text-muted-foreground/40 focus:ring-2 focus:ring-primary/15 focus:border-primary/25"
           />
           {search && (
             <button

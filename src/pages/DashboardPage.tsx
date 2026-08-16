@@ -64,7 +64,7 @@ const Dashboard = () => {
       <StaggerSection index={0}>
         <PageHeader
           icon={Clock}
-          iconColor="bg-primary/10 text-primary"
+          iconColor="bg-stat-blue/15 text-stat-blue"
           title={getGreeting()}
           subtitle={today}
           actions={

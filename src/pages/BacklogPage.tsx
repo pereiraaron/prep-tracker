@@ -168,11 +168,11 @@ const BacklogPage = () => {
     <Layout>
       <PageHeader
         icon={Archive}
-        iconColor="bg-primary/10 text-primary"
+        iconColor="bg-stat-orange/15 text-stat-orange"
         title="Backlog"
         subtitle={total > 0 ? "Questions saved for later" : "Save questions you want to tackle later"}
         count={total}
-        countColor="bg-primary/10 text-primary"
+        countColor="bg-stat-orange/15 text-stat-orange"
         actions={
           <PrimaryButton to="/question/new?mode=backlog" size="sm" className="shrink-0">
             <Plus className="h-4 w-4" />
@@ -213,7 +213,7 @@ const BacklogPage = () => {
             ) : (
               <EmptyState
                 icon={Archive}
-                iconBg="from-primary/15 via-primary/8 to-transparent"
+                iconBg="from-stat-orange/20 via-stat-orange/10 to-transparent"
                 title="Backlog is empty"
                 description="Add questions you want to solve later"
                 tip="Paste a LeetCode or GFG link while browsing — save it for when you have time."

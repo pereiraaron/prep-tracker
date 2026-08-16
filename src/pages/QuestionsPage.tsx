@@ -136,8 +136,8 @@ const QuestionsPage = () => {
     <Layout>
       <PageHeader
         icon={BookOpen}
-        iconColor="bg-primary/10 text-primary"
-        countColor="bg-primary/10 text-primary"
+        iconColor="bg-stat-green/15 text-stat-green"
+        countColor="bg-stat-green/15 text-stat-green"
         title="Questions"
         subtitle={total > 0 ? "Your solved questions library" : "Your solved questions will appear here"}
         count={total}
@@ -181,7 +181,7 @@ const QuestionsPage = () => {
             ) : (
               <EmptyState
                 icon={BookOpen}
-                iconBg="from-primary/15 via-primary/8 to-transparent"
+                iconBg="from-stat-green/20 via-stat-green/10 to-transparent"
                 title="No questions yet"
                 description="Log your first solved question to start building your library"
                 tip="Start with an Easy DSA problem you've done recently — it only takes a minute."

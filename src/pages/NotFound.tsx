@@ -8,8 +8,7 @@ const NotFound = () => {
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-background px-4">
       <div className="app-background" aria-hidden>
-        <div className="app-background-orb left-1/2 top-1/3 h-[26rem] w-[26rem] -translate-x-1/2 bg-primary/12" />
-        <div className="app-background-orb right-[15%] bottom-[20%] h-64 w-64 bg-stat-blue/10" />
+        <div className="app-background-orb left-1/2 top-1/3 h-80 w-80 -translate-x-1/2 bg-primary/10" />
       </div>
 
       <div className="relative text-center animate-fade-in">
@@ -28,7 +27,7 @@ const NotFound = () => {
         <div className="mt-8 flex items-center justify-center gap-3">
           <button
             onClick={() => window.history.back()}
-            className="flex items-center gap-2 rounded-xl border border-border/70 bg-white/40 px-4 py-2.5 text-sm font-medium backdrop-blur-sm hover:bg-white/60 active:scale-[0.98] transition-all dark:bg-white/5 dark:hover:bg-white/10"
+            className="flex items-center gap-2 rounded-xl border border-border/60 bg-background/50 px-4 py-2.5 text-sm font-medium backdrop-blur-md hover:bg-background/70 active:scale-[0.98] transition-all dark:bg-white/5 dark:hover:bg-white/10"
           >
             <ArrowLeft className="h-4 w-4" />
             Go Back

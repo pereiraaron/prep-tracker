@@ -73,7 +73,7 @@ const ChipSelect = ({
         </div>
         <input
           disabled
-          className="h-11 w-full shrink-0 rounded-xl border border-border/60 bg-white/45 px-4 text-sm opacity-50 backdrop-blur-sm dark:bg-white/5"
+          className="h-11 w-full shrink-0 rounded-xl border border-border/60 bg-background/50 px-4 text-sm opacity-50 backdrop-blur-md dark:bg-white/5"
           placeholder={placeholder}
         />
       </div>
@@ -140,7 +140,7 @@ const ChipSelect = ({
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
-        className="h-11 w-full shrink-0 rounded-xl border border-border/60 bg-white/45 px-4 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30 backdrop-blur-sm dark:bg-white/5"
+        className="h-11 w-full shrink-0 rounded-xl border border-border/60 bg-background/50 px-4 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 focus:border-primary/30 backdrop-blur-md dark:bg-white/5"
         placeholder={placeholder}
       />
     </div>

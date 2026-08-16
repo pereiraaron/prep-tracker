@@ -7,7 +7,6 @@ import {
   Archive,
   Shuffle,
   Settings,
-  Zap,
   LogOut,
   Sun,
   Moon,
@@ -18,6 +17,7 @@ import useAuth from "@hooks/useAuth";
 import useKeyboardShortcuts from "@hooks/useKeyboardShortcuts";
 import prefetchRoute from "@lib/prefetchRoute";
 import { Button } from "@components/ui/button";
+import BrandLogo from "@components/BrandLogo";
 import { cn } from "@lib/utils";
 
 const navItems = [
@@ -81,22 +81,12 @@ const Layout = ({ children }: { children: ReactNode }) => {
       </a>
 
       <div className="app-background" aria-hidden>
-        <div className="app-background-orb -left-40 -top-40 h-[28rem] w-[28rem] bg-primary/16 dark:bg-primary/20" />
-        <div className="app-background-orb -right-28 top-[22%] h-96 w-96 bg-stat-blue/10 dark:bg-stat-blue/14" />
-        <div className="app-background-orb bottom-[-4rem] left-[32%] h-80 w-80 bg-stat-green/8 dark:bg-stat-green/12" />
+        <div className="app-background-orb -left-32 -top-32 h-96 w-96 bg-primary/10 dark:bg-primary/14" />
       </div>
 
       <aside className="glass-shell fixed left-0 top-0 z-30 hidden h-screen w-60 flex-col border-r md:flex">
-        <div className="flex h-16 items-center gap-3 px-5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/75 text-primary-foreground shadow-md shadow-primary/25">
-            <Zap className="h-4 w-4" />
-          </div>
-          <div className="min-w-0">
-            <span className="font-display text-[15px] font-bold tracking-tight">PrepTracker</span>
-            <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground/55">
-              Interview prep
-            </p>
-          </div>
+        <div className="flex h-16 items-center px-5">
+          <BrandLogo />
         </div>
 
         <nav className="flex-1 space-y-1 px-3 py-3">
@@ -112,7 +102,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
                   "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                   isActive
                     ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-white/45 hover:text-foreground dark:hover:bg-white/5",
+                    : "text-muted-foreground hover:bg-black/[0.03] hover:text-foreground dark:hover:bg-white/5",
                 )
               }
             >

@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
+@import "@fontsource-variable/space-grotesk/wght.css";
+@import "@fontsource-variable/dm-sans/opsz.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -52,8 +54,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 
-  --font-family-display: "Space Grotesk", sans-serif;
-  --font-family-body: "DM Sans", sans-serif;
+  --font-family-display: "Space Grotesk Variable", "Space Grotesk", system-ui, sans-serif;
+  --font-family-body: "DM Sans Variable", "DM Sans", system-ui, sans-serif;
 
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
@@ -76,38 +78,37 @@
 }
 
 :root {
-  /* Cool slate wash — more atmosphere than flat near-white */
-  --background: 224 36% 95.5%;
-  --foreground: 226 44% 8%;
+  /* Minimal cool canvas */
+  --background: 220 20% 97%;
+  --foreground: 224 32% 12%;
 
   --card: 0 0% 100%;
-  --card-foreground: 226 44% 8%;
+  --card-foreground: 224 32% 12%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 226 44% 8%;
+  --popover-foreground: 224 32% 12%;
 
-  --primary: 226 76% 50%;
+  --primary: 226 72% 52%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 224 28% 92%;
-  --secondary-foreground: 226 44% 8%;
+  --secondary: 220 16% 94%;
+  --secondary-foreground: 224 32% 12%;
 
-  --muted: 224 24% 92%;
-  --muted-foreground: 224 14% 36%;
+  --muted: 220 14% 94%;
+  --muted-foreground: 220 10% 42%;
 
-  --accent: 226 76% 50%;
+  --accent: 226 72% 52%;
   --accent-foreground: 0 0% 100%;
 
   --destructive: 0 72% 50%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 224 22% 84%;
-  --input: 224 22% 84%;
-  --ring: 226 76% 50%;
+  --border: 220 14% 90%;
+  --input: 220 14% 90%;
+  --ring: 226 72% 52%;
 
   --radius: 0.875rem;
 
-  /* Data ink — intentionally distinct from brand primary (226) */
   --stat-blue: 208 78% 46%;
   --stat-green: 162 58% 36%;
   --stat-orange: 22 90% 48%;
@@ -115,58 +116,59 @@
   --stat-yellow: 38 86% 44%;
   --stat-pink: 340 62% 48%;
 
-  --code-bg: 224 24% 95%;
-  --code-fg: 226 18% 28%;
+  --code-bg: 220 16% 96%;
+  --code-fg: 224 14% 32%;
 
-  --sidebar-background: 224 40% 98%;
-  --sidebar-foreground: 226 44% 8%;
-  --sidebar-primary: 226 76% 50%;
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 224 32% 12%;
+  --sidebar-primary: 226 72% 52%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 224 28% 94%;
-  --sidebar-accent-foreground: 226 44% 8%;
-  --sidebar-border: 224 22% 88%;
-  --sidebar-ring: 226 76% 50%;
+  --sidebar-accent: 220 16% 96%;
+  --sidebar-accent-foreground: 224 32% 12%;
+  --sidebar-border: 220 14% 92%;
+  --sidebar-ring: 226 72% 52%;
 
-  /* Glass system */
-  --glass-blur: 18px;
-  --glass-blur-shell: 24px;
-  --glass-bg: 224 50% 100% / 0.68;
-  --glass-bg-shell: 224 45% 99% / 0.82;
-  --glass-bg-inset: 224 40% 98% / 0.58;
-  --glass-border: 220 50% 100% / 0.75;
-  --glass-border-strong: 224 24% 50% / 0.14;
-  --glass-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 12px 32px -16px rgb(37 56 120 / 0.16);
-  --glass-highlight: inset 0 1px 0 0 rgb(255 255 255 / 0.8);
+  /* Minimalist glass — soft frost, quiet edges */
+  --glass-blur: 16px;
+  --glass-blur-shell: 20px;
+  --glass-saturate: 1.12;
+  --glass-bg: 0 0% 100% / 0.58;
+  --glass-bg-shell: 0 0% 100% / 0.72;
+  --glass-bg-inset: 220 20% 99% / 0.5;
+  --glass-border: 0 0% 100% / 0.7;
+  --glass-border-strong: 220 16% 82% / 0.55;
+  --glass-shadow: 0 1px 2px rgb(15 23 42 / 0.03), 0 8px 24px -12px rgb(15 23 42 / 0.1);
+  --glass-highlight: inset 0 1px 0 0 rgb(255 255 255 / 0.65);
 }
 
 .dark {
-  --background: 226 40% 5%;
-  --foreground: 220 22% 95%;
+  --background: 226 28% 6%;
+  --foreground: 220 18% 94%;
 
-  --card: 226 30% 10%;
-  --card-foreground: 220 22% 95%;
+  --card: 226 24% 9%;
+  --card-foreground: 220 18% 94%;
 
-  --popover: 226 32% 8.5%;
-  --popover-foreground: 220 22% 95%;
+  --popover: 226 26% 8%;
+  --popover-foreground: 220 18% 94%;
 
-  --primary: 226 82% 66%;
-  --primary-foreground: 226 42% 8%;
+  --primary: 226 78% 64%;
+  --primary-foreground: 226 40% 8%;
 
-  --secondary: 226 24% 13%;
-  --secondary-foreground: 220 22% 95%;
+  --secondary: 226 18% 12%;
+  --secondary-foreground: 220 18% 94%;
 
-  --muted: 226 24% 13%;
-  --muted-foreground: 220 12% 58%;
+  --muted: 226 18% 12%;
+  --muted-foreground: 220 10% 58%;
 
-  --accent: 226 82% 66%;
-  --accent-foreground: 226 42% 8%;
+  --accent: 226 78% 64%;
+  --accent-foreground: 226 40% 8%;
 
-  --destructive: 0 64% 50%;
+  --destructive: 0 62% 50%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 226 22% 15%;
-  --input: 226 22% 15%;
-  --ring: 226 82% 66%;
+  --border: 226 16% 14%;
+  --input: 226 16% 14%;
+  --ring: 226 78% 64%;
 
   --stat-blue: 208 85% 62%;
   --stat-green: 162 55% 50%;
@@ -175,27 +177,28 @@
   --stat-yellow: 38 90% 56%;
   --stat-pink: 340 65% 62%;
 
-  --code-bg: 226 24% 11%;
-  --code-fg: 220 14% 78%;
+  --code-bg: 226 20% 10%;
+  --code-fg: 220 12% 76%;
 
-  --sidebar-background: 226 36% 6%;
-  --sidebar-foreground: 220 22% 95%;
-  --sidebar-primary: 226 82% 66%;
-  --sidebar-primary-foreground: 226 42% 8%;
-  --sidebar-accent: 226 26% 11%;
-  --sidebar-accent-foreground: 220 22% 95%;
-  --sidebar-border: 226 22% 14%;
-  --sidebar-ring: 226 82% 66%;
+  --sidebar-background: 226 26% 7%;
+  --sidebar-foreground: 220 18% 94%;
+  --sidebar-primary: 226 78% 64%;
+  --sidebar-primary-foreground: 226 40% 8%;
+  --sidebar-accent: 226 18% 11%;
+  --sidebar-accent-foreground: 220 18% 94%;
+  --sidebar-border: 226 16% 13%;
+  --sidebar-ring: 226 78% 64%;
 
-  --glass-blur: 20px;
-  --glass-blur-shell: 26px;
-  --glass-bg: 226 30% 11% / 0.55;
-  --glass-bg-shell: 226 34% 7% / 0.78;
-  --glass-bg-inset: 226 26% 15% / 0.45;
-  --glass-border: 220 20% 100% / 0.07;
-  --glass-border-strong: 220 20% 100% / 0.11;
-  --glass-shadow: 0 1px 2px rgb(0 0 0 / 0.45), 0 18px 44px -18px rgb(0 0 0 / 0.7);
-  --glass-highlight: inset 0 1px 0 0 hsl(220 20% 100% / 0.08);
+  --glass-blur: 16px;
+  --glass-blur-shell: 20px;
+  --glass-saturate: 1.1;
+  --glass-bg: 226 22% 12% / 0.52;
+  --glass-bg-shell: 226 26% 8% / 0.7;
+  --glass-bg-inset: 226 18% 16% / 0.4;
+  --glass-border: 0 0% 100% / 0.06;
+  --glass-border-strong: 0 0% 100% / 0.09;
+  --glass-shadow: 0 1px 2px rgb(0 0 0 / 0.25), 0 12px 32px -16px rgb(0 0 0 / 0.5);
+  --glass-highlight: inset 0 1px 0 0 hsl(0 0% 100% / 0.06);
 }
 
 * {
@@ -265,8 +268,8 @@ h1, h2, h3, h4, h5, h6 {
   background-color: hsl(var(--glass-bg));
   border: 1px solid hsl(var(--glass-border-strong));
   box-shadow: var(--glass-shadow), var(--glass-highlight);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease,
@@ -278,8 +281,8 @@ h1, h2, h3, h4, h5, h6 {
   background-color: hsl(var(--glass-bg));
   border: 1px solid hsl(var(--glass-border-strong));
   box-shadow: var(--glass-shadow), var(--glass-highlight);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease,
@@ -290,15 +293,15 @@ h1, h2, h3, h4, h5, h6 {
   background-color: hsl(var(--glass-bg-shell));
   border-color: hsl(var(--glass-border-strong));
   box-shadow: var(--glass-highlight);
-  backdrop-filter: blur(var(--glass-blur-shell));
-  -webkit-backdrop-filter: blur(var(--glass-blur-shell));
+  backdrop-filter: blur(var(--glass-blur-shell)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur-shell)) saturate(var(--glass-saturate));
 }
 
 @utility glass-inset {
   background-color: hsl(var(--glass-bg-inset));
   border: 1px solid hsl(var(--glass-border-strong));
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(10px) saturate(var(--glass-saturate));
 }
 
 /* Opt-in lift for interactive glass tiles (stats, quick actions) */
@@ -310,12 +313,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .glass-lift:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   border-color: hsl(var(--glass-border));
-  box-shadow:
-    var(--glass-shadow),
-    var(--glass-highlight),
-    0 12px 28px -16px hsl(var(--primary) / 0.22);
+  box-shadow: var(--glass-shadow), var(--glass-highlight);
 }
 
 @utility app-background {
@@ -325,16 +325,14 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 0;
   overflow: hidden;
   background:
-    radial-gradient(ellipse 90% 55% at 8% -8%, hsl(var(--primary) / 0.14), transparent 58%),
-    radial-gradient(ellipse 55% 40% at 92% 12%, hsl(var(--stat-blue) / 0.07), transparent 52%),
-    radial-gradient(ellipse 50% 38% at 48% 105%, hsl(var(--stat-green) / 0.06), transparent 48%);
+    radial-gradient(ellipse 90% 55% at 0% 0%, hsl(var(--primary) / 0.07), transparent 60%),
+    radial-gradient(ellipse 70% 45% at 100% 100%, hsl(var(--primary) / 0.04), transparent 55%);
 }
 
 .dark .app-background {
   background:
-    radial-gradient(ellipse 90% 55% at 8% -8%, hsl(var(--primary) / 0.18), transparent 58%),
-    radial-gradient(ellipse 55% 40% at 92% 12%, hsl(var(--stat-purple) / 0.08), transparent 52%),
-    radial-gradient(ellipse 50% 38% at 48% 105%, hsl(var(--stat-green) / 0.07), transparent 48%);
+    radial-gradient(ellipse 90% 55% at 0% 0%, hsl(var(--primary) / 0.12), transparent 60%),
+    radial-gradient(ellipse 70% 45% at 100% 100%, hsl(var(--primary) / 0.06), transparent 55%);
 }
 
 @utility app-background-orb {
@@ -347,7 +345,7 @@ h1, h2, h3, h4, h5, h6 {
 @media (max-width: 767px) {
   :root,
   .dark {
-    --glass-blur: 10px;
+    --glass-blur: 12px;
     --glass-blur-shell: 14px;
   }
 }
@@ -456,7 +454,9 @@ h1, h2, h3, h4, h5, h6 {
   .animate-heatmap-milestone,
   .animate-slide-up,
   .animate-list-in,
-  .animate-fade-in {
+  .animate-fade-in,
+  .tip-glow,
+  .tip-glow-fast {
     animation: none;
   }
 }

@@ -532,7 +532,7 @@ const QuestionDetailPage = () => {
               onChange={(e) => setNotes(e.target.value)}
               rows={5}
               disabled={mutating}
-              className="w-full rounded-xl border border-border/60 bg-white/45 px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 resize-none disabled:opacity-50 backdrop-blur-sm dark:bg-white/5"
+              className="w-full rounded-xl border border-border/60 bg-background/50 px-4 py-3 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/30 resize-none disabled:opacity-50 backdrop-blur-md dark:bg-white/5"
               placeholder="Personal notes, edge cases, tips..."
             />
           ) : (

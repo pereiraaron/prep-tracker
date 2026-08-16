@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Zap } from "lucide-react";
+import BrandLogo from "@components/BrandLogo";
 
 interface AuthShellProps {
   title: string;
@@ -12,16 +12,12 @@ interface AuthShellProps {
 const AuthShell = ({ title, subtitle, children, footer }: AuthShellProps) => (
   <div className="relative min-h-screen flex items-center justify-center bg-background px-4 py-10">
     <div className="app-background" aria-hidden>
-      <div className="app-background-orb left-1/2 top-1/4 h-[28rem] w-[28rem] -translate-x-1/2 bg-primary/12 dark:bg-primary/16" />
-      <div className="app-background-orb right-[12%] bottom-[18%] h-72 w-72 bg-stat-blue/10 dark:bg-stat-blue/14" />
-      <div className="app-background-orb left-[10%] bottom-[12%] h-64 w-64 bg-stat-green/8 dark:bg-stat-green/12" />
+      <div className="app-background-orb left-1/2 top-1/3 h-80 w-80 -translate-x-1/2 bg-primary/10 dark:bg-primary/14" />
     </div>
 
     <div className="relative w-full max-w-md space-y-7 animate-fade-in">
       <div className="text-center space-y-3">
-        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-lg shadow-primary/25 mb-1">
-          <Zap className="w-7 h-7" />
-        </div>
+        <BrandLogo size="lg" showWordmark={false} to={null} className="justify-center mb-1" />
         <div>
           <p className="font-display text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/60 mb-2">
             PrepTracker

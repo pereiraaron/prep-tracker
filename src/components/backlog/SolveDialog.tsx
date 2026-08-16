@@ -22,7 +22,7 @@ interface SolveDialogProps {
 }
 
 const dialogTextareaCls =
-  "w-full rounded-xl border border-border/60 bg-white/40 px-4 py-3 text-sm leading-relaxed placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all resize-y font-mono backdrop-blur-sm dark:bg-white/5";
+  "w-full rounded-xl border border-border/60 bg-background/50 px-4 py-3 text-sm leading-relaxed placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all resize-y font-mono backdrop-blur-md dark:bg-white/5";
 
 const SolveDialog = ({ open, onOpenChange, onSolve, isPending, questionTitle, category }: SolveDialogProps) => {
   const [solutions, setSolutions] = useState<Solution[]>([{ content: "" }]);

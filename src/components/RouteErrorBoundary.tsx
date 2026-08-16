@@ -59,7 +59,7 @@ class RouteErrorBoundary extends Component<Props, State> {
               </button>
               <a
                 href="/"
-                className="inline-flex items-center gap-2 rounded-xl border border-border/70 bg-white/40 px-4 py-2 text-sm font-medium backdrop-blur-sm hover:bg-white/60 active:scale-[0.98] transition-all dark:bg-white/5 dark:hover:bg-white/10"
+                className="inline-flex items-center gap-2 rounded-xl border border-border/60 bg-background/50 px-4 py-2 text-sm font-medium backdrop-blur-md hover:bg-background/70 active:scale-[0.98] transition-all dark:bg-white/5 dark:hover:bg-white/10"
               >
                 <Home className="h-3.5 w-3.5" />
                 Home

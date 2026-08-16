@@ -57,13 +57,13 @@ export const CATEGORY_BORDER_COLORS: Record<string, string> = {
 export const CHIP_BASE = "rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-all active:scale-[0.97]";
 export const CHIP_ACTIVE = "border-primary/40 bg-primary/15 text-primary shadow-sm shadow-primary/5";
 export const CHIP_INACTIVE =
-  "border-border/60 bg-white/35 text-muted-foreground hover:border-primary/20 hover:text-foreground dark:bg-white/5";
+  "border-border/50 bg-background/40 text-muted-foreground backdrop-blur-md hover:border-primary/20 hover:text-foreground dark:bg-white/5";
 
 export const FORM_INPUT =
-  "flex h-10 w-full rounded-lg border border-border/60 bg-white/45 px-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 backdrop-blur-sm dark:bg-white/5";
+  "flex h-10 w-full rounded-lg border border-border/60 bg-background/50 px-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 backdrop-blur-md dark:bg-white/5";
 
 export const FORM_TEXTAREA =
-  "flex w-full rounded-lg border border-border/60 bg-white/45 px-3 py-2.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none backdrop-blur-sm dark:bg-white/5";
+  "flex w-full rounded-lg border border-border/60 bg-background/50 px-3 py-2.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none backdrop-blur-md dark:bg-white/5";
 
 export const SOURCE_COLORS: Record<string, string> = {
   leetcode: "bg-stat-orange/10 text-stat-orange border-stat-orange/20",

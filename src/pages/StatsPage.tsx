@@ -186,7 +186,7 @@ const StatsPage = () => {
       <StaggerSection index={0}>
         <PageHeader
           icon={BarChart3}
-          iconColor="bg-primary/10 text-primary"
+          iconColor="bg-stat-purple/15 text-stat-purple"
           title="Stats & Insights"
           subtitle="Track your interview prep progress"
         />
@@ -272,7 +272,7 @@ const StatsPage = () => {
             <SectionHeader title="Deep Dive" />
           </StaggerSection>
           <StaggerSection index={10}>
-          <div className="sticky top-0 z-20 -mx-1 mb-4 border-b border-border/30 bg-background/75 px-1 py-2.5 backdrop-blur-xl supports-[backdrop-filter]:bg-background/55">
+          <div className="sticky top-0 z-20 -mx-1 mb-4 border-b border-border/40 bg-background/60 px-1 py-2.5 backdrop-blur-md">
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setActivityCategory(undefined)}
