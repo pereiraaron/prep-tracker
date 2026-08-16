@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@lib/queryKeys";
 import { prefetchDetailChunks } from "@lib/prefetchDetailChunks";
-import { CATEGORY_BORDER_COLORS } from "@lib/styles";
 import { CategoryBadge } from "@components/Badge";
 import { ChevronRight } from "lucide-react";
 
@@ -21,15 +20,13 @@ const ActivityItem = ({ question, index = 0 }: ActivityItemProps) => {
     ? new Date(question.solvedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })
     : "";
 
-  const borderColor = cat ? CATEGORY_BORDER_COLORS[cat] || "border-l-border" : "border-l-border";
-
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const startPrefetch = () => {
     hoverTimer.current = setTimeout(() => {
       queryClient.prefetchQuery({
         queryKey: queryKeys.questions.detail(question.id),
-        queryFn: () => questionsApi.getById(question.id),
+        queryFn: ({ signal }) => questionsApi.getById(question.id, { signal }),
         staleTime: 30_000,
       });
       prefetchDetailChunks(question.category);
@@ -50,7 +47,7 @@ const ActivityItem = ({ question, index = 0 }: ActivityItemProps) => {
       onMouseLeave={cancelPrefetch}
       onFocus={startPrefetch}
       onBlur={cancelPrefetch}
-      className={`list-row group flex items-center gap-3 border-l-[3px] ${borderColor} px-4 py-3 animate-list-in`}
+      className="list-row group flex items-center gap-3 px-4 py-3 animate-list-in"
       style={{ animationDelay: `${Math.min(index, 12) * 28}ms` }}
     >
       <div className="min-w-0 flex-1 overflow-hidden">

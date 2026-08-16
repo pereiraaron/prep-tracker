@@ -88,7 +88,7 @@ const Dashboard = () => {
               color="bg-stat-green/10 text-stat-green"
               trend={solvedTrend !== 0 ? solvedTrend : undefined}
             />
-            <StatCard label="Backlog" value={backlog || "—"} icon={ListTodo} color="bg-stat-orange/10 text-stat-orange" />
+            <StatCard label="Backlog" value={backlog || "—"} icon={ListTodo} color="bg-stat-purple/10 text-stat-purple" />
             <StatCard
               label="Streak"
               value={`${streaks?.currentStreak ?? 0}d`}
@@ -100,7 +100,7 @@ const Dashboard = () => {
               label="Active Days"
               value={streaks?.totalActiveDays ?? "—"}
               icon={CalendarCheck}
-              color="bg-stat-blue/10 text-stat-blue"
+              color="bg-stat-sky/10 text-stat-sky"
             />
           </div>
         )}

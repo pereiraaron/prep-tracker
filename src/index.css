@@ -49,6 +49,7 @@
   --color-stat-purple: hsl(var(--stat-purple));
   --color-stat-yellow: hsl(var(--stat-yellow));
   --color-stat-pink: hsl(var(--stat-pink));
+  --color-stat-sky: hsl(var(--stat-sky));
 
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
@@ -115,6 +116,7 @@
   --stat-purple: 278 54% 50%;
   --stat-yellow: 38 86% 44%;
   --stat-pink: 340 62% 48%;
+  --stat-sky: 198 72% 42%;
 
   --code-bg: 220 16% 96%;
   --code-fg: 224 14% 32%;
@@ -176,6 +178,7 @@
   --stat-purple: 278 60% 68%;
   --stat-yellow: 38 90% 56%;
   --stat-pink: 340 65% 62%;
+  --stat-sky: 198 78% 58%;
 
   --code-bg: 226 20% 10%;
   --code-fg: 220 12% 76%;
@@ -408,17 +411,15 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Shared list-row hover language */
 @utility list-row {
-  transition:
-    background-color 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: background-color 0.15s ease;
 }
 
 .list-row:hover {
-  background-color: hsl(var(--primary) / 0.04);
+  background-color: hsl(var(--foreground) / 0.03);
 }
 
 .dark .list-row:hover {
-  background-color: hsl(0 0% 100% / 0.035);
+  background-color: hsl(0 0% 100% / 0.03);
 }
 
 @keyframes heatmap-cell-in {

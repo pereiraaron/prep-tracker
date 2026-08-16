@@ -1,6 +1,6 @@
 import { useQuestionsSidebarStats } from "@queries/useStats";
 import { StatsSidebarSkeleton } from "@components/Skeleton";
-import { CATEGORY_COLORS } from "@lib/styles";
+import { CATEGORY_DOT_COLORS } from "@lib/styles";
 import { CATEGORY_LABEL, SOURCE_LABEL } from "@api/types";
 import type { PrepCategory } from "@api/types";
 import { CHART_BLUE, SOURCE_CHART_COLORS } from "@components/stats/constants";
@@ -109,12 +109,12 @@ const StatsSidebar = () => {
           <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">Top Categories</h3>
           <div className="space-y-2">
             {topCategories.map((cat) => {
-              const colorCls = CATEGORY_COLORS[cat.category] || "";
+              const dotCls = CATEGORY_DOT_COLORS[cat.category] || "bg-muted-foreground";
               const label = CATEGORY_LABEL[cat.category as PrepCategory] || cat.category;
               return (
                 <div key={cat.category} className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className={`h-2 w-2 shrink-0 rounded-full ${colorCls.split(" ")[0]?.replace("/10", "") || "bg-muted-foreground"}`} />
+                    <span className={`h-2 w-2 shrink-0 rounded-full ${dotCls}`} />
                     <span className="text-xs font-medium truncate">{label}</span>
                   </div>
                   <span className="text-xs font-semibold tabular-nums text-muted-foreground">{cat.count}</span>

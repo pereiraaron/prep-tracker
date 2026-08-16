@@ -209,8 +209,8 @@ const StatsPage = () => {
                 color="bg-stat-green/10 text-stat-green"
                 trend={solvedTrend !== 0 ? solvedTrend : undefined}
               />
-              <StatCard label="Backlog" value={backlog || "—"} icon={ListTodo} color="bg-stat-yellow/10 text-stat-yellow" />
-              <StatCard label="Solve Rate" value={total > 0 ? `${solveRate}%` : "—"} icon={Percent} color="bg-stat-blue/10 text-stat-blue" />
+              <StatCard label="Backlog" value={backlog || "—"} icon={ListTodo} color="bg-stat-purple/10 text-stat-purple" />
+              <StatCard label="Solve Rate" value={total > 0 ? `${solveRate}%` : "—"} icon={Percent} color="bg-stat-sky/10 text-stat-sky" />
             </div>
           </StaggerSection>
 

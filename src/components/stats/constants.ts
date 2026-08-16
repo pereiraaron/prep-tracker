@@ -12,7 +12,7 @@ export const CHART_TEAL = "hsl(var(--stat-green))";
 
 const CHART_ORANGE = "hsl(var(--stat-orange))";
 const CHART_ROSE = "hsl(var(--stat-pink))";
-const CHART_SKY = "hsl(208 70% 52%)";
+const CHART_SKY = "hsl(var(--stat-sky))";
 const CHART_AMBER = "hsl(var(--stat-yellow))";
 const CHART_EMERALD = "hsl(152 48% 40%)";
 const PENDING_COLOR = "hsl(var(--muted-foreground) / 0.45)";

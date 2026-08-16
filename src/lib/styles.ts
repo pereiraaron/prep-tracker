@@ -40,18 +40,19 @@ export const CATEGORY_COLORS: Record<string, string> = {
   machine_coding: "bg-stat-orange/10 text-stat-orange border-stat-orange/20",
   language_framework: "bg-stat-green/10 text-stat-green border-stat-green/20",
   behavioral: "bg-stat-pink/10 text-stat-pink border-stat-pink/20",
-  theory: "bg-stat-blue/10 text-stat-blue/80 border-stat-blue/15",
+  theory: "bg-stat-sky/10 text-stat-sky border-stat-sky/20",
   quiz: "bg-stat-yellow/10 text-stat-yellow border-stat-yellow/20",
 };
 
-export const CATEGORY_BORDER_COLORS: Record<string, string> = {
-  dsa: "border-l-stat-blue",
-  system_design: "border-l-stat-purple",
-  machine_coding: "border-l-stat-orange",
-  language_framework: "border-l-stat-green",
-  behavioral: "border-l-stat-pink",
-  theory: "border-l-stat-blue",
-  quiz: "border-l-stat-yellow",
+/** Solid dots for legends — full class names so Tailwind can detect them. */
+export const CATEGORY_DOT_COLORS: Record<string, string> = {
+  dsa: "bg-stat-blue",
+  system_design: "bg-stat-purple",
+  machine_coding: "bg-stat-orange",
+  language_framework: "bg-stat-green",
+  behavioral: "bg-stat-pink",
+  theory: "bg-stat-sky",
+  quiz: "bg-stat-yellow",
 };
 
 export const CHIP_BASE = "rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-all active:scale-[0.97]";

@@ -1,54 +1,43 @@
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
-import { questionsApi, type QuestionsFilter, type CreateBacklogQuestionBody, type Solution } from "@api/questions";
+import {
+  questionsApi,
+  fetchBacklogList,
+  type ListQueryParams,
+  type CreateBacklogQuestionBody,
+  type Solution,
+} from "@api/questions";
 import { queryKeys } from "@lib/queryKeys";
 import { useBacklogFilterStore } from "@store/useBacklogFilterStore";
 import { useQuestionsFilterStore } from "@store/useQuestionsFilterStore";
 import { invalidateCoreStats } from "@lib/invalidateStats";
 import { invalidateQuestionLists, invalidateBacklogLists } from "@lib/invalidateLists";
+import {
+  toggleStarredInCaches,
+  removeIdFromCaches,
+  snapshotQueries,
+  restoreSnapshots,
+} from "@lib/queryCache";
 
 // ---- Queries ----
 
-interface BacklogListParams extends QuestionsFilter {
-  search?: string;
-}
-
-export const useBacklogList = (params: BacklogListParams = {}, enabled = true) => {
-  const { search, ...filter } = params;
-  return useQuery({
+export const useBacklogList = (params: ListQueryParams = {}, enabled = true) =>
+  useQuery({
     queryKey: queryKeys.backlog.list(params),
-    queryFn: () =>
-      search
-        ? questionsApi.search(search, {
-            status: "pending",
-            difficulty: filter.difficulty,
-            category: filter.category,
-            sort: filter.sort,
-            page: filter.page,
-            limit: filter.limit,
-          })
-        : questionsApi.getBacklog(filter),
+    queryFn: ({ signal }) => fetchBacklogList(params, { signal }),
     enabled,
     placeholderData: keepPreviousData,
   });
-};
 
-export const useBacklogInfinite = (params: Omit<BacklogListParams, "page"> & { limit: number; enabled?: boolean }) => {
-  const { search, limit, enabled = true, ...filter } = params;
+export const useBacklogInfinite = (
+  params: Omit<ListQueryParams, "page"> & { limit: number; enabled?: boolean },
+) => {
+  const { limit, enabled = true, ...rest } = params;
   const keyParams = { ...params, page: undefined, enabled: undefined };
   return useInfiniteQuery({
     enabled,
     queryKey: queryKeys.backlog.infinite(keyParams),
-    queryFn: ({ pageParam = 1 }) =>
-      search
-        ? questionsApi.search(search, {
-            status: "pending",
-            difficulty: filter.difficulty,
-            category: filter.category,
-            sort: filter.sort,
-            page: pageParam,
-            limit,
-          })
-        : questionsApi.getBacklog({ ...filter, page: pageParam, limit }),
+    queryFn: ({ pageParam = 1, signal }) =>
+      fetchBacklogList({ ...rest, page: pageParam, limit }, { signal }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       const { page, totalPages } = lastPage.pagination;
@@ -63,7 +52,8 @@ export const useCreateBacklogItem = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: CreateBacklogQuestionBody) => questionsApi.createBacklog(body),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      queryClient.setQueryData(queryKeys.questions.detail(data.id), data);
       invalidateBacklogLists(queryClient);
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.suggestions() });
       invalidateCoreStats(queryClient);
@@ -76,7 +66,18 @@ export const useDeleteBacklogItem = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => questionsApi.delete(id),
-    onSuccess: () => {
+    onMutate: async (id) => {
+      const rootKeys = [queryKeys.backlog.all, queryKeys.questions.all];
+      await Promise.all(rootKeys.map((key) => queryClient.cancelQueries({ queryKey: key })));
+      const snapshots = snapshotQueries(queryClient, rootKeys);
+      removeIdFromCaches(queryClient, rootKeys, id);
+      queryClient.removeQueries({ queryKey: queryKeys.questions.detail(id) });
+      return { snapshots };
+    },
+    onError: (_err, _id, context) => {
+      restoreSnapshots(queryClient, context?.snapshots);
+    },
+    onSettled: () => {
       invalidateBacklogLists(queryClient);
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.suggestions() });
       invalidateCoreStats(queryClient);
@@ -89,38 +90,15 @@ export const useStarBacklogItem = () => {
   return useMutation({
     mutationFn: (id: string) => questionsApi.star(id),
     onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.backlog.all });
-      const previousQueries = queryClient.getQueriesData({ queryKey: queryKeys.backlog.all });
-
-      queryClient.setQueriesData({ queryKey: queryKeys.backlog.all }, (old: unknown) => {
-        if (!old || typeof old !== "object") return old;
-        if ("data" in old && Array.isArray((old as { data: unknown[] }).data)) {
-          const typed = old as { data: { id: string; starred: boolean }[] };
-          return { ...typed, data: typed.data.map((q) => q.id === id ? { ...q, starred: !q.starred } : q) };
-        }
-        if ("pages" in old && Array.isArray((old as { pages: unknown[] }).pages)) {
-          const typed = old as { pages: { data: { id: string; starred: boolean }[] }[]; pageParams: unknown[] };
-          return {
-            ...typed,
-            pages: typed.pages.map((page) => ({
-              ...page,
-              data: page.data.map((q) => q.id === id ? { ...q, starred: !q.starred } : q),
-            })),
-          };
-        }
-        return old;
-      });
-
-      return { previousQueries };
+      const rootKeys = [queryKeys.questions.all, queryKeys.backlog.all];
+      await Promise.all(rootKeys.map((key) => queryClient.cancelQueries({ queryKey: key })));
+      const snapshots = snapshotQueries(queryClient, rootKeys);
+      toggleStarredInCaches(queryClient, id);
+      return { snapshots };
     },
     onError: (_err, _id, context) => {
-      if (context?.previousQueries) {
-        for (const [key, data] of context.previousQueries) {
-          queryClient.setQueryData(key, data);
-        }
-      }
+      restoreSnapshots(queryClient, context?.snapshots);
     },
-    // Trust optimistic update — no full list refetch on settle
   });
 };
 
@@ -129,12 +107,25 @@ export const useSolveBacklogItem = () => {
   return useMutation({
     mutationFn: ({ id, solutions }: { id: string; solutions?: Solution[] }) =>
       questionsApi.solve(id, solutions?.length ? { solutions } : undefined),
-    onSuccess: () => {
+    onMutate: async ({ id }) => {
+      const rootKeys = [queryKeys.backlog.all];
+      await queryClient.cancelQueries({ queryKey: queryKeys.backlog.all });
+      const snapshots = snapshotQueries(queryClient, rootKeys);
+      removeIdFromCaches(queryClient, rootKeys, id);
+      return { snapshots };
+    },
+    onError: (_err, _vars, context) => {
+      restoreSnapshots(queryClient, context?.snapshots);
+    },
+    onSuccess: (data) => {
       useBacklogFilterStore.getState().setCurrentPage(1);
       useQuestionsFilterStore.getState().setCurrentPage(1);
-      invalidateBacklogLists(queryClient);
-      invalidateCoreStats(queryClient);
+      queryClient.setQueryData(queryKeys.questions.detail(data.id), data);
       invalidateQuestionLists(queryClient);
+      invalidateCoreStats(queryClient);
+    },
+    onSettled: () => {
+      invalidateBacklogLists(queryClient);
     },
   });
 };

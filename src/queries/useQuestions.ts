@@ -1,52 +1,42 @@
 import { useQuery, useInfiniteQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
-import { questionsApi, type QuestionsFilter, type CreateQuestionBody, type UpdateQuestionBody } from "@api/questions";
+import {
+  questionsApi,
+  fetchQuestionsList,
+  type ListQueryParams,
+  type CreateQuestionBody,
+  type UpdateQuestionBody,
+} from "@api/questions";
 import { queryKeys } from "@lib/queryKeys";
 import { invalidateCoreStats } from "@lib/invalidateStats";
 import { invalidateQuestionLists, invalidateBacklogLists } from "@lib/invalidateLists";
+import {
+  toggleStarredInCaches,
+  removeIdFromCaches,
+  patchQuestionInCaches,
+  snapshotQueries,
+  restoreSnapshots,
+} from "@lib/queryCache";
 
 // ---- Queries ----
 
-interface ListParams extends QuestionsFilter {
-  search?: string;
-}
-
-export const useQuestionsList = (params: ListParams = {}, enabled = true) => {
-  const { search, ...filter } = params;
-  return useQuery({
+export const useQuestionsList = (params: ListQueryParams = {}, enabled = true) =>
+  useQuery({
     queryKey: queryKeys.questions.list(params),
-    queryFn: () =>
-      search
-        ? questionsApi.search(search, {
-            status: filter.status,
-            difficulty: filter.difficulty,
-            category: filter.category,
-            sort: filter.sort,
-            page: filter.page,
-            limit: filter.limit,
-          })
-        : questionsApi.getAll(filter),
+    queryFn: ({ signal }) => fetchQuestionsList(params, { signal }),
     enabled,
     placeholderData: keepPreviousData,
   });
-};
 
-export const useQuestionsInfinite = (params: Omit<ListParams, "page"> & { limit: number; enabled?: boolean }) => {
-  const { search, limit, enabled = true, ...filter } = params;
+export const useQuestionsInfinite = (
+  params: Omit<ListQueryParams, "page"> & { limit: number; enabled?: boolean },
+) => {
+  const { limit, enabled = true, ...rest } = params;
   const keyParams = { ...params, page: undefined, enabled: undefined };
   return useInfiniteQuery({
     enabled,
     queryKey: queryKeys.questions.infinite(keyParams),
-    queryFn: ({ pageParam = 1 }) =>
-      search
-        ? questionsApi.search(search, {
-            status: filter.status,
-            difficulty: filter.difficulty,
-            category: filter.category,
-            sort: filter.sort,
-            page: pageParam,
-            limit,
-          })
-        : questionsApi.getAll({ ...filter, page: pageParam, limit }),
+    queryFn: ({ pageParam = 1, signal }) =>
+      fetchQuestionsList({ ...rest, page: pageParam, limit }, { signal }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       const { page, totalPages } = lastPage.pagination;
@@ -58,14 +48,15 @@ export const useQuestionsInfinite = (params: Omit<ListParams, "page"> & { limit:
 export const useQuestionDetail = (id: string | undefined) =>
   useQuery({
     queryKey: queryKeys.questions.detail(id!),
-    queryFn: () => questionsApi.getById(id!),
+    queryFn: ({ signal }) => questionsApi.getById(id!, { signal }),
     enabled: !!id,
   });
 
 export const useRecentQuestions = () =>
   useQuery({
     queryKey: queryKeys.questions.recent(),
-    queryFn: () => questionsApi.getAll({ sort: "-solvedAt", limit: 5, status: "solved" }),
+    queryFn: ({ signal }) =>
+      questionsApi.getAll({ sort: "-solvedAt", limit: 5, status: "solved" }, { signal }),
   });
 
 // ---- Suggestions ----
@@ -73,7 +64,7 @@ export const useRecentQuestions = () =>
 export const useSuggestions = (enabled = true) =>
   useQuery({
     queryKey: queryKeys.questions.suggestions(),
-    queryFn: () => questionsApi.getSuggestions(),
+    queryFn: ({ signal }) => questionsApi.getSuggestions({ signal }),
     staleTime: Infinity,
     enabled,
   });
@@ -84,7 +75,8 @@ export const useCreateQuestion = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: CreateQuestionBody) => questionsApi.create(body),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      queryClient.setQueryData(queryKeys.questions.detail(data.id), data);
       invalidateQuestionLists(queryClient);
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.suggestions() });
       invalidateCoreStats(queryClient);
@@ -95,9 +87,11 @@ export const useCreateQuestion = () => {
 export const useUpdateQuestion = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, body }: { id: string; body: UpdateQuestionBody }) => questionsApi.update(id, body),
-    onSuccess: (_data, { id }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.questions.detail(id) });
+    mutationFn: ({ id, body }: { id: string; body: UpdateQuestionBody }) =>
+      questionsApi.update(id, body),
+    onSuccess: (data, { id }) => {
+      queryClient.setQueryData(queryKeys.questions.detail(id), data);
+      patchQuestionInCaches(queryClient, data);
       invalidateQuestionLists(queryClient);
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.suggestions() });
       invalidateCoreStats(queryClient);
@@ -109,11 +103,22 @@ export const useDeleteQuestion = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => questionsApi.delete(id),
-    onSuccess: () => {
+    onMutate: async (id) => {
+      const rootKeys = [queryKeys.questions.all, queryKeys.backlog.all];
+      await Promise.all(rootKeys.map((key) => queryClient.cancelQueries({ queryKey: key })));
+      const snapshots = snapshotQueries(queryClient, rootKeys);
+      removeIdFromCaches(queryClient, rootKeys, id);
+      queryClient.removeQueries({ queryKey: queryKeys.questions.detail(id) });
+      return { snapshots };
+    },
+    onError: (_err, _id, context) => {
+      restoreSnapshots(queryClient, context?.snapshots);
+    },
+    onSettled: () => {
       invalidateQuestionLists(queryClient);
+      invalidateBacklogLists(queryClient);
       queryClient.invalidateQueries({ queryKey: queryKeys.questions.suggestions() });
       invalidateCoreStats(queryClient);
-      invalidateBacklogLists(queryClient);
     },
   });
 };
@@ -123,41 +128,14 @@ export const useStarQuestion = () => {
   return useMutation({
     mutationFn: (id: string) => questionsApi.star(id),
     onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.questions.all });
-      const previousQueries = queryClient.getQueriesData({ queryKey: queryKeys.questions.all });
-
-      // Optimistically toggle starred in all question caches
-      queryClient.setQueriesData({ queryKey: queryKeys.questions.all }, (old: unknown) => {
-        if (!old || typeof old !== "object") return old;
-        // Paginated shape: { data: Question[], pagination }
-        if ("data" in old && Array.isArray((old as { data: unknown[] }).data)) {
-          const typed = old as { data: { id: string; starred: boolean }[] };
-          return { ...typed, data: typed.data.map((q) => q.id === id ? { ...q, starred: !q.starred } : q) };
-        }
-        // Infinite shape: { pages: [...], pageParams }
-        if ("pages" in old && Array.isArray((old as { pages: unknown[] }).pages)) {
-          const typed = old as { pages: { data: { id: string; starred: boolean }[] }[]; pageParams: unknown[] };
-          return {
-            ...typed,
-            pages: typed.pages.map((page) => ({
-              ...page,
-              data: page.data.map((q) => q.id === id ? { ...q, starred: !q.starred } : q),
-            })),
-          };
-        }
-        return old;
-      });
-
-      return { previousQueries };
+      const rootKeys = [queryKeys.questions.all, queryKeys.backlog.all];
+      await Promise.all(rootKeys.map((key) => queryClient.cancelQueries({ queryKey: key })));
+      const snapshots = snapshotQueries(queryClient, rootKeys);
+      toggleStarredInCaches(queryClient, id);
+      return { snapshots };
     },
     onError: (_err, _id, context) => {
-      // Rollback on error
-      if (context?.previousQueries) {
-        for (const [key, data] of context.previousQueries) {
-          queryClient.setQueryData(key, data);
-        }
-      }
+      restoreSnapshots(queryClient, context?.snapshots);
     },
-    // Trust optimistic update — no full list refetch on settle
   });
 };

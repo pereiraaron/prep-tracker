@@ -1,6 +1,6 @@
 import type { QuestionListItem } from "@api/questions";
 import { questionsApi } from "@api/questions";
-import { capitalize, CATEGORY_BORDER_COLORS, sortAlpha } from "@lib/styles";
+import { capitalize, sortAlpha } from "@lib/styles";
 import { DifficultyBadge, CategoryBadge, SourceBadge } from "@components/Badge";
 import IconButton from "@components/IconButton";
 import { queryKeys } from "@lib/queryKeys";
@@ -22,7 +22,6 @@ const formatDate = (dateStr: string) =>
 
 const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps) => {
   const queryClient = useQueryClient();
-  const borderColor = q.category ? CATEGORY_BORDER_COLORS[q.category] || "border-l-border" : "border-l-border";
 
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -30,7 +29,7 @@ const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps)
     hoverTimer.current = setTimeout(() => {
       queryClient.prefetchQuery({
         queryKey: queryKeys.questions.detail(q.id),
-        queryFn: () => questionsApi.getById(q.id),
+        queryFn: ({ signal }) => questionsApi.getById(q.id, { signal }),
         staleTime: 30_000,
       });
       prefetchDetailChunks(q.category);
@@ -51,7 +50,7 @@ const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps)
       onMouseLeave={cancelPrefetch}
       onFocus={startPrefetch}
       onBlur={cancelPrefetch}
-      className={`list-row group flex items-center gap-3 border-l-[3px] ${borderColor} px-3 sm:px-4 py-3 md:py-2.5 animate-list-in`}
+      className="list-row group flex items-center gap-3 px-3 sm:px-4 py-3 md:py-2.5 animate-list-in"
       style={{ animationDelay: `${Math.min(index, 12) * 22}ms` }}
     >
       <IconButton

@@ -1,5 +1,5 @@
 import type { QuestionListItem } from "@api/questions";
-import { capitalize, CATEGORY_BORDER_COLORS, sortAlpha } from "@lib/styles";
+import { capitalize, sortAlpha } from "@lib/styles";
 import { DifficultyBadge, CategoryBadge, SourceBadge } from "@components/Badge";
 import IconButton from "@components/IconButton";
 import { Star, Trash2, ExternalLink, CheckCircle, ChevronRight } from "lucide-react";
@@ -17,12 +17,10 @@ const formatDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
 const BacklogRow = ({ item: q, index, onStar, onDelete, onSolve }: BacklogRowProps) => {
-  const borderColor = q.category ? CATEGORY_BORDER_COLORS[q.category] || "border-l-border" : "border-l-border";
-
   return (
     <Link
       to={`/questions/${q.id}`}
-      className={`list-row group flex items-center gap-3 border-l-[3px] ${borderColor} px-3 sm:px-4 py-3 md:py-2.5 animate-list-in`}
+      className="list-row group flex items-center gap-3 px-3 sm:px-4 py-3 md:py-2.5 animate-list-in"
       style={{ animationDelay: `${Math.min(index, 12) * 22}ms` }}
     >
       <IconButton

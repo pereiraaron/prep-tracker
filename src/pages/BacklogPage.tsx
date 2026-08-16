@@ -28,7 +28,7 @@ import {
   useSolveBacklogItem,
 } from "@queries/useBacklog";
 import { useQueryClient } from "@tanstack/react-query";
-import { questionsApi } from "@api/questions";
+import { fetchBacklogList } from "@api/questions";
 import { queryKeys } from "@lib/queryKeys";
 import type { QuestionListItem } from "@api/questions";
 import type { PrepCategory, Difficulty } from "@api/types";
@@ -107,17 +107,7 @@ const BacklogPage = () => {
     const nextParams = { ...filterParams, page: currentPage + 1, limit: ITEMS_PER_PAGE };
     queryClient.prefetchQuery({
       queryKey: queryKeys.backlog.list(nextParams),
-      queryFn: () =>
-        debouncedSearch
-          ? questionsApi.search(debouncedSearch, {
-              status: "pending",
-              difficulty: filterParams.difficulty,
-              category: filterParams.category,
-              sort: filterParams.sort,
-              page: currentPage + 1,
-              limit: ITEMS_PER_PAGE,
-            })
-          : questionsApi.getBacklog({ ...filterParams, page: currentPage + 1, limit: ITEMS_PER_PAGE }),
+      queryFn: ({ signal }) => fetchBacklogList(nextParams, { signal }),
       staleTime: 30_000,
     });
   }, [isMobile, currentPage, totalPages, debouncedSearch, categoryFilter, difficultyFilter, sort, queryClient]);
@@ -270,7 +260,7 @@ const BacklogPage = () => {
                     )}
                   />
                 ) : (
-                  <div className="divide-y divide-border">
+                  <div className="divide-y divide-border/50">
                     {backlog.map((q, i) => (
                       <BacklogRow
                         key={q.id}
