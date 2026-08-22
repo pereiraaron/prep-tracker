@@ -29,7 +29,7 @@ const QuestionRow = ({ question: q, index, onStar, onDelete }: QuestionRowProps)
     hoverTimer.current = setTimeout(() => {
       queryClient.prefetchQuery({
         queryKey: queryKeys.questions.detail(q.id),
-        queryFn: ({ signal }) => questionsApi.getById(q.id, { signal }),
+        queryFn: () => questionsApi.getById(q.id),
         staleTime: 30_000,
       });
       prefetchDetailChunks(q.category);

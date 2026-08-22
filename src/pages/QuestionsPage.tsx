@@ -18,7 +18,7 @@ import ColumnHeader from "@components/questions/ColumnHeader";
 import { Button } from "@components/ui/button";
 import { useQuestionsList, useQuestionsInfinite, useDeleteQuestion, useStarQuestion } from "@queries/useQuestions";
 import { useQueryClient } from "@tanstack/react-query";
-import { fetchQuestionsList } from "@api/questions";
+import { questionsApi } from "@api/questions";
 import { queryKeys } from "@lib/queryKeys";
 import type { PrepCategory, Difficulty } from "@api/types";
 import { BookOpen, Plus, Search, X } from "lucide-react";
@@ -97,7 +97,17 @@ const QuestionsPage = () => {
     const nextParams = { ...filterParams, page: currentPage + 1, limit: ITEMS_PER_PAGE };
     queryClient.prefetchQuery({
       queryKey: queryKeys.questions.list(nextParams),
-      queryFn: ({ signal }) => fetchQuestionsList(nextParams, { signal }),
+      queryFn: () =>
+        debouncedSearch
+          ? questionsApi.search(debouncedSearch, {
+              status: "solved",
+              difficulty: filterParams.difficulty,
+              category: filterParams.category,
+              sort: filterParams.sort,
+              page: currentPage + 1,
+              limit: ITEMS_PER_PAGE,
+            })
+          : questionsApi.getAll({ ...filterParams, page: currentPage + 1, limit: ITEMS_PER_PAGE }),
       staleTime: 30_000,
     });
   }, [isMobile, currentPage, totalPages, debouncedSearch, categoryFilter, difficultyFilter, sort, queryClient]);

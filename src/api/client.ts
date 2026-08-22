@@ -99,10 +99,8 @@ export const handleResponse = async <T>(res: Response, retryRequest?: () => Prom
 /**
  * Fetch wrapper for protected API endpoints.
  * Automatically attaches auth headers and retries on 401 after token refresh.
- * Pass `signal` via init to cancel in-flight requests (TanStack Query supplies this).
  */
 export const apiFetch = async <T>(url: string, init?: RequestInit): Promise<T> => {
-  const headers = { ...apiHeaders(), ...(init?.headers as Record<string, string> | undefined) };
-  const res = await fetch(url, { ...init, headers });
-  return handleResponse<T>(res, () => fetch(url, { ...init, headers: { ...apiHeaders(), ...(init?.headers as Record<string, string> | undefined) } }));
+  const res = await fetch(url, { ...init, headers: apiHeaders() });
+  return handleResponse<T>(res, () => fetch(url, { ...init, headers: apiHeaders() }));
 };

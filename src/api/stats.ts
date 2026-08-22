@@ -106,14 +106,13 @@ export interface BatchStatsResponse {
 // ---- API ----
 
 export const statsApi = {
-  getStreaks: async (init?: RequestInit) =>
-    apiFetch<StreaksResponse>(`${API_BASE_URL}/stats/streaks`, init),
+  getStreaks: async () => apiFetch<StreaksResponse>(`${API_BASE_URL}/stats/streaks`),
 
-  getBatch: async (keys?: string[], category?: string, init?: RequestInit) => {
+  getBatch: async (keys?: string[], category?: string) => {
     const params = new URLSearchParams();
     if (keys) params.set("keys", keys.join(","));
     if (category) params.set("category", category);
     const query = params.toString() ? `?${params}` : "";
-    return apiFetch<BatchStatsResponse>(`${API_BASE_URL}/stats/batch${query}`, init);
+    return apiFetch<BatchStatsResponse>(`${API_BASE_URL}/stats/batch${query}`);
   },
 };

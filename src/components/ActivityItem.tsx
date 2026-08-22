@@ -26,7 +26,7 @@ const ActivityItem = ({ question, index = 0 }: ActivityItemProps) => {
     hoverTimer.current = setTimeout(() => {
       queryClient.prefetchQuery({
         queryKey: queryKeys.questions.detail(question.id),
-        queryFn: ({ signal }) => questionsApi.getById(question.id, { signal }),
+        queryFn: () => questionsApi.getById(question.id),
         staleTime: 30_000,
       });
       prefetchDetailChunks(question.category);
