@@ -30,47 +30,35 @@ export default defineConfig(() => ({
     },
   },
   build: {
-    chunkSizeWarningLimit: 700,
-    rollupOptions: {
+    chunkSizeWarningLimit: 750,
+    rolldownOptions: {
       output: {
-        manualChunks(id) {
-          // React core — shared by everything
-          if (id.includes("node_modules/react/") || id.includes("node_modules/react-dom/")) {
-            return "react";
-          }
-          // Router
-          if (id.includes("node_modules/react-router")) {
-            return "router";
-          }
-          // React Query
-          if (id.includes("node_modules/@tanstack")) {
-            return "react-query";
-          }
-          // Recharts (only used by StatsPage)
-          if (id.includes("node_modules/recharts") || id.includes("node_modules/d3-")) {
-            return "charts";
-          }
-          // CodeMirror (lazy-loaded by QuestionDetailPage)
-          if (id.includes("node_modules/@codemirror") || id.includes("node_modules/@uiw") || id.includes("node_modules/@lezer")) {
-            return "codemirror";
-          }
-          // Icons
-          if (id.includes("node_modules/lucide-react")) {
-            return "icons";
-          }
-          // Radix UI primitives
-          if (id.includes("node_modules/@radix-ui")) {
-            return "radix";
-          }
-          // Utility libs (cva, clsx, tailwind-merge, sonner)
-          if (
-            id.includes("node_modules/sonner") ||
-            id.includes("node_modules/class-variance-authority") ||
-            id.includes("node_modules/clsx") ||
-            id.includes("node_modules/tailwind-merge")
-          ) {
-            return "ui-utils";
-          }
+        // Rolldown pulls a group's dependencies into that group, so shared libs
+        // (react, clsx, …) get higher priority than the lazy-only chunks
+        // (charts, codemirror). Otherwise the entry has to import from those.
+        codeSplitting: {
+          groups: [
+            // React core, shared by everything
+            {
+              name: "react",
+              test: /node_modules[\\/](react|react-dom|scheduler|react-is|use-sync-external-store)[\\/]/,
+              priority: 50,
+            },
+            { name: "router", test: /node_modules[\\/]react-router/, priority: 40 },
+            { name: "react-query", test: /node_modules[\\/]@tanstack[\\/]/, priority: 40 },
+            { name: "icons", test: /node_modules[\\/]lucide-react[\\/]/, priority: 40 },
+            { name: "radix", test: /node_modules[\\/]@radix-ui[\\/]/, priority: 40 },
+            // Utility libs (cva, clsx, tailwind-merge, sonner)
+            {
+              name: "ui-utils",
+              test: /node_modules[\\/](sonner|class-variance-authority|clsx|tailwind-merge)[\\/]/,
+              priority: 40,
+            },
+            // Recharts (only used by StatsPage)
+            { name: "charts", test: /node_modules[\\/](recharts|d3-)/, priority: 10 },
+            // CodeMirror (lazy-loaded by QuestionDetailPage)
+            { name: "codemirror", test: /node_modules[\\/](@codemirror|@uiw|@lezer)[\\/]/, priority: 10 },
+          ],
         },
       },
     },
